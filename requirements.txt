@@ -1,0 +1,7 @@
+# core: everything except the optional perception and LLM backends
+numpy>=1.24
+scipy>=1.10
+plyfile>=0.9
+pyyaml>=6.0
+# ScanNet++ iPhone depth frames are LZ4 blocks
+lz4>=4.0

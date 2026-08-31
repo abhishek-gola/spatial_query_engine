@@ -1,0 +1,65 @@
+# Every physically meaningful threshold in the relation scorers. Nothing here is
+# tuned on the benchmark: the values are set from what the words mean and from
+# the geometry of ordinary rooms, and the benchmark is then run once. Anything
+# fitted to the benchmark would make the reported accuracy meaningless.
+
+projective:
+  # "left of" tolerates a fair amount of slop in bearing before it stops being
+  # true; 55 degrees is roughly where native speakers start objecting.
+  cone_half_angle_deg: 55.0
+  cone_full_credit_deg: 25.0
+  # how much of the target has to be clear of the anchor's face
+  lateral_separation_full: 0.75
+  lateral_separation_zero: 0.05
+  # "left of" implies roughly the same depth; beyond this the phrase reads
+  # as "in front of" or "behind" instead
+  depth_overlap_slack: 0.45
+  height_band: 1.10
+  height_band_hard: 2.20
+  # "in front of the sofa" means the coffee table, not the bookshelf four
+  # metres away on the same side. This term encodes that, at a low enough
+  # weight that it only ever breaks ties.
+  proximity_full_factor: 1.5
+  proximity_zero_factor: 5.0
+  proximity_floor: 0.30
+  # A projective relation presupposes the two objects share a local context.
+  # Past this multiple of the anchor's radius the relation is false rather than
+  # weak: "the monitor to the left of the keyboard" is not satisfied by a
+  # monitor on a different desk across the room.
+  proximity_cutoff_factor: 8.0
+  w_proximity: 0.35
+  w_cone: 1.0
+  w_separation: 0.9
+  w_depth: 0.7
+  w_height: 0.35
+
+vertical:
+  # full credit inside this gap, with a linear tail to 3x it. Reconstructed
+  # instances routinely miss the bottom few centimetres of an object, or its
+  # stand, so a hard cutoff here measures mesh quality rather than contact.
+  contact_tol: 0.08
+  contact_tol_predicted: 0.15
+  support_min_overlap: 0.35
+  above_min_overlap: 0.20
+  above_gap_zero: 2.50
+  containment_pad: 0.05
+  containment_min_fraction: 0.60
+
+proximity:
+  # "next to" scales with object size: two mugs 40 cm apart are not next to
+  # each other, two sofas 40 cm apart are
+  near_base: 0.30
+  near_size_factor: 0.60
+  near_zero_multiplier: 3.0
+  beside_height_tol: 0.35
+  between_corridor: 0.70
+  between_span_lo: 0.12
+  between_span_hi: 0.88
+
+ordinal:
+  ordinal_min_spread_factor: 1.4
+  ordinal_min_gap: 0.06
+  ordinal_tie_ratio: 0.35
+
+comparative:
+  size_ratio_significant: 1.25

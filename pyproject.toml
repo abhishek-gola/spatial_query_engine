@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "spatial-query-engine"
+version = "0.1.0"
+description = "Reference-frame-aware spatial query resolution for indoor 3D scenes"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Abhishek Gola", email = "abhishek.gola@bigvisionllc.com" }]
+keywords = ["3d", "spatial reasoning", "reference frames", "scannet++",
+            "visual grounding", "robotics", "spatial ai"]
+
+# The core -- geometry, reference frames, relations, resolver, benchmark and
+# viewer -- runs on numpy and scipy alone. That is deliberate: the part of this
+# repo worth reading should not be gated behind a CUDA install.
+dependencies = [
+    "numpy>=1.24",
+    "scipy>=1.10",
+    "plyfile>=0.9",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+# reading ScanNet++ iPhone depth (LZ4-compressed frames)
+iphone = ["lz4>=4.0"]
+# open-vocabulary perception backend
+openvocab = ["torch>=2.1", "torchvision>=0.16", "transformers>=4.35",
+             "pillow>=10.0", "lz4>=4.0"]
+# LLM query parser
+llm = ["anthropic>=0.40"]
+dev = ["pytest>=7.4"]
+all = ["lz4>=4.0", "torch>=2.1", "torchvision>=0.16", "transformers>=4.35",
+       "pillow>=10.0", "anthropic>=0.40", "pytest>=7.4"]
+
+[project.scripts]
+sqe = "sqe.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["sqe*"]
+
+[tool.setuptools.package-data]
+sqe = ["viewer/static/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

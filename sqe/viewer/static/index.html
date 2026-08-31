@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spatial query engine</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div id="app">
+  <div id="canvas-wrap">
+    <canvas id="gl"></canvas>
+    <div id="overlay"></div>
+    <div id="hud">
+      <span id="fps"></span>
+      <span id="hint">drag to orbit &middot; scroll to zoom &middot; shift-drag to pan &middot; click an object to inspect it</span>
+    </div>
+    <div id="boot">loading three.js&hellip;</div>
+  </div>
+
+  <aside id="panel">
+    <header>
+      <h1>Spatial query engine</h1>
+      <p class="sub">reference-frame-aware relation resolver</p>
+    </header>
+
+    <section>
+      <label for="scene">scene</label>
+      <select id="scene"></select>
+      <div id="scene-info" class="mono small"></div>
+    </section>
+
+    <section>
+      <label for="q">query</label>
+      <input id="q" type="text" autocomplete="off"
+             placeholder="the second mug from the left on the middle shelf">
+      <div class="row">
+        <button id="run">resolve</button>
+        <select id="force-frame">
+          <option value="">frame: policy</option>
+          <option value="egocentric">force egocentric</option>
+          <option value="egocentric_bearing">force egocentric (bearing)</option>
+          <option value="intrinsic">force intrinsic</option>
+          <option value="addressee">force addressee</option>
+          <option value="world">force world</option>
+        </select>
+      </div>
+      <div class="row">
+        <label class="check"><input type="checkbox" id="use-camera">
+          viewpoint = my camera</label>
+      </div>
+      <div id="examples" class="small"></div>
+    </section>
+
+    <section id="answer-box" class="hidden">
+      <label>answer</label>
+      <div id="answer"></div>
+      <div id="frame-table"></div>
+      <div id="ambiguity"></div>
+    </section>
+
+    <section id="explain-box" class="hidden">
+      <label>how it got there</label>
+      <pre id="explain" class="mono"></pre>
+    </section>
+
+    <section id="inspect-box" class="hidden">
+      <label>object</label>
+      <div id="inspect" class="mono small"></div>
+      <div id="obj-frames" class="mono small"></div>
+    </section>
+
+    <section>
+      <label>display</label>
+      <div class="row wrap">
+        <label class="check"><input type="checkbox" id="show-cloud" checked> point cloud</label>
+        <label class="check"><input type="checkbox" id="show-boxes" checked> boxes</label>
+        <label class="check"><input type="checkbox" id="show-fronts"> object fronts</label>
+        <label class="check"><input type="checkbox" id="show-axes" checked> frame axes</label>
+        <label class="check"><input type="checkbox" id="show-traj"> camera path</label>
+        <label class="check"><input type="checkbox" id="show-room"> room axes</label>
+      </div>
+      <label for="psize">point size <span id="psize-val" class="mono"></span></label>
+      <input id="psize" type="range" min="1" max="8" step="0.5" value="2.5">
+    </section>
+
+    <section id="annotate-box" class="hidden">
+      <label>annotate</label>
+      <div class="small">clicked object becomes the target. shift-click to add.</div>
+      <div id="ann-targets" class="mono small">targets: (none)</div>
+      <div class="row wrap">
+        <select id="ann-frame">
+          <option value="any">frame-free</option>
+          <option value="egocentric">egocentric</option>
+          <option value="intrinsic">intrinsic</option>
+          <option value="addressee">addressee</option>
+          <option value="world">world</option>
+          <option value="unspecified">unspecified</option>
+        </select>
+        <select id="ann-diff">
+          <option value="easy">easy</option>
+          <option value="medium" selected>medium</option>
+          <option value="hard">hard</option>
+        </select>
+      </div>
+      <div class="row wrap">
+        <label class="check"><input type="checkbox" id="ann-stated"> frame stated in text</label>
+        <label class="check"><input type="checkbox" id="ann-amb"> ambiguous</label>
+      </div>
+      <select id="ann-kind">
+        <option value="none">ambiguity: none</option>
+        <option value="frame">frame</option>
+        <option value="ordinal_degenerate">ordinal degenerate</option>
+        <option value="ordinal_tie">ordinal tie</option>
+        <option value="level_even">level even</option>
+        <option value="score_tie">score tie</option>
+        <option value="anchor">anchor</option>
+        <option value="vague">vague</option>
+        <option value="multiple_valid">multiple valid</option>
+      </select>
+      <button id="ann-save">save item</button>
+      <div id="ann-status" class="small"></div>
+    </section>
+
+    <section>
+      <label>objects <span id="obj-count" class="mono"></span></label>
+      <input id="filter" type="text" placeholder="filter by label" autocomplete="off">
+      <div id="objects"></div>
+    </section>
+  </aside>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>
