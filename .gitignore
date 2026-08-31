@@ -7,7 +7,13 @@ __pycache__/
 # reproducible build artefacts
 cache/
 data/
-renders/
+
+# Renders are regenerable scratch, except the shareable GIF and the two stills
+# behind it, which are deliverables.
+renders/*
+!renders/gif/
+renders/gif/*
+!renders/gif/frame_switch.gif
 
 # Results are ignored by default -- a timestamped run directory is scratch.
 # The two that are actual claims are tracked, because a claim that lives only

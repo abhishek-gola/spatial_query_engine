@@ -31,11 +31,17 @@ operational in a 3-D pipeline and measuring it, not discovering it.**
 On **882 queries over 5 ScanNet++ scenes with ground-truth perception**:
 
 ### Two plausible frames pick different objects on 12–20% of frame-dependent queries
+#### 512 frame-dependent queries · **5 ScanNet++ scenes** · **ground-truth perception** · no annotation used
 
 18.8% as configured; median 16.1% and never below 11.3% across 20 trials that
 jitter all 43 query-time constants by ±30%
 ([results/robustness/](results/robustness/robustness.md)).
 Highest for lateral relations (24.8%), lower for frontal (15.4%).
+
+Five scenes is thin and ground-truth perception is generous — both are stated
+here rather than in a limitations section further down, because they are the
+first two things a reader should weigh. Per-scene numbers are in
+[results/sensitivity/](results/sensitivity/sensitivity.md).
 
 This is the number to quote, for two reasons. It makes no reference to *which*
 frame is correct, so it does not depend on my policy being right. And it is a
@@ -64,6 +70,17 @@ not the contribution.
 ---
 
 ## The one thing to look at
+
+![one query, two frames, two different objects](renders/gif/frame_switch.gif)
+
+*"The bottle in front of the laptop."* Intrinsic reads it as the side the laptop
+faces; egocentric as between me and the laptop. Same scene, same camera, same
+geometry — only the frame changes. Regenerate with
+`sqe gif --root DATA --scene 0a7cc12c0e "the bottle in front of the laptop"`,
+or `sqe find-gif --items <proposals>` to list other queries that work as a
+picture. It is a rendering of the resolver's output, not a screen recording of
+the viewer.
+
 
 Same sentence, same scene, same geometry. Only the frame changes.
 
@@ -345,11 +362,16 @@ sqe/
   data/          scannetpp, arkitscenes, synthetic rooms with exact ground truth
                  quality.py  flags dubious ground-truth annotations
   bench/         schema, proposal generation, blind annotation, evaluation
+                 sensitivity.py  how much the frame changes the answer
+                 robustness.py   does that survive perturbing the constants
+                 vlm_baseline.py which frame an LLM implicitly uses
   viewer/        stdlib HTTP server + three.js front end
   viz/           3-D boxes projected into real frames, plan views, point splats
   selftest.py    hand-derived frame checks
 
 docs/METHOD.md        the reasoning and the experimental design
+docs/RELATED_WORK.md  positioning, with the quotes the gap claim rests on
+docs/POST_DRAFT.md    write-up draft, ambiguity reported per kind
 docs/CONVENTIONS.md   every sign convention, in one place
 configs/relations.yaml every physical threshold, with its rationale
 run_benchmark.sh      build -> propose -> annotate -> evaluate
@@ -403,6 +425,11 @@ Outstanding:
 * **the annotation itself** — 882 proposals are generated and waiting. Every
   accuracy number in the report depends on them, and none is claimed until then.
 * the LLM parser condition needs an API key to run;
+* **the VLM baseline is built and tested but unrun** (`sqe vlm-baseline`): hand a
+  model the same scene graph, ask which object a frame-split sentence refers to,
+  then classify its answer by which frame it matches. The prompt never mentions
+  frames and ids are shuffled. Needs `ANTHROPIC_API_KEY`; `--dry-run` shows the
+  prompt without calling anything;
 * the open-vocabulary backend would benefit from a GPU pass over all five
   scenes, and from a learned proposal network in place of the geometric one.
 

@@ -72,8 +72,15 @@ def project_box(obb: OBB, K: np.ndarray, pose_c2w: np.ndarray,
     corners_c = transform_points(se3_inverse(pose_c2w), corners_w)
     uv, z, valid = project(corners_c, K)
     all_front = bool(np.all(z > 0.05))
-    on_screen = bool(np.any((uv[:, 0] > -w) & (uv[:, 0] < 2 * w)
-                            & (uv[:, 1] > -h) & (uv[:, 1] < 2 * h) & valid))
+    # The projected box's bounding rectangle must actually overlap the image.
+    # The previous test allowed a full image-width of margin on each side, so a
+    # box projecting to x in [-4947, -1345] on a 1920-wide frame counted as
+    # on-screen -- entirely outside the picture.
+    if all_front and len(uv):
+        lo, hi = uv.min(axis=0), uv.max(axis=0)
+        on_screen = bool(hi[0] > 0 and lo[0] < w and hi[1] > 0 and lo[1] < h)
+    else:
+        on_screen = False
     return uv, z, all_front, on_screen
 
 
@@ -196,11 +203,21 @@ def _runs(values: np.ndarray):
 
 def edge_visibility(p0: np.ndarray, p1: np.ndarray, K: np.ndarray,
                     pose_c2w: np.ndarray, dbuf: Optional[DepthBuffer],
-                    tol: float = 0.04, max_samples: int = 96):
+                    tol: float = 0.04, max_samples: int = 96,
+                    image_size: Optional[Tuple[int, int]] = None):
     """Sample one box edge and say which parts of it are visible.
 
-    Returns `(uv, visible, in_front)`, all indexed by sample. The sample count
-    follows the edge's projected pixel length, so a long edge across the frame
+    Returns `(uv, visible, in_front)`, all indexed by sample. `in_front` means
+    "in front of the camera **and** inside the image"; a sample outside the frame
+    is not visible, however unoccluded it is.
+
+    That second half was missing and it mattered. The depth lookup returns "no
+    measurement" for an out-of-bounds pixel, the occlusion test then found
+    nothing in the way, and an entirely off-screen box scored a visible fraction
+    of 1.00 -- which made `best_joint_view` pick frames where none of the
+    objects were in the picture at all.
+
+    The sample count follows the edge's projected pixel length, so a long edge
     gets a fine test and a two-pixel edge does not cost 96 depth lookups.
     """
     p0 = np.asarray(p0, float)
@@ -215,6 +232,12 @@ def edge_visibility(p0: np.ndarray, p1: np.ndarray, K: np.ndarray,
     cam = transform_points(se3_inverse(pose_c2w), world)
     uv, z, valid = project(cam, K)
     in_front = valid & (z > 0.05)
+    if image_size is None and dbuf is not None:
+        image_size = (dbuf.rgb_w, dbuf.rgb_h)
+    if image_size is not None:
+        w, h = image_size
+        in_front &= ((uv[:, 0] >= 0) & (uv[:, 0] < w)
+                     & (uv[:, 1] >= 0) & (uv[:, 1] < h))
     if dbuf is None:
         return uv, in_front.copy(), in_front
     meas, ok = dbuf.sample(uv)
@@ -311,7 +334,9 @@ def draw_box_hidden_line(img: np.ndarray, obb: OBB, K: np.ndarray,
 
     for a, b in BOX_EDGES:
         uv, visible, in_front = edge_visibility(corners[a], corners[b], K,
-                                                pose_c2w, dbuf, tol)
+                                                pose_c2w, dbuf, tol,
+                                                image_size=(img.shape[1],
+                                                            img.shape[0]))
         state = np.where(~in_front, SKIP,
                          np.where(visible, VISIBLE, HIDDEN)).astype(np.int8)
         n_tot += int(in_front.sum())
@@ -447,7 +472,8 @@ def visible_objects(scene: Scene, K: np.ndarray, pose_c2w: np.ndarray,
             continue
         frac = 1.0
         if dbuf is not None and occlusion_test:
-            frac = box_visible_fraction(o.obb, K, pose_c2w, dbuf)
+            frac = box_visible_fraction(o.obb, K, pose_c2w, dbuf,
+                                        image_size=image_size)
             if frac < min_visible_fraction:
                 continue
         rows.append((o, uv, dist, frac))
@@ -461,16 +487,29 @@ def visible_objects(scene: Scene, K: np.ndarray, pose_c2w: np.ndarray,
 
 def box_visible_fraction(obb: OBB, K: np.ndarray, pose_c2w: np.ndarray,
                          dbuf: Optional["DepthBuffer"],
-                         tol: float = 0.04) -> float:
-    """Fraction of a box's in-front edge length that is not occluded."""
+                         tol: float = 0.04,
+                         image_size: Optional[Tuple[int, int]] = None) -> float:
+    """Fraction of a box's edge length that is in frame and not occluded.
+
+    Returns 0 when nothing of the box is inside the image, which is what makes
+    "is this object actually visible here" a usable test.
+    """
     corners = obb.corners()
     n_vis = n_tot = 0
+    total_samples = 0
     for a, b in BOX_EDGES:
         _, visible, in_front = edge_visibility(corners[a], corners[b], K,
-                                               pose_c2w, dbuf, tol)
+                                               pose_c2w, dbuf, tol,
+                                               image_size=image_size)
+        total_samples += len(in_front)
         n_tot += int(in_front.sum())
         n_vis += int((visible & in_front).sum())
-    return (n_vis / n_tot) if n_tot else 0.0
+    if not n_tot:
+        return 0.0
+    # scale by how much of the box is in frame at all, so a box with one corner
+    # peeking in does not score 1.0
+    in_frame_share = n_tot / max(total_samples, 1)
+    return (n_vis / n_tot) * in_frame_share
 
 
 # --------------------------------------------------------------------------
@@ -802,15 +841,20 @@ def best_joint_view(src: FrameSource, obbs: Sequence[OBB],
             # want it in frame and at a sane apparent size
             fit = np.exp(-0.5 * (np.log(max(d, 1e-6)
                                         / max(radius / 0.18, 0.5)) / 0.75) ** 2)
-            score = fit * (1.0 if inside else 0.25)
-            worst = min(worst, float(score))
+            if not inside:
+                # a box whose centre is outside the frame is not "seen" here;
+                # scoring it at a quarter let candidates through where an object
+                # was entirely off the picture
+                worst = 0.0
+                break
+            worst = min(worst, float(fit))
         if worst > 0.0:
             cand.append((worst, i))
     if not cand:
         return -1
     cand.sort(key=lambda t: -t[0])
 
-    best_i, best_score = cand[0][1], -1.0
+    best_i, best_score = -1, 0.0
     for _, i in cand[:refine_top]:
         pose = src.poses[i]
         K = src.Ks[i] if src.Ks.ndim == 3 else src.Ks
@@ -820,11 +864,14 @@ def best_joint_view(src: FrameSource, obbs: Sequence[OBB],
                 (DepthBuffer.from_points(scene_background, K, pose,
                                          src.image_size)
                  if scene_background is not None else None))
-        fracs = [box_visible_fraction(o, K, pose, dbuf) for o in obbs]
+        fracs = [box_visible_fraction(o, K, pose, dbuf,
+                                      image_size=src.image_size) for o in obbs]
         score = float(min(fracs))
         if score > best_score:
             best_i, best_score = i, score
-    return int(best_i)
+    # No frame shows every box: say so rather than returning a frame in which
+    # some of them are invisible.
+    return int(best_i) if best_score > 0.0 else -1
 
 
 def render_query_overlay(scene: Scene, src: FrameSource, resolution,

@@ -244,3 +244,57 @@ def test_synthetic_trajectory_cameras_are_level(studio):
     downs = np.array([camera_down(traj.poses[i]) for i in range(len(traj))])
     # camera +y is image-down, so it must point broadly along world -z
     assert float(downs[:, 2].max()) < 0.0, downs[:, 2].max()
+
+
+def test_a_box_entirely_off_screen_is_not_visible():
+    """The bug this pins was silently inflating every visibility number.
+
+    `on_screen` used to allow a full image-width of margin on each side, and
+    `box_visible_fraction` counted out-of-bounds samples as visible, because the
+    depth lookup returns "no measurement" there and nothing was found in the
+    way. A door projecting to x in [-4947, -1345] on a 1920-wide frame scored
+    on_screen=True and visible=1.00, which made the joint-view chooser pick
+    frames containing none of the objects.
+    """
+    from sqe.viz.overlay import DepthBuffer, box_visible_fraction
+    pose = _camera_at_origin_looking_along_y()
+    # far off to the world -x side: behind the left edge of the frame
+    off = obb_from_extent_yaw((-12.0, 3.0, 1.5), (0.6, 0.6, 0.6), 0.0)
+    uv, _, front, on = project_box(off, K, pose, SIZE)
+    assert front, "it is still in front of the camera"
+    assert not on, f"but it is off screen; uv x range {uv[:, 0].min():.0f}..{uv[:, 0].max():.0f}"
+    clear = DepthBuffer.from_sensor(np.full((192, 256), 99.0, np.float32), SIZE)
+    assert box_visible_fraction(off, K, pose, clear, image_size=SIZE) == 0.0
+    # and with no depth buffer at all, an explicit image size still rules it out
+    assert box_visible_fraction(off, K, pose, None, image_size=SIZE) == 0.0
+    # a box in the middle of the frame is visible
+    inframe = obb_from_extent_yaw((0.0, 3.0, 1.5), (0.6, 0.6, 0.6), 0.0)
+    assert box_visible_fraction(inframe, K, pose, clear, image_size=SIZE) > 0.9
+
+
+def test_partially_in_frame_scores_between():
+    from sqe.viz.overlay import DepthBuffer, box_visible_fraction
+    pose = _camera_at_origin_looking_along_y()
+    clear = DepthBuffer.from_sensor(np.full((192, 256), 99.0, np.float32), SIZE)
+    # straddling the left edge
+    straddle = obb_from_extent_yaw((-1.6, 2.0, 1.5), (1.6, 0.4, 1.6), 0.0)
+    f = box_visible_fraction(straddle, K, pose, clear, image_size=SIZE)
+    assert 0.02 < f < 0.95, f
+
+
+def test_best_joint_view_returns_minus_one_when_nothing_shows_all():
+    """Two objects at opposite ends of a room cannot share one 55-degree frame.
+
+    It used to fall back to the best geometric candidate, which meant returning
+    a frame where some objects were invisible.
+    """
+    from sqe.geom.transforms import se3
+    from sqe.viz.overlay import FrameSource, best_joint_view
+    poses = np.stack([_camera_at_origin_looking_along_y()])
+    src = FrameSource(poses=poses, Ks=np.stack([K]), names=["f0"],
+                      image_size=SIZE, video_path=None, depth_reader=None)
+    near = obb_from_extent_yaw((0.0, 3.0, 1.5), (0.4, 0.4, 0.4), 0.0)
+    far_left = obb_from_extent_yaw((-14.0, 3.0, 1.5), (0.4, 0.4, 0.4), 0.0)
+    assert best_joint_view(src, [near], np.array([0.0, 0.0, 1.0]), stride=1) == 0
+    assert best_joint_view(src, [near, far_left], np.array([0.0, 0.0, 1.0]),
+                           stride=1) == -1

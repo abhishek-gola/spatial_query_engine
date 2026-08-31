@@ -380,6 +380,137 @@ def cmd_robustness(args):
     return 0
 
 
+def cmd_vlm_baseline(args):
+    """Which reference frame does an LLM implicitly use?"""
+    import json as _json
+    from .bench.schema import read_many
+    from .bench.vlm_baseline import (Runner, render, run, select_queries,
+                                     summarise, _fmt_scene)
+    get = _scene_getter(args)
+    items = read_many(args.items)
+    selected = select_queries(items, get, RelationConfig.load(args.config),
+                              limit=args.limit, verbose=not args.quiet)
+    if not selected:
+        print("no frame-split queries found; nothing to ask")
+        return 1
+
+    if args.dry_run:
+        import numpy as np
+        it, info = selected[0]
+        scene = get(it.scene_id)
+        vp = info.get("viewpoint") or {}
+        eye = np.asarray(vp.get("eye") or [0, 0, 1.6], float)
+        look = np.asarray(vp.get("look_dir") or [0, 1, 0], float)
+        order = [o.id for o in scene.objects if not o.is_room_fixed]
+        print("\n--- example prompt (nothing sent) "
+              + "-" * 40)
+        print(_fmt_scene(scene, eye, look, order[:25]))
+        if len(order) > 25:
+            print(f"  ... and {len(order) - 25} more objects")
+        print(f'\nWhich object does this refer to?\n"{it.text}"')
+        print("-" * 74)
+        print(f"\n{len(selected)} queries would be sent to {args.model}.")
+        print("Frame answers for the first few, which is what the reply gets "
+              "classified against:")
+        for it2, info2 in selected[:5]:
+            print(f'  "{it2.text}" -> {info2["frame_answers"]}')
+        print("\nRun without --dry-run to execute (needs ANTHROPIC_API_KEY).")
+        return 0
+
+    runner = Runner(args.model, cache_path=args.cache_file)
+    rows = run(selected, get, runner, seed=args.seed, verbose=not args.quiet)
+    summary = summarise(rows)
+    text = render(summary, args.model, args.title)
+    print()
+    print(text)
+    if args.out:
+        os.makedirs(args.out, exist_ok=True)
+        with open(os.path.join(args.out, "vlm_baseline.md"), "w") as f:
+            f.write(text)
+        with open(os.path.join(args.out, "vlm_baseline.json"), "w") as f:
+            _json.dump({"summary": summary,
+                        "rows": [r.to_dict() for r in rows]}, f, indent=1,
+                       default=float)
+        print(f"\nwrote {args.out}/vlm_baseline.md and vlm_baseline.json")
+    return 0
+
+
+def cmd_gif(args):
+    """Animated GIF of one query resolving differently under each frame."""
+    from .viz.animate import frame_switch_gif
+    from .viz.overlay import scannetpp_frame_source
+    get = _scene_getter(args)
+    if not args.root:
+        print("error: --root is needed, the GIF is drawn on real camera frames")
+        return 2
+    scene = get(args.scene)
+    src = scannetpp_frame_source(args.root, args.scene)
+    out = args.out or f"renders/gif/{args.scene}.gif"
+    p = frame_switch_gif(scene, src, args.text, out,
+                         cfg=RelationConfig.load(args.config),
+                         kinds=tuple(args.frames), width=args.width,
+                         hold_ms=args.hold, colours=args.colours)
+    if p is None:
+        print("no GIF written: the frames agree on this query, or no single "
+              "camera frame shows the anchor and every candidate answer. Try "
+              "`sqe gif --find` to list queries that do.")
+        return 1
+    return 0
+
+
+def cmd_find_gif(args):
+    """List frame-split queries whose objects all fit in one camera frame."""
+    import numpy as np
+    from .bench.schema import read_many
+    from .query.parser_rules import parse
+    from .query.resolver import Resolver
+    from .viz.overlay import (DepthBuffer, best_joint_view,
+                              box_visible_fraction, scannetpp_frame_source)
+    get = _scene_getter(args)
+    cfg = RelationConfig.load(args.config)
+    items = read_many(args.items)
+    rows = []
+    for sid in sorted({it.scene_id for it in items}):
+        try:
+            scene = get(sid)
+            src = scannetpp_frame_source(args.root, sid)
+        except Exception as exc:
+            print(f"[skip] {sid}: {exc}")
+            continue
+        r = Resolver(scene, cfg)
+        for it in [x for x in items if x.scene_id == sid
+                   and x.relation_type in ("projective_lateral",
+                                            "projective_frontal")]:
+            res = r.resolve(parse(it.text), it.viewpoint_spec())
+            real = {k: v for k, v in res.frame_answers.items() if v is not None}
+            if len(set(real.values())) < 2:
+                continue
+            anchor = next((a.obj for a in res.anchors if a.obj is not None), None)
+            if anchor is None:
+                continue
+            objs = [scene.by_id(i) for i in sorted(set(real.values()))] + [anchor]
+            ctrs = np.array([o.center for o in objs])
+            if float(np.linalg.norm(ctrs.max(0) - ctrs.min(0))) > args.max_spread:
+                continue
+            i = best_joint_view(src, [o.obb for o in objs], scene.up,
+                                scene_background=scene.background)
+            if i < 0:
+                continue
+            K = src.Ks[i]
+            pose = src.poses[i]
+            d = src.depth(i)
+            db = DepthBuffer.from_sensor(d, src.image_size) if d is not None else None
+            fr = [box_visible_fraction(o.obb, K, pose, db,
+                                       image_size=src.image_size) for o in objs]
+            rows.append((min(fr), sid, it.text, i, dict(real)))
+    rows.sort(key=lambda t: -t[0])
+    print(f"\n{len(rows)} frame-split queries with every object in one frame\n")
+    for v, sid, text, i, real in rows[: args.limit or 20]:
+        print(f"  min visibility {v:.2f}   {sid}  frame {i}")
+        print(f"     \"{text}\"   {real}")
+    return 0
+
+
 def cmd_audit(args):
     from .data.quality import audit_scene, format_audit
     get = _scene_getter(args)
@@ -701,6 +832,56 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--gt-fronts", action="store_true")
     p.add_argument("--forward", default="composite")
     p.set_defaults(func=cmd_sensitivity)
+
+    p = sub.add_parser("vlm-baseline",
+                       help="which reference frame does an LLM implicitly use?")
+    _add_common(p)
+    p.add_argument("--root", default=None)
+    p.add_argument("--items", nargs="+", required=True)
+    p.add_argument("--out", default=None)
+    p.add_argument("--model", default="claude-sonnet-5")
+    p.add_argument("--limit", type=int, default=60)
+    p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--cache-file", default="results/vlm/cache.json")
+    p.add_argument("--dry-run", action="store_true",
+                   help="print an example prompt and the selected queries "
+                        "without calling the model")
+    p.add_argument("--title", default="Which frame does the model use?")
+    p.add_argument("--perception", default="gt", choices=["gt", "openvocab"])
+    p.add_argument("--gt-fronts", action="store_true")
+    p.add_argument("--forward", default="composite")
+    p.set_defaults(func=cmd_vlm_baseline)
+
+    p = sub.add_parser("gif", help="animated GIF of one query per frame")
+    _add_common(p)
+    p.add_argument("--root", default=None)
+    p.add_argument("--scene", required=True)
+    p.add_argument("text")
+    p.add_argument("--out", default=None)
+    p.add_argument("--frames", nargs="*",
+                   default=["intrinsic", "egocentric"],
+                   help="which frames to cycle between")
+    p.add_argument("--width", type=int, default=1000)
+    p.add_argument("--hold", type=int, default=1500, help="ms per state")
+    p.add_argument("--colours", type=int, default=160)
+    p.add_argument("--perception", default="gt", choices=["gt", "openvocab"])
+    p.add_argument("--gt-fronts", action="store_true")
+    p.add_argument("--forward", default="composite")
+    p.set_defaults(func=cmd_gif)
+
+    p = sub.add_parser("find-gif",
+                       help="list frame-split queries that fit one frame")
+    _add_common(p)
+    p.add_argument("--root", default=None)
+    p.add_argument("--items", nargs="+", required=True)
+    p.add_argument("--limit", type=int, default=20)
+    p.add_argument("--max-spread", type=float, default=3.2,
+                   help="metres; objects further apart than this cannot share "
+                        "a frame")
+    p.add_argument("--perception", default="gt", choices=["gt", "openvocab"])
+    p.add_argument("--gt-fronts", action="store_true")
+    p.add_argument("--forward", default="composite")
+    p.set_defaults(func=cmd_find_gif)
 
     p = sub.add_parser("robustness",
                        help="does the sensitivity number survive perturbing "
