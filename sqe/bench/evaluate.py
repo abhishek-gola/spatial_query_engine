@@ -63,6 +63,27 @@ PERCEPTION_MODES = ("gt", "openvocab")
 ATTRIBUTION_ORDER = ("unresolvable", "parse", "perception", "frame_unavailable",
                      "frame_convention", "geometry", "ambiguous_item")
 
+#: Ambiguity kinds scored separately. `frame` is the one this project claims;
+#: the others are reported so a reader can see that a poor pooled number comes
+#: from `anchor` and `score_tie`, which are properties of how many instances a
+#: real room contains rather than of the frame resolver.
+AMBIGUITY_KINDS_SCORED = ("frame", "anchor", "score_tie", "level_even",
+                          "ordinal_degenerate", "ordinal_tie",
+                          "world_undetermined", "weak_match", "no_candidate")
+
+
+def _binary_scores(pairs: Sequence[Tuple[bool, bool]]) -> Dict:
+    """precision / recall / F1 / confusion counts for (gold, predicted) pairs."""
+    tp = sum(1 for g, p in pairs if g and p)
+    fp = sum(1 for g, p in pairs if not g and p)
+    fn = sum(1 for g, p in pairs if g and not p)
+    tn = sum(1 for g, p in pairs if not g and not p)
+    prec = tp / (tp + fp) if (tp + fp) else None
+    rec = tp / (tp + fn) if (tp + fn) else None
+    f1 = (2 * prec * rec / (prec + rec)) if (prec and rec) else None
+    return {"tp": tp, "fp": fp, "fn": fn, "tn": tn, "n": len(pairs),
+            "precision": prec, "recall": rec, "f1": f1}
+
 
 @dataclass
 class Outcome:
@@ -80,6 +101,7 @@ class Outcome:
     frame_used: Optional[str]
     flagged_ambiguous: bool
     ambiguity_kinds: List[str]
+    gold_ambiguity_kind: str = "none"
     frame_answers: Dict[str, Optional[int]] = field(default_factory=dict)
     top_score: float = 0.0
     elapsed_ms: float = 0.0
@@ -137,6 +159,7 @@ def run_condition(items: Sequence[BenchItem],
                                     it.frame, it.frame_stated_in_text,
                                     it.ambiguous, it.difficulty, None,
                                     list(it.target_ids), False, None, False, [],
+                                    gold_ambiguity_kind=it.ambiguity_kind,
                                     error=f"scene unavailable: {exc}"))
             continue
         if it.scene_id not in resolvers:
@@ -174,6 +197,7 @@ def run_condition(items: Sequence[BenchItem],
                                     it.frame, it.frame_stated_in_text,
                                     it.ambiguous, it.difficulty, None,
                                     list(it.target_ids), False, None, False, [],
+                                    gold_ambiguity_kind=it.ambiguity_kind,
                                     error=f"{type(exc).__name__}: {exc}"))
             continue
 
@@ -187,6 +211,7 @@ def run_condition(items: Sequence[BenchItem],
             frame_used=res.frame_used,
             flagged_ambiguous=res.ambiguity.ambiguous,
             ambiguity_kinds=list(res.ambiguity.kinds),
+            gold_ambiguity_kind=it.ambiguity_kind,
             frame_answers=dict(res.frame_answers),
             top_score=(res.candidates[0].score if res.candidates else 0.0),
             elapsed_ms=res.elapsed_ms))
@@ -220,15 +245,32 @@ def aggregate(outcomes: Sequence[Outcome]) -> Dict:
     stated = [o for o in fdep if o.frame_stated]
     unstated = [o for o in fdep if not o.frame_stated]
 
-    # ambiguity detection, scored as a binary classifier
-    tp = sum(1 for o in outcomes if o.ambiguous_gold and o.flagged_ambiguous)
-    fp = sum(1 for o in outcomes if not o.ambiguous_gold and o.flagged_ambiguous)
-    fn = sum(1 for o in outcomes if o.ambiguous_gold and not o.flagged_ambiguous)
-    tn = sum(1 for o in outcomes
-             if not o.ambiguous_gold and not o.flagged_ambiguous)
-    prec = tp / (tp + fp) if (tp + fp) else None
-    rec = tp / (tp + fn) if (tp + fn) else None
-    f1 = (2 * prec * rec / (prec + rec)) if (prec and rec) else None
+    # Ambiguity detection, scored per kind and not pooled.
+    #
+    # Pooling is misleading here. On real scenes the `anchor` and `score_tie`
+    # flags fire on the large majority of queries -- because a room genuinely
+    # has five keyboards and four tables -- while the `frame` flag, the one this
+    # project actually claims, fires on far fewer. A single pooled
+    # precision/recall is then dominated by the two kinds that have nothing to
+    # do with the contribution, and reads as a system that cries wolf.
+    # `amb_metrics`, not `amb`: there is already a local `amb` holding the
+    # ambiguous outcomes, and shadowing it silently broke
+    # accuracy_ambiguous_only.
+    amb_metrics = {"pooled": _binary_scores(
+        [(o.ambiguous_gold, o.flagged_ambiguous) for o in outcomes])}
+    for kind in AMBIGUITY_KINDS_SCORED:
+        pairs = [(o.ambiguous_gold and o.gold_ambiguity_kind == kind,
+                  kind in o.ambiguity_kinds) for o in outcomes]
+        amb_metrics[kind] = _binary_scores(pairs)
+    # `frame` is the claimed one: does the system flag the queries the annotator
+    # judged frame-ambiguous, among frame-dependent queries only?
+    amb_metrics["frame_on_frame_dependent"] = _binary_scores(
+        [(o.ambiguous_gold and o.gold_ambiguity_kind == "frame",
+          "frame" in o.ambiguity_kinds)
+         for o in outcomes if is_frame_dependent_type(o.relation_type)])
+    prec = amb_metrics["pooled"]["precision"]
+    rec = amb_metrics["pooled"]["recall"]
+    f1 = amb_metrics["pooled"]["f1"]
 
     # how often the frames actually disagreed, and how often that mattered
     disagreed = 0
@@ -261,8 +303,8 @@ def aggregate(outcomes: Sequence[Outcome]) -> Dict:
                      for k, v in sorted(by_scene.items())},
         "frames_used": dict(Counter(o.frame_used for o in outcomes
                                     if o.frame_used)),
-        "ambiguity_detection": {"tp": tp, "fp": fp, "fn": fn, "tn": tn,
-                                "precision": prec, "recall": rec, "f1": f1},
+        "ambiguity_detection": amb_metrics["pooled"],
+        "ambiguity_detection_by_kind": amb_metrics,
         "frame_disagreement": {
             "n_frame_dependent": len(fdep),
             "n_frames_disagreed": disagreed,
@@ -440,17 +482,36 @@ def render_report(split: Dict, conditions: Dict[str, Dict],
     L.append("")
 
     first = next(iter(conditions.values()))
-    ad = first["ambiguity_detection"]
-    L.append("## Ambiguity detection")
+    by_kind = first.get("ambiguity_detection_by_kind", {})
+    L.append("## Ambiguity detection, per kind")
     L.append("")
-    L.append(f"Scored as a binary classifier against the annotator's "
-             f"`ambiguous` flag, on the primary condition.")
+    L.append("Scored against the annotator's `ambiguous` flag and "
+             "`ambiguity_kind`, on the primary condition. **Reported per kind, "
+             "not pooled.** On real scenes the `anchor` and `score_tie` flags "
+             "fire on most queries, because a room genuinely does contain five "
+             "keyboards and four tables; a pooled number is dominated by those "
+             "and says nothing about the frame resolver. `frame` is the kind "
+             "this project claims.")
     L.append("")
-    L.append(f"| precision | recall | F1 | tp | fp | fn | tn |")
-    L.append("|---|---|---|---|---|---|---|")
-    L.append(f"| {_pct(ad['precision'])} | {_pct(ad['recall'])} | "
-             f"{_pct(ad['f1'])} | {ad['tp']} | {ad['fp']} | {ad['fn']} | "
-             f"{ad['tn']} |")
+    L.append("| kind | n | gold positives | precision | recall | F1 |")
+    L.append("|---|---|---|---|---|---|")
+    order = ["frame", "frame_on_frame_dependent"] + [
+        k for k in by_kind if k not in ("frame", "frame_on_frame_dependent",
+                                        "pooled")] + ["pooled"]
+    for k in order:
+        v = by_kind.get(k)
+        if not v:
+            continue
+        gold_pos = v["tp"] + v["fn"]
+        name = f"**{k}**" if k.startswith("frame") else k
+        L.append(f"| {name} | {v['n']} | {gold_pos} | "
+                 f"{_pct(v['precision'])} | {_pct(v['recall'])} | "
+                 f"{_pct(v['f1'])} |")
+    L.append("")
+    L.append("`n/a` means the annotator marked no query with that kind, so "
+             "there is nothing to score. `pooled` is shown last and "
+             "deliberately de-emphasised: it is the number a reader would "
+             "otherwise quote, and it is the least informative one here.")
     L.append("")
 
     fd = first["frame_disagreement"]

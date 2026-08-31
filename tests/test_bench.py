@@ -193,3 +193,54 @@ def test_run_condition_survives_a_missing_scene():
         raise FileNotFoundError("no such scene")
     oc = run_condition(items, getter)
     assert len(oc) == 1 and not oc[0].correct and oc[0].error
+
+
+def test_ambiguity_is_scored_per_kind_not_only_pooled():
+    """Pooled precision is dominated by `anchor`, which is not the claim.
+
+    Constructed so the pooled number looks terrible while `frame` is perfect:
+    nine queries the annotator called anchor-ambiguous and one called
+    frame-ambiguous, with the system flagging `anchor` on everything.
+    """
+    oc = []
+    for i in range(9):
+        o = _oc(f"a{i}", True, ambiguous=True)
+        o.gold_ambiguity_kind = "anchor"
+        o.ambiguity_kinds = ["anchor"]
+        o.flagged_ambiguous = True
+        oc.append(o)
+    for i in range(9):
+        o = _oc(f"b{i}", True)
+        o.ambiguity_kinds = ["anchor"]     # fires but nothing was ambiguous
+        o.flagged_ambiguous = True
+        oc.append(o)
+    o = _oc("f0", True, ambiguous=True)
+    o.gold_ambiguity_kind = "frame"
+    o.ambiguity_kinds = ["frame"]
+    o.flagged_ambiguous = True
+    oc.append(o)
+
+    m = aggregate(oc)
+    by_kind = m["ambiguity_detection_by_kind"]
+    assert "frame" in by_kind and "anchor" in by_kind and "pooled" in by_kind
+    # frame is perfect; anchor drags the pooled number down
+    assert by_kind["frame"]["precision"] == pytest.approx(1.0)
+    assert by_kind["frame"]["recall"] == pytest.approx(1.0)
+    assert by_kind["anchor"]["precision"] == pytest.approx(0.5)
+    assert m["ambiguity_detection"]["precision"] < 0.6
+    # and the frame-dependent-only view exists
+    assert "frame_on_frame_dependent" in by_kind
+
+
+def test_report_shows_per_kind_ambiguity_and_labels_pooled_last():
+    items = [_item(id="a", relation_type="projective_lateral",
+                   frame="egocentric")]
+    o = _oc("a", True, ambiguous=True)
+    o.gold_ambiguity_kind = "frame"
+    o.ambiguity_kinds = ["frame"]
+    o.flagged_ambiguous = True
+    text = render_report(describe_split(items), {"ours": aggregate([o])},
+                         attribute([o], {}))
+    assert "Ambiguity detection, per kind" in text
+    assert "not pooled" in text
+    assert text.index("| **frame**") < text.index("| pooled |")

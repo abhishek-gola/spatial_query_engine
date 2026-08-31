@@ -170,28 +170,66 @@ def summarise(rows: Sequence[SensitivityRow],
 
 
 def render(summary: Dict, title: str = "Frame sensitivity") -> str:
+    """Report the policy-independent statistic first.
+
+    Two numbers are available and they are not equally good:
+
+    * **mutual disagreement** -- two plausible frames, both available and both
+      confident, select different objects. This makes no reference to which
+      frame is correct, so it stands on its own.
+    * **flip rate against a fixed frame** -- forcing one convention changes the
+      answer away from the policy's. This is *not* an error rate. It measures
+      divergence from my choice, and if my policy is wrong a high flip rate only
+      says "disagrees with me". It is reported second, and labelled.
+
+    An earlier version of this report put the flip table first and largest,
+    which invited exactly the conflation it should prevent.
+    """
     def pct(x):
         return "  n/a" if x is None else f"{100.0 * x:5.1f}%"
 
-    L = [f"# {title}", "",
-         "Measured without annotation. This is not accuracy -- it is how much",
-         "the answer depends on which reference frame is used. It is the",
-         "precondition for the accuracy claim: if the frame never changed the",
-         "answer, the frame would not matter.", ""]
+    d = summary["disagreement"]
+    L = [f"# {title}", ""]
+    L.append("Measured without annotation. **This is not accuracy.** It is how "
+             "much the answer depends on which reference frame is used, which "
+             "is the precondition for any accuracy claim: if the frame never "
+             "changed the answer, the frame would not matter.")
+    L.append("")
     L.append(f"{summary['n_queries']} queries, "
              f"{summary['n_frame_dependent']} of them frame-dependent "
              f"({summary['n_frame_independent']} frame-free).")
     L.append("")
-    d = summary["disagreement"]
-    L.append(f"**Plausible frames disagree on {d['n']} of "
-             f"{summary['n_frame_dependent']} frame-dependent queries "
-             f"({pct(d['rate']).strip()}).** Both frames must be available and "
-             f"confident to count, so this is a lower bound.")
+    L.append("## Headline: frames disagree with each other")
     L.append("")
-    L.append("## Forcing one fixed convention")
+    L.append(f"### {pct(d['rate']).strip()} of frame-dependent queries "
+             f"({d['n']} of {summary['n_frame_dependent']})")
     L.append("")
-    L.append("How often a single fixed frame -- what an unexamined pipeline "
-             "effectively has -- picks a different object from the policy.")
+    L.append("Two plausible reference frames, both constructible and both "
+             "returning a confident answer, select **different objects**. This "
+             "is the statistic to quote: it says nothing about which frame is "
+             "right, so it does not depend on my policy being correct. It is a "
+             "lower bound -- a frame that could not be built at all, because an "
+             "anchor's front was not estimable, counts as agreement here rather "
+             "than as disagreement.")
+    L.append("")
+    L.append("| relation type | n | frames disagree |")
+    L.append("|---|---|---|")
+    for t, v in summary["by_relation_type"].items():
+        L.append(f"| {t} | {v['n']} | {pct(v['disagreement_rate'])} |")
+    L.append("")
+
+    L.append("## Secondary, and weaker: flip rate against a fixed convention")
+    L.append("")
+    L.append("How often forcing a single fixed frame -- what a pipeline that "
+             "never names its convention effectively has -- picks a different "
+             "object from the policy.")
+    L.append("")
+    L.append("**This is not an error rate.** It measures divergence from *my* "
+             "policy's answer, and the policy has not been validated against "
+             "human labels yet. If the policy is wrong, a high flip rate means "
+             "only \"disagrees with my choice\". Treat it as an upper bound on "
+             "how much the frame choice could matter, not as a measurement of "
+             "how much anyone gets wrong.")
     L.append("")
     L.append("| forced frame | queries | answer changed | flip rate | "
              "no answer under this frame |")
@@ -201,28 +239,32 @@ def render(summary: Dict, title: str = "Frame sensitivity") -> str:
                  f"{pct(v['flip_rate'])} | "
                  f"{v['n_no_answer_under_this_frame']} |")
     L.append("")
-    L.append("## By relation type")
+    L.append("The last column matters as much as the flip rate: those queries "
+             "have no answer at all under that frame, usually because the "
+             "anchor's front could not be estimated. They are counted as "
+             "unchanged above, which is another reason the flip rate is not an "
+             "error rate.")
     L.append("")
-    L.append("| relation type | n | frames disagree | worst fixed-frame flip |")
-    L.append("|---|---|---|---|")
-    for t, v in summary["by_relation_type"].items():
-        L.append(f"| {t} | {v['n']} | {pct(v['disagreement_rate'])} | "
-                 f"{pct(v['worst_fixed_frame_flip_rate'])} |")
-    L.append("")
+
     L.append("## Frames the policy chose")
     L.append("")
     for k, v in sorted(summary["policy_frames_used"].items(),
                        key=lambda kv: -kv[1]):
         L.append(f"* {k}: {v}")
     L.append("")
-    L.append("## Ambiguity flags raised")
+    L.append("## Ambiguity flags raised, by kind")
     L.append("")
     L.append(f"{summary['n_flagged_ambiguous']} of {summary['n_queries']} "
              f"queries were flagged. These are the system's own flags, not "
-             f"annotator judgements; the benchmark scores them against the "
-             f"annotator's `ambiguous` field.")
+             f"annotator judgements. Note the composition: `anchor` and "
+             f"`score_tie` dominate because a real room contains several "
+             f"instances of most classes, and they are not what this project "
+             f"claims. The benchmark scores each kind separately for exactly "
+             f"this reason.")
     L.append("")
+    L.append("| kind | n flagged |")
+    L.append("|---|---|")
     for k, v in sorted(summary["ambiguity_kinds"].items(),
                        key=lambda kv: -kv[1]):
-        L.append(f"* {k}: {v}")
+        L.append(f"| {k} | {v} |")
     return "\n".join(L)

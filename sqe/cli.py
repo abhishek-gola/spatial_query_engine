@@ -353,6 +353,31 @@ def cmd_evaluate(args):
     return 0
 
 
+def cmd_robustness(args):
+    """Does the headline sensitivity number survive perturbing the constants?"""
+    import json as _json
+    from .bench.robustness import render, sweep
+    from .bench.schema import read_many
+    get = _scene_getter(args)
+    items = read_many(args.items)
+    if args.limit:
+        items = items[: args.limit]
+    res = sweep(items, get, n_trials=args.trials, scale=args.scale,
+                seed=args.seed, base_cfg=RelationConfig.load(args.config),
+                verbose=not args.quiet)
+    text = render(res, args.title)
+    print()
+    print(text)
+    if args.out:
+        os.makedirs(args.out, exist_ok=True)
+        with open(os.path.join(args.out, "robustness.md"), "w") as f:
+            f.write(text)
+        with open(os.path.join(args.out, "robustness.json"), "w") as f:
+            _json.dump(res, f, indent=1, default=float)
+        print(f"\nwrote {args.out}/robustness.md and robustness.json")
+    return 0
+
+
 def cmd_audit(args):
     from .data.quality import audit_scene, format_audit
     get = _scene_getter(args)
@@ -666,6 +691,24 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--gt-fronts", action="store_true")
     p.add_argument("--forward", default="composite")
     p.set_defaults(func=cmd_sensitivity)
+
+    p = sub.add_parser("robustness",
+                       help="does the sensitivity number survive perturbing "
+                            "the hand-set constants?")
+    _add_common(p)
+    p.add_argument("--root", default=None)
+    p.add_argument("--items", nargs="+", required=True)
+    p.add_argument("--out", default=None)
+    p.add_argument("--trials", type=int, default=20)
+    p.add_argument("--scale", type=float, default=0.30,
+                   help="log-uniform jitter, 0.30 = +/-30 percent")
+    p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--limit", type=int, default=None)
+    p.add_argument("--title", default="Threshold robustness")
+    p.add_argument("--perception", default="gt", choices=["gt", "openvocab"])
+    p.add_argument("--gt-fronts", action="store_true")
+    p.add_argument("--forward", default="composite")
+    p.set_defaults(func=cmd_robustness)
 
     p = sub.add_parser("audit", help="flag dubious ground-truth annotations")
     _add_common(p)
