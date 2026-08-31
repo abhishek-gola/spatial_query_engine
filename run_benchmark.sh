@@ -209,6 +209,23 @@ if [[ $SKIP_PROPOSE -eq 0 ]]; then
   fi
 fi
 
+# ------------------------------------------------------- frame sensitivity
+# Needs no annotation, so it runs on every invocation. It is not accuracy: it
+# measures how much the answer depends on which frame is used, which is the
+# precondition for the accuracy claim.
+if [[ -s "$PROPOSALS" || -s "$ITEMS" ]]; then
+  SENS_IN="$PROPOSALS"
+  [[ -s "$ITEMS" ]] && SENS_IN="$ITEMS"
+  say "frame sensitivity (no annotation needed)"
+  mkdir -p results/sensitivity
+  $RUN --quiet sensitivity --cache "$CACHE" --items "$SENS_IN" \
+       --out results/sensitivity \
+       --title "Frame sensitivity: $N_SCENES scenes, perception=$PERCEPTION" \
+       2>&1 | grep -E "queries,|disagree on|^\| (egocentric|intrinsic|addressee|world|ordinal|projective)" \
+       | sed 's/^/    /'
+  note "full report: results/sensitivity/sensitivity.md"
+fi
+
 if [[ $PROPOSE_ONLY -eq 1 ]]; then
   say "done (proposals only)"
   note "annotate them with:"

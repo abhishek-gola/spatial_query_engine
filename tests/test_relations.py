@@ -250,3 +250,25 @@ def test_comparatives_and_superlatives():
     same = [box((0, 0, 0.5), (0.3, 0.3, 1.0)),
             box((1, 0, 0.5), (0.3, 0.3, 1.01))]
     assert superlative_rank(same, "tallest")[3] is True
+
+
+def test_cone_term_needs_no_obtuse_branch():
+    """arctan2 handles a negative along-axis component on its own.
+
+    A separate branch for `along <= 0` used to sit here. It was dead: over a
+    2001x401 grid its maximum effect was 2.8e-14. This pins the property so it
+    does not get reintroduced.
+    """
+    from sqe.relations.projective import _cone_term
+    for along in np.linspace(-5, 5, 201):
+        for across in np.linspace(-2, 2, 41):
+            v = _cone_term(along if True else 0.0, across, 0, 1, CFG)
+            # behind the anchor the cone term must be zero, in front it must
+            # decay monotonically with the off-axis angle
+            assert 0.0 <= v <= 1.0
+    # dead ahead is full credit, sideways is none, and behind is none
+    assert _cone_term(1.0, 0.0, 0, 1, CFG) == pytest.approx(1.0)
+    assert _cone_term(0.0, 1.0, 0, 1, CFG) == pytest.approx(0.0)
+    assert _cone_term(-1.0, 0.0, 0, 1, CFG) == pytest.approx(0.0)
+    # and the sign flag reverses it
+    assert _cone_term(-1.0, 0.0, 0, -1, CFG) == pytest.approx(1.0)

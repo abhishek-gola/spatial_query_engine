@@ -7,6 +7,7 @@
     sqe propose   --scene ID --out FILE        propose benchmark queries
     sqe annotate  --items FILE                 annotate them (blind by default)
     sqe evaluate  --items FILE --out DIR       run the benchmark and report
+    sqe sensitivity --items FILE               how much the frame matters
     sqe render    --scene ID --root DATA "..."  boxes drawn on real frames
     sqe audit     --scene ID                   flag dubious annotations
     sqe viewer    --scene ID                   web viewer
@@ -495,6 +496,31 @@ def cmd_render(args):
     return 0
 
 
+def cmd_sensitivity(args):
+    """How much the answer depends on the frame. Needs no annotation."""
+    import json as _json
+    from .bench.schema import read_many
+    from .bench.sensitivity import measure, render, summarise
+    get = _scene_getter(args)
+    items = read_many(args.items)
+    if args.limit:
+        items = items[: args.limit]
+    rows = measure(items, get, RelationConfig.load(args.config),
+                   progress=not args.quiet)
+    summary = summarise(rows)
+    text = render(summary, args.title)
+    print()
+    print(text)
+    if args.out:
+        os.makedirs(args.out, exist_ok=True)
+        with open(os.path.join(args.out, "sensitivity.md"), "w") as f:
+            f.write(text)
+        with open(os.path.join(args.out, "sensitivity.json"), "w") as f:
+            _json.dump(summary, f, indent=1, default=float)
+        print(f"\nwrote {args.out}/sensitivity.md and sensitivity.json")
+    return 0
+
+
 def cmd_viewer(args):
     from .viewer.server import serve
     get = _scene_getter(args)
@@ -626,6 +652,20 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--gt-fronts", action="store_true")
     p.add_argument("--forward", default="composite")
     p.set_defaults(func=cmd_evaluate)
+
+    p = sub.add_parser("sensitivity",
+                       help="how much the answer depends on the frame "
+                            "(needs no annotation)")
+    _add_common(p)
+    p.add_argument("--root", default=None)
+    p.add_argument("--items", nargs="+", required=True)
+    p.add_argument("--out", default=None)
+    p.add_argument("--limit", type=int, default=None)
+    p.add_argument("--title", default="Frame sensitivity")
+    p.add_argument("--perception", default="gt", choices=["gt", "openvocab"])
+    p.add_argument("--gt-fronts", action="store_true")
+    p.add_argument("--forward", default="composite")
+    p.set_defaults(func=cmd_sensitivity)
 
     p = sub.add_parser("audit", help="flag dubious ground-truth annotations")
     _add_common(p)
