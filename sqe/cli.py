@@ -420,7 +420,8 @@ def cmd_render(args):
                     p = render_query_overlay(
                         scene, src, res,
                         os.path.join(out_dir, f"q{n:02d}_{slug}.jpg"),
-                        scale=args.scale)
+                        scale=args.scale, hidden_style=args.hidden_style,
+                        max_distance=args.max_distance)
                     if p:
                         written.append(p)
                 fr = (res.frame_decision.frame
@@ -443,7 +444,10 @@ def cmd_render(args):
             if src is not None and len(src):
                 written += render_scene_frames(
                     scene, src, out_dir, n_frames=args.frames,
-                    include_structure=args.structure, scale=args.scale)
+                    include_structure=args.structure, scale=args.scale,
+                    hidden_style=args.hidden_style,
+                    max_distance=args.max_distance,
+                    max_objects=(args.max_objects or None))
             else:
                 written.append(render_pointcloud_view(
                     scene, os.path.join(out_dir, "view.png")))
@@ -470,11 +474,15 @@ def cmd_render(args):
                 if rgb is None:
                     continue
                 img = render_frame_overlay(
-                    scene, src, i, {o.id: "target"}, rgb, max_distance=8.0,
+                    scene, src, i, {o.id: "target"}, rgb,
+                    max_distance=args.max_distance,
                     caption=[f"best view of {o.label} #{o.id} (amber), "
                              f"frame {i}",
-                             "the amber box should sit on the object"],
-                    scale=args.scale)
+                             "the amber box should sit on the object",
+                             "solid = visible, faint dashes = occluded"],
+                    scale=args.scale, hidden_style=args.hidden_style,
+                    label_all=True,
+                    max_objects=(args.max_objects or None))
                 p = os.path.join(out_dir,
                                  f"best_{lab.replace(' ', '_')}.jpg")
                 cv2.imwrite(p, img, [cv2.IMWRITE_JPEG_QUALITY, 90])
@@ -646,6 +654,12 @@ def build_parser() -> argparse.ArgumentParser:
                    help="also render the best view of each of these classes")
     p.add_argument("--structure", action="store_true",
                    help="draw walls, floor and ceiling too")
+    p.add_argument("--hidden-style", default="dashed",
+                   choices=["dashed", "dim", "hide"],
+                   help="how to draw the occluded parts of a box")
+    p.add_argument("--max-objects", type=int, default=12,
+                   help="draw only the nearest N objects (0 for no limit)")
+    p.add_argument("--max-distance", type=float, default=6.0)
     p.add_argument("--scale", type=float, default=0.55)
     p.add_argument("--perception", default="gt", choices=["gt", "openvocab"])
     p.add_argument("--gt-fronts", action="store_true")

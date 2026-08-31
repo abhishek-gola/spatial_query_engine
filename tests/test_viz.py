@@ -108,5 +108,139 @@ def test_topdown_and_pointcloud_renderers_write_files(studio, tmp_path):
 def test_visible_objects_filters_by_distance(studio):
     pose = _camera_at_origin_looking_along_y()
     near = visible_objects(studio, K, pose, SIZE, max_distance=1.0)
-    far = visible_objects(studio, K, pose, SIZE, max_distance=20.0)
+    far = visible_objects(studio, K, pose, SIZE, max_distance=20.0,
+                          max_objects=None)
     assert len(far) >= len(near)
+    # rows are (object, corners, distance, visible_fraction), far first so a
+    # caller painting in order draws near objects last
+    for row in far:
+        assert len(row) == 4
+    dists = [r[2] for r in far]
+    assert dists == sorted(dists, reverse=True)
+
+
+def test_visible_objects_caps_the_count(studio):
+    pose = _camera_at_origin_looking_along_y()
+    capped = visible_objects(studio, K, pose, SIZE, max_distance=20.0,
+                             max_objects=3)
+    assert len(capped) <= 3
+
+
+def test_a_box_enclosing_the_camera_is_dropped(studio):
+    """Its wireframe is four lines sprawling off every edge of the frame."""
+    from sqe.geom.obb import obb_from_extent_yaw
+    from sqe.scenegraph.objects import Object3D, Scene
+    pose = _camera_at_origin_looking_along_y()
+    eye = pose[:3, 3]
+    big = Object3D(id=0, label="table",
+                   obb=obb_from_extent_yaw(eye, (4.0, 4.0, 4.0), 0.0))
+    tiny = Object3D(id=1, label="mug",
+                    obb=obb_from_extent_yaw((0.0, 3.0, 1.5),
+                                            (0.3, 0.3, 0.3), 0.0))
+    sc = Scene(scene_id="t", objects=[big, tiny])
+    rows = visible_objects(sc, K, pose, SIZE, max_distance=20.0)
+    assert [o.id for o, _, _, _ in rows] == [1]
+    # `skip_enclosing` drops it before projection; the all-corners-in-front
+    # test would have caught this particular one anyway, since a box around the
+    # camera has corners behind it. The explicit check matters for a box that
+    # merely grazes the camera.
+    kept = visible_objects(sc, K, pose, SIZE, max_distance=20.0,
+                           skip_enclosing=False)
+    assert 0 not in [o.id for o, _, _, _ in kept]
+
+
+def test_hidden_line_removal_splits_an_occluded_edge():
+    """A box behind a near wall must come back with almost nothing visible."""
+    from sqe.viz.overlay import (DepthBuffer, box_visible_fraction,
+                                 edge_visibility)
+    pose = _camera_at_origin_looking_along_y()
+    box = obb_from_extent_yaw((0.0, 4.0, 1.5), (0.6, 0.6, 0.6), 0.0)
+    wall = DepthBuffer.from_sensor(np.full((192, 256), 1.0, np.float32), SIZE)
+    clear = DepthBuffer.from_sensor(np.full((192, 256), 9.0, np.float32), SIZE)
+    assert box_visible_fraction(box, K, pose, wall) < 0.02
+    assert box_visible_fraction(box, K, pose, clear) > 0.98
+    assert box_visible_fraction(box, K, pose, None) > 0.98
+
+
+def test_a_box_is_occluded_by_its_own_front_surface():
+    """The back edges of a box must not be drawn as if in front of the object.
+
+    This is what made a full wireframe look like it was floating: a real
+    wireframe of a solid shows only the edges the object itself does not hide.
+    """
+    from sqe.viz.overlay import DepthBuffer, box_visible_fraction
+    pose = _camera_at_origin_looking_along_y()
+    box = obb_from_extent_yaw((0.0, 4.0, 1.5), (0.8, 0.8, 0.8), 0.0)
+    # the object's front surface sits at y = 3.6, so anything deeper is hidden
+    surface = DepthBuffer.from_sensor(np.full((192, 256), 3.6, np.float32), SIZE)
+    frac = box_visible_fraction(box, K, pose, surface)
+    assert 0.1 < frac < 0.75, frac
+
+
+def test_partial_occlusion_lands_between_the_extremes():
+    from sqe.viz.overlay import DepthBuffer, box_visible_fraction
+    pose = _camera_at_origin_looking_along_y()
+    box = obb_from_extent_yaw((0.0, 4.0, 1.5), (1.6, 0.4, 1.6), 0.0)
+    d = np.full((192, 256), 9.0, np.float32)
+    d[:, :128] = 1.0                      # a near wall over the left half
+    half = DepthBuffer.from_sensor(d, SIZE)
+    frac = box_visible_fraction(box, K, pose, half)
+    assert 0.2 < frac < 0.85, frac
+
+
+def test_point_splat_depth_buffer_closes_its_holes(studio):
+    """A sparse z-buffer full of gaps would let occluded edges show through."""
+    from sqe.viz.overlay import DepthBuffer
+    pose = _camera_at_origin_looking_along_y()
+    db = DepthBuffer.from_points(studio.background, K, pose, SIZE)
+    assert db.source == "points"
+    covered = (db.depth > 0.05).mean()
+    assert covered > 0.15, covered
+
+
+def test_rendered_camera_is_not_upside_down_or_mirrored(studio, tmp_path):
+    """Pins image orientation.
+
+    `up x f` and `f x up` are both valid rotations with determinant +1, so a
+    handedness check does not catch swapping them -- but one of them renders the
+    image rotated 180 degrees, and a left/right judgement made on a flipped
+    picture is worse than no picture at all. This asserts the actual convention:
+    world up projects above the centre, and the viewer's right projects to the
+    right of it.
+    """
+    from sqe.geom.transforms import (intrinsics_matrix, normalize, project,
+                                     se3, se3_inverse, transform_points)
+    eye = np.array([2.0, 2.0, 1.55])
+    look = np.array([4.78, 2.0, 1.0])
+
+    # rebuild the basis exactly as render_pointcloud_view does
+    f = normalize(look - eye)
+    right = normalize(np.cross(f, np.array([0.0, 0.0, 1.0])))
+    down = normalize(np.cross(f, right))
+    pose = se3(np.stack([right, down, f], axis=1), eye)
+    Kv = intrinsics_matrix(600.0, 600.0, 320.0, 240.0)
+
+    def px(world):
+        cam = transform_points(se3_inverse(pose), np.atleast_2d(world))
+        uv, z, _ = project(cam, Kv)
+        return uv[0], float(z[0])
+
+    mid, _ = px(look)
+    higher, _ = px(look + np.array([0.0, 0.0, 0.5]))
+    assert higher[1] < mid[1], "world up must project ABOVE the centre"
+
+    # the viewer's right, by this repo's frame convention
+    from sqe.frames.reference_frame import egocentric_frame
+    frame = egocentric_frame(look, eye, up=np.array([0.0, 0.0, 1.0]))
+    to_right, _ = px(look + 0.5 * frame.right)
+    assert to_right[0] > mid[0], "the viewer's right must project RIGHT of centre"
+
+
+def test_synthetic_trajectory_cameras_are_level(studio):
+    """A synthetic capture's cameras must not be upside down."""
+    from sqe.geom.transforms import camera_down
+    traj = studio.trajectory
+    assert traj is not None and len(traj)
+    downs = np.array([camera_down(traj.poses[i]) for i in range(len(traj))])
+    # camera +y is image-down, so it must point broadly along world -z
+    assert float(downs[:, 2].max()) < 0.0, downs[:, 2].max()

@@ -82,6 +82,289 @@ def box_screen_area(uv: np.ndarray) -> float:
     return float(max(0.0, hi[0] - lo[0]) * max(0.0, hi[1] - lo[1]))
 
 
+class DepthBuffer:
+    """Per-pixel scene depth, for hidden-line removal.
+
+    A box drawn as a complete wireframe reads as floating in front of
+    everything, because a real wireframe of a solid object shows only the edges
+    that are not behind something -- including its own front faces. So every
+    edge is tested against the scene depth, sample by sample, and split into
+    visible and hidden runs.
+
+    Two sources. The ScanNet++ iPhone depth maps are fully dense (100% valid on
+    the frames measured here) and are the primary source; a z-buffer splatted
+    from the scene point cloud is the fallback for captures and synthetic rooms
+    with no depth, where it also keeps the same code path working.
+    """
+
+    def __init__(self, depth: np.ndarray, rgb_size: Tuple[int, int],
+                 source: str = "sensor"):
+        self.depth = np.asarray(depth, dtype=np.float32)
+        self.h, self.w = self.depth.shape[:2]
+        self.rgb_w, self.rgb_h = rgb_size
+        self.sx = self.w / float(max(self.rgb_w, 1))
+        self.sy = self.h / float(max(self.rgb_h, 1))
+        self.source = source
+
+    @classmethod
+    def from_sensor(cls, depth: np.ndarray,
+                    rgb_size: Tuple[int, int]) -> "DepthBuffer":
+        """The capture's own depth map, rescaled to RGB pixel coordinates.
+
+        The depth is a downscaled version of the same image, so the mapping is a
+        pure scale -- no need to rebuild intrinsics, which is where the earlier
+        version guessed a factor from the principal point.
+        """
+        return cls(depth, rgb_size, "sensor")
+
+    @classmethod
+    def from_points(cls, points: np.ndarray, K: np.ndarray,
+                    pose_c2w: np.ndarray, rgb_size: Tuple[int, int],
+                    downscale: int = 4, splat: int = 2,
+                    max_points: int = 600_000) -> "DepthBuffer":
+        """Nearest-surface z-buffer splatted from a point cloud.
+
+        Points are splatted as small squares and the buffer is then min-filtered
+        over a `splat`-pixel neighbourhood, because a raw one-pixel-per-point
+        buffer is full of holes and every hole reads as "nothing here", which
+        would make occluded edges pop back into view.
+        """
+        from ..geom.pointcloud import subsample
+        w, h = rgb_size
+        bw, bh = max(1, w // downscale), max(1, h // downscale)
+        buf = np.full((bh, bw), np.inf, np.float32)
+        pts = np.asarray(points, dtype=np.float64)
+        if len(pts) == 0:
+            return cls(buf, rgb_size, "points")
+        if len(pts) > max_points:
+            pts = pts[subsample(pts, max_points, 0)]
+        Kb = np.asarray(K, dtype=np.float64).copy()
+        Kb[0, :] *= bw / float(w)
+        Kb[1, :] *= bh / float(h)
+        cam = transform_points(se3_inverse(pose_c2w), pts)
+        uv, z, valid = project(cam, Kb)
+        u = np.round(uv[:, 0]).astype(np.int64)
+        v = np.round(uv[:, 1]).astype(np.int64)
+        ok = valid & (u >= 0) & (u < bw) & (v >= 0) & (v < bh) & (z > 0.05)
+        u, v, z = u[ok], v[ok], z[ok]
+        # np.minimum.at is the scatter-min the z-buffer needs
+        np.minimum.at(buf, (v, u), z.astype(np.float32))
+        if splat > 0:
+            pad = splat
+            padded = np.pad(buf, pad, constant_values=np.inf)
+            out = buf.copy()
+            for dy in range(-pad, pad + 1):
+                for dx in range(-pad, pad + 1):
+                    out = np.minimum(
+                        out, padded[pad + dy:pad + dy + bh,
+                                    pad + dx:pad + dx + bw])
+            buf = out
+        buf[~np.isfinite(buf)] = 0.0        # 0 means "no measurement"
+        return cls(buf, rgb_size, "points")
+
+    def sample(self, uv: np.ndarray):
+        """Depth at RGB pixel coordinates. Returns (depth, valid)."""
+        uv = np.asarray(uv, dtype=np.float64).reshape(-1, 2)
+        iu = np.round(uv[:, 0] * self.sx).astype(np.int64)
+        iv = np.round(uv[:, 1] * self.sy).astype(np.int64)
+        inside = (iu >= 0) & (iu < self.w) & (iv >= 0) & (iv < self.h)
+        d = np.zeros(len(uv), np.float32)
+        if inside.any():
+            d[inside] = self.depth[iv[inside], iu[inside]]
+        return d, inside & (d > 0.05)
+
+
+def _runs(values: np.ndarray):
+    """Group an array into (start, stop_exclusive, value) runs.
+
+    Works on ints as well as bools, because edge samples carry three states and
+    collapsing them to a boolean is what made "behind the camera" and "occluded"
+    render the same way.
+    """
+    out = []
+    if len(values) == 0:
+        return out
+    start = 0
+    cur = values[0]
+    for i in range(1, len(values)):
+        if values[i] != cur:
+            out.append((start, i, cur))
+            start, cur = i, values[i]
+    out.append((start, len(values), cur))
+    return out
+
+
+def edge_visibility(p0: np.ndarray, p1: np.ndarray, K: np.ndarray,
+                    pose_c2w: np.ndarray, dbuf: Optional[DepthBuffer],
+                    tol: float = 0.04, max_samples: int = 96):
+    """Sample one box edge and say which parts of it are visible.
+
+    Returns `(uv, visible, in_front)`, all indexed by sample. The sample count
+    follows the edge's projected pixel length, so a long edge across the frame
+    gets a fine test and a two-pixel edge does not cost 96 depth lookups.
+    """
+    p0 = np.asarray(p0, float)
+    p1 = np.asarray(p1, float)
+    ends_c = transform_points(se3_inverse(pose_c2w), np.stack([p0, p1]))
+    ends_uv, _, _ = project(ends_c, K)
+    px = float(np.linalg.norm(ends_uv[1] - ends_uv[0]))
+    n = int(np.clip(px / 6.0, 8, max_samples))
+
+    t = np.linspace(0.0, 1.0, n)
+    world = p0[None, :] + t[:, None] * (p1 - p0)[None, :]
+    cam = transform_points(se3_inverse(pose_c2w), world)
+    uv, z, valid = project(cam, K)
+    in_front = valid & (z > 0.05)
+    if dbuf is None:
+        return uv, in_front.copy(), in_front
+    meas, ok = dbuf.sample(uv)
+    # hidden where a measurement exists and the edge is behind it
+    hidden = ok & (z > meas + tol)
+    return uv, in_front & ~hidden, in_front
+
+
+def _close_holes(buf: np.ndarray, radius: int = 2) -> np.ndarray:
+    """Min-filter a sparse z-buffer so its holes stop reading as empty space.
+
+    A point splat leaves gaps between samples, and every gap would let an
+    occluded edge show through.
+    """
+    if radius <= 0:
+        return buf
+    h, w = buf.shape
+    filled = np.where(buf > 0.0, buf, np.inf)
+    padded = np.pad(filled, radius, constant_values=np.inf)
+    out = filled.copy()
+    for dy in range(-radius, radius + 1):
+        for dx in range(-radius, radius + 1):
+            out = np.minimum(out, padded[radius + dy:radius + dy + h,
+                                         radius + dx:radius + dx + w])
+    out[~np.isfinite(out)] = 0.0
+    return out.astype(np.float32)
+
+
+def _dim(colour, factor: float = 0.45, bg: int = 22):
+    return tuple(int(bg + (c - bg) * factor) for c in colour)
+
+
+def _draw_polyline(img, uv, i0, i1, colour, thickness, dashed=False,
+                   dash_px: int = 9, gap_px: int = 7):
+    cv2 = _cv2()
+    h, w = img.shape[:2]
+    lim = 4 * max(w, h)
+    pts = np.clip(uv[i0:i1], -lim, lim).astype(np.int32)
+    if len(pts) < 2:
+        return
+    if not dashed:
+        cv2.polylines(img, [pts], False, colour, thickness, cv2.LINE_AA)
+        return
+    # walk the polyline in pixel space, alternating on and off
+    on, carried = True, 0.0
+    for a, b in zip(pts[:-1], pts[1:]):
+        seg = float(np.hypot(*(b - a)))
+        if seg < 1e-6:
+            continue
+        pos = 0.0
+        while pos < seg:
+            span = (dash_px if on else gap_px) - carried
+            step = min(span, seg - pos)
+            if on and step > 0.5:
+                p = a + (b - a) * (pos / seg)
+                q = a + (b - a) * ((pos + step) / seg)
+                cv2.line(img, tuple(p.astype(np.int32)),
+                         tuple(q.astype(np.int32)), colour, thickness,
+                         cv2.LINE_AA)
+            pos += step
+            carried += step
+            if carried >= (dash_px if on else gap_px) - 1e-6:
+                on, carried = not on, 0.0
+
+
+def draw_box_hidden_line(img: np.ndarray, obb: OBB, K: np.ndarray,
+                         pose_c2w: np.ndarray,
+                         dbuf: Optional[DepthBuffer], colour,
+                         thickness: int = 2, label: Optional[str] = None,
+                         label_scale: float = 0.6, tol: float = 0.04,
+                         hidden_style: str = "dashed") -> float:
+    """Draw a box with its occluded portions removed. Returns visible fraction.
+
+    `hidden_style`:
+      * `dashed` -- hidden runs as faint dashes, so the box's full extent is
+        still readable. This is the CAD convention and it looks right.
+      * `dim`    -- hidden runs as faint solid lines.
+      * `hide`   -- hidden runs not drawn at all.
+
+    Because the test is against the *scene* depth, and the scene includes the
+    object itself, a box's own back edges come out hidden without any special
+    case: the front surface of the object is nearer than they are.
+    """
+    corners = obb.corners()
+    n_vis = n_tot = 0
+    vis_uv: List[np.ndarray] = []
+
+    hidden_colour = _dim(colour)
+    hidden_thickness = max(1, thickness - 1)
+
+    # Three states per sample, so "behind the camera" is never confused with
+    # "occluded": 0 skip, 1 visible, 2 hidden.
+    SKIP, VISIBLE, HIDDEN = 0, 1, 2
+
+    for a, b in BOX_EDGES:
+        uv, visible, in_front = edge_visibility(corners[a], corners[b], K,
+                                                pose_c2w, dbuf, tol)
+        state = np.where(~in_front, SKIP,
+                         np.where(visible, VISIBLE, HIDDEN)).astype(np.int8)
+        n_tot += int(in_front.sum())
+        n_vis += int((state == VISIBLE).sum())
+        for i0, i1, val in _runs(state):
+            if i1 - i0 < 2 or val == SKIP:
+                continue
+            if val == VISIBLE:
+                _draw_polyline(img, uv, i0, i1, colour, thickness)
+                vis_uv.append(uv[i0:i1])
+            elif hidden_style != "hide":
+                _draw_polyline(img, uv, i0, i1, hidden_colour,
+                               hidden_thickness,
+                               dashed=(hidden_style == "dashed"))
+
+    fraction = (n_vis / n_tot) if n_tot else 0.0
+
+    if label:
+        _draw_label(img, vis_uv, corners, K, pose_c2w, label, colour,
+                    label_scale, fraction)
+    return fraction
+
+
+def _draw_label(img, vis_uv, corners, K, pose_c2w, label, colour, scale,
+                fraction: float, margin: int = 24):
+    """Put the label on a visible part of the box, not over an occluder.
+
+    Anchored to a *visible* sample well inside the frame. Without the margin
+    test, a box whose visible portion is almost entirely off-screen parked its
+    label against the image edge, which read as a stray annotation belonging to
+    nothing.
+    """
+    cv2 = _cv2()
+    h, w = img.shape[:2]
+    if vis_uv:
+        pts = np.concatenate(vis_uv, axis=0)
+    else:
+        cam = transform_points(se3_inverse(pose_c2w), corners)
+        pts, _, _ = project(cam, K)
+    inside = pts[(pts[:, 0] > margin) & (pts[:, 0] < w - margin)
+                 & (pts[:, 1] > margin) & (pts[:, 1] < h - margin)]
+    if len(inside) == 0:
+        return              # nothing of this box is comfortably in frame
+    anchor = inside[np.argmin(inside[:, 1])]
+    x = int(np.clip(anchor[0], 4, w - 8))
+    y = int(np.clip(anchor[1] - 8, 16, h - 6))
+    text = label if fraction > 0.15 else f"{label} (mostly hidden)"
+    (tw, th), _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, scale, 1)
+    cv2.rectangle(img, (x - 3, y - th - 5), (x + tw + 3, y + 4), (24, 24, 24), -1)
+    cv2.putText(img, text, (x, y), cv2.FONT_HERSHEY_SIMPLEX, scale,
+                colour if fraction > 0.15 else _dim(colour, 0.6), 1, cv2.LINE_AA)
+
+
 def is_occluded(obb: OBB, K: np.ndarray, pose_c2w: np.ndarray,
                 depth: Optional[np.ndarray], tolerance: float = 0.25) -> bool:
     """Whether the box's nearest face is behind the measured depth.
@@ -121,28 +404,73 @@ def visible_objects(scene: Scene, K: np.ndarray, pose_c2w: np.ndarray,
                     image_size: Tuple[int, int],
                     depth: Optional[np.ndarray] = None,
                     max_distance: float = 6.0,
-                    min_screen_area: float = 400.0,
+                    min_screen_area: float = 2500.0,
                     include_structure: bool = False,
-                    occlusion_test: bool = True) -> List[Tuple[Object3D, np.ndarray]]:
-    """Objects worth drawing on this frame, with their projected corners."""
+                    occlusion_test: bool = True,
+                    dbuf: Optional["DepthBuffer"] = None,
+                    min_visible_fraction: float = 0.04,
+                    max_objects: Optional[int] = 14,
+                    skip_enclosing: bool = True
+                    ) -> List[Tuple[Object3D, np.ndarray, float, float]]:
+    """Objects worth drawing on this frame.
+
+    Returns `(object, projected_corners, distance, visible_fraction)`, nearest
+    last so a caller drawing in order paints near objects over far ones.
+
+    Three filters exist to keep the picture readable rather than exhaustive.
+    Forty-two boxes on one frame is not a visualisation, it is a haystack:
+
+    * objects that are entirely hidden are dropped -- but a *partly* hidden one
+      is kept and drawn with its occluded edges removed, which is the whole
+      point of the hidden-line pass;
+    * a box that encloses the camera is dropped, because its wireframe is just
+      four lines sprawling off every edge of the frame and tells you nothing;
+    * only the nearest `max_objects` survive.
+    """
     eye = pose_c2w[:3, 3]
-    out = []
+    w, h = image_size
+    if dbuf is None and depth is not None and occlusion_test:
+        dbuf = DepthBuffer.from_sensor(depth, image_size)
+    rows: List[Tuple[Object3D, np.ndarray, float, float]] = []
     for o in scene.objects:
         if not include_structure and o.is_room_fixed:
             continue
-        if float(np.linalg.norm(o.center - eye)) > max_distance:
+        dist = float(np.linalg.norm(o.center - eye))
+        if dist > max_distance:
+            continue
+        if skip_enclosing and bool(o.obb.contains(eye[None, :], pad=0.10)[0]):
             continue
         uv, z, all_front, on_screen = project_box(o.obb, K, pose_c2w, image_size)
         if not all_front or not on_screen:
             continue
         if box_screen_area(uv) < min_screen_area:
             continue
-        if occlusion_test and is_occluded(o.obb, K, pose_c2w, depth):
-            continue
-        out.append((o, uv))
-    # far objects first, so near ones draw over them
-    out.sort(key=lambda t: -float(np.linalg.norm(t[0].center - eye)))
-    return out
+        frac = 1.0
+        if dbuf is not None and occlusion_test:
+            frac = box_visible_fraction(o.obb, K, pose_c2w, dbuf)
+            if frac < min_visible_fraction:
+                continue
+        rows.append((o, uv, dist, frac))
+
+    rows.sort(key=lambda t: t[2])                 # nearest first
+    if max_objects is not None:
+        rows = rows[:max_objects]
+    rows.sort(key=lambda t: -t[2])                # far first for painting
+    return rows
+
+
+def box_visible_fraction(obb: OBB, K: np.ndarray, pose_c2w: np.ndarray,
+                         dbuf: Optional["DepthBuffer"],
+                         tol: float = 0.04) -> float:
+    """Fraction of a box's in-front edge length that is not occluded."""
+    corners = obb.corners()
+    n_vis = n_tot = 0
+    for a, b in BOX_EDGES:
+        _, visible, in_front = edge_visibility(corners[a], corners[b], K,
+                                               pose_c2w, dbuf, tol)
+        n_tot += int(in_front.sum())
+        n_vis += int((visible & in_front).sum())
+    return (n_vis / n_tot) if n_tot else 0.0
 
 
 # --------------------------------------------------------------------------
@@ -310,8 +638,17 @@ def render_frame_overlay(scene: Scene, src: FrameSource, frame_index: int,
                          include_structure: bool = False,
                          occlusion_test: bool = True,
                          caption: Optional[Sequence[str]] = None,
-                         scale: float = 0.5) -> Optional[np.ndarray]:
-    """Boxes on one real frame. `highlight` maps object id to a colour key."""
+                         scale: float = 0.5,
+                         hidden_style: str = "dashed",
+                         label_all: bool = False,
+                         max_objects: Optional[int] = 14,
+                         label_top: int = 6,
+                         fade_distance: bool = True) -> Optional[np.ndarray]:
+    """Boxes on one real frame, with occluded edges removed.
+
+    `highlight` maps object id to a colour key. `hidden_style` controls how the
+    occluded parts of an edge are drawn -- `dashed` (default), `dim`, or `hide`.
+    """
     cv2 = _cv2()
     if rgb is None:
         rgb = src.rgb(frame_index)
@@ -321,14 +658,23 @@ def render_frame_overlay(scene: Scene, src: FrameSource, frame_index: int,
     pose = src.poses[frame_index]
     K = src.Ks[frame_index] if src.Ks.ndim == 3 else src.Ks
     depth = src.depth(frame_index) if occlusion_test else None
+    dbuf = None
+    if occlusion_test:
+        if depth is not None:
+            dbuf = DepthBuffer.from_sensor(depth, src.image_size)
+        elif scene.background is not None and len(scene.background):
+            dbuf = DepthBuffer.from_points(scene.background, K, pose,
+                                           src.image_size)
 
     highlight = highlight or {}
-    drawn = visible_objects(scene, K, pose, src.image_size, depth,
-                            max_distance=max_distance,
-                            include_structure=include_structure,
-                            occlusion_test=occlusion_test)
+    rows = visible_objects(scene, K, pose, src.image_size, depth,
+                           max_distance=max_distance,
+                           include_structure=include_structure,
+                           occlusion_test=occlusion_test, dbuf=dbuf,
+                           max_objects=max_objects)
     # anything highlighted is drawn even if the filters would have dropped it
-    already = {o.id for o, _ in drawn}
+    already = {o.id for o, _, _, _ in rows}
+    eye = pose[:3, 3]
     for oid in highlight:
         if oid in already:
             continue
@@ -337,14 +683,33 @@ def render_frame_overlay(scene: Scene, src: FrameSource, frame_index: int,
             continue
         uv, _, front, on_screen = project_box(o.obb, K, pose, src.image_size)
         if front and on_screen:
-            drawn.append((o, uv))
+            frac = (box_visible_fraction(o.obb, K, pose, dbuf)
+                    if dbuf is not None else 1.0)
+            rows.append((o, uv, float(np.linalg.norm(o.center - eye)), frac))
+    rows.sort(key=lambda t: -t[2])
 
-    for o, uv in drawn:
+    # label only the nearest few unlabelled objects; highlighted ones always
+    label_ids = {oid for oid in highlight}
+    if label_all:
+        nearest = sorted((r for r in rows if r[0].id not in highlight),
+                         key=lambda t: t[2])[:label_top]
+        label_ids |= {o.id for o, _, _, _ in nearest}
+
+    for o, uv, dist, frac in rows:
         key = highlight.get(o.id, "structure" if o.is_room_fixed else "other")
+        important = key in ("target", "anchor", "runner")
         thickness = 3 if key in ("target", "anchor") else 1
-        label = (f"{o.label} #{o.id}" if key in ("target", "anchor", "runner")
-                 else o.canonical_label)
-        draw_box(img, uv, COLOURS.get(key, COLOURS["other"]), thickness, label)
+        colour = COLOURS.get(key, COLOURS["other"])
+        if not important and fade_distance:
+            # let the background recede instead of competing with the answer
+            t = float(np.clip((dist - 1.0) / max(max_distance - 1.0, 1e-6),
+                              0.0, 1.0))
+            colour = _dim(colour, 1.0 - 0.55 * t)
+        label = None
+        if o.id in label_ids:
+            label = (f"{o.label} #{o.id}" if important else o.canonical_label)
+        draw_box_hidden_line(img, o.obb, K, pose, dbuf, colour, thickness,
+                             label, tol=0.04, hidden_style=hidden_style)
 
     if caption:
         draw_caption(img, list(caption))
@@ -360,7 +725,10 @@ def render_scene_frames(scene: Scene, src: FrameSource, out_dir: str,
                         max_distance: float = 6.0,
                         include_structure: bool = False,
                         scale: float = 0.5,
-                        indices: Optional[Sequence[int]] = None) -> List[str]:
+                        indices: Optional[Sequence[int]] = None,
+                        hidden_style: str = "dashed",
+                        label_all: bool = True,
+                        max_objects: Optional[int] = 14) -> List[str]:
     """Overlay boxes on frames spread through the capture. Returns file paths."""
     cv2 = _cv2()
     os.makedirs(out_dir, exist_ok=True)
@@ -377,10 +745,15 @@ def render_scene_frames(scene: Scene, src: FrameSource, out_dir: str,
             continue
         cap = [f"{scene.scene_id}  frame {i}"
                + (f" ({src.names[i]})" if i < len(src.names) else ""),
-               "3D boxes projected with the dataset's own pose + intrinsics"]
+               "3D boxes projected with the dataset's own pose + intrinsics",
+               "solid = visible, faint dashes = occluded by the scene depth",
+               f"nearest {max_objects} objects shown"]
         img = render_frame_overlay(scene, src, int(i), highlight, rgb,
                                    max_distance, include_structure,
-                                   caption=cap, scale=scale)
+                                   caption=cap, scale=scale,
+                                   hidden_style=hidden_style,
+                                   label_all=label_all,
+                                   max_objects=max_objects)
         if img is None:
             continue
         p = os.path.join(out_dir, f"{scene.scene_id}_frame{int(i):05d}.jpg")
@@ -389,10 +762,76 @@ def render_scene_frames(scene: Scene, src: FrameSource, out_dir: str,
     return written
 
 
+def best_joint_view(src: FrameSource, obbs: Sequence[OBB],
+                    up: np.ndarray = np.array([0.0, 0.0, 1.0]),
+                    stride: int = 15, refine_top: int = 6,
+                    scene_background: Optional[np.ndarray] = None) -> int:
+    """A frame that sees *all* of `obbs` at once.
+
+    Picking the best view of the answer alone often leaves the anchor out of
+    frame, and then the picture cannot be used to check the relation -- which is
+    the only reason to draw it. This scores frames on the worst-seen box, so a
+    frame that shows the target beautifully and the anchor not at all loses to
+    one showing both.
+
+    Two passes: a cheap geometric score over every `stride`-th frame, then a
+    depth-based occlusion check on the best few, because each depth read costs
+    an LZ4 decode.
+    """
+    if len(src) == 0 or not obbs:
+        return -1
+    w, h = src.image_size
+    cand: List[Tuple[float, int]] = []
+    for i in range(0, len(src), max(1, stride)):
+        pose = src.poses[i]
+        K = src.Ks[i] if src.Ks.ndim == 3 else src.Ks
+        eye = pose[:3, 3]
+        worst = 1e9
+        for obb in obbs:
+            uv, z, all_front, on_screen = project_box(obb, K, pose, (w, h))
+            if not all_front:
+                worst = 0.0
+                break
+            centre_uv = uv.mean(axis=0)
+            inside = (0 <= centre_uv[0] < w) and (0 <= centre_uv[1] < h)
+            d = float(np.linalg.norm(obb.center - eye))
+            radius = max(0.05, float(np.linalg.norm(obb.half)))
+            if d < 1.25 * radius:
+                worst = 0.0
+                break
+            # want it in frame and at a sane apparent size
+            fit = np.exp(-0.5 * (np.log(max(d, 1e-6)
+                                        / max(radius / 0.18, 0.5)) / 0.75) ** 2)
+            score = fit * (1.0 if inside else 0.25)
+            worst = min(worst, float(score))
+        if worst > 0.0:
+            cand.append((worst, i))
+    if not cand:
+        return -1
+    cand.sort(key=lambda t: -t[0])
+
+    best_i, best_score = cand[0][1], -1.0
+    for _, i in cand[:refine_top]:
+        pose = src.poses[i]
+        K = src.Ks[i] if src.Ks.ndim == 3 else src.Ks
+        depth = src.depth(i)
+        dbuf = (DepthBuffer.from_sensor(depth, src.image_size)
+                if depth is not None else
+                (DepthBuffer.from_points(scene_background, K, pose,
+                                         src.image_size)
+                 if scene_background is not None else None))
+        fracs = [box_visible_fraction(o, K, pose, dbuf) for o in obbs]
+        score = float(min(fracs))
+        if score > best_score:
+            best_i, best_score = i, score
+    return int(best_i)
+
+
 def render_query_overlay(scene: Scene, src: FrameSource, resolution,
                          out_path: str, scale: float = 0.6,
                          draw_axes: bool = True,
-                         max_distance: float = 7.0) -> Optional[str]:
+                         max_distance: float = 7.0,
+                         hidden_style: str = "dashed") -> Optional[str]:
     """One resolution drawn on the frame that best sees its target.
 
     Target in amber, anchors in red, runner-up in blue, and the reference frame's
@@ -404,9 +843,6 @@ def render_query_overlay(scene: Scene, src: FrameSource, resolution,
         return None
     from ..scenegraph.objects import CameraTrajectory
     traj = CameraTrajectory(src.poses, src.Ks, src.image_size, src.names)
-    i = traj.best_view(resolution.target.obb, scene.up)
-    if i < 0:
-        i = traj.nearest_index(resolution.target.center)
 
     highlight: Dict[int, str] = {resolution.target.id: "target"}
     for a in resolution.anchors:
@@ -415,6 +851,17 @@ def render_query_overlay(scene: Scene, src: FrameSource, resolution,
     if len(resolution.candidates) > 1:
         highlight.setdefault(resolution.candidates[1].obj.id, "runner")
 
+    # prefer a frame showing the answer *and* its anchors: a picture with only
+    # the answer in it cannot be used to check the relation
+    want = [resolution.target.obb]
+    want += [a.obj.obb for a in resolution.anchors if a.obj is not None]
+    i = best_joint_view(src, want, scene.up,
+                        scene_background=scene.background)
+    if i < 0:
+        i = traj.best_view(resolution.target.obb, scene.up)
+    if i < 0:
+        i = traj.nearest_index(resolution.target.center)
+
     rgb = src.rgb(int(i))
     if rgb is None:
         return None
@@ -422,11 +869,13 @@ def render_query_overlay(scene: Scene, src: FrameSource, resolution,
     lines = [f'"{resolution.query.text}"',
              f"answer: {resolution.target.label} #{resolution.target.id}"
              f"   frame: {frame_kind}",
-             f"amber = answer, red = anchor, blue = runner-up"]
+             "amber = answer, red = anchor, blue = runner-up   "
+             "solid = visible, faint dashes = occluded"]
     if resolution.ambiguity.ambiguous:
         lines.append("ambiguous: " + ", ".join(resolution.ambiguity.kinds))
     img = render_frame_overlay(scene, src, int(i), highlight, rgb,
-                               max_distance, caption=lines, scale=1.0)
+                               max_distance, caption=lines, scale=1.0,
+                               hidden_style=hidden_style, label_all=False)
     if img is None:
         return None
 
@@ -490,6 +939,8 @@ def render_topdown(scene: Scene, out_path: str,
             continue
         key = highlight.get(o.id, "other")
         colour = COLOURS.get(key, COLOURS["other"])
+        if key == "other":
+            colour = _dim(colour, 0.75)
         c = o.obb.corners()
         base = c[np.argsort(c[:, 2])[:4]]
         order = np.argsort(np.arctan2(base[:, 1] - o.center[1],
@@ -535,7 +986,8 @@ def render_pointcloud_view(scene: Scene, out_path: str,
                            size: Tuple[int, int] = (1280, 960),
                            fov_deg: float = 60.0,
                            highlight: Optional[Dict[int, str]] = None,
-                           caption: Optional[Sequence[str]] = None) -> str:
+                           caption: Optional[Sequence[str]] = None,
+                           hidden_style: str = "dashed") -> str:
     """Software point splat from an arbitrary viewpoint, with boxes.
 
     The fallback for datasets and synthetic rooms with no RGB, so the same visual
@@ -558,7 +1010,12 @@ def render_pointcloud_view(scene: Scene, out_path: str,
     eye = np.asarray(eye, float)
 
     f = normalize(centre - eye)
-    right = normalize(np.cross(np.array([0.0, 0.0, 1.0]), f))
+    # OpenCV camera-to-world columns are (right, down, forward). The image's
+    # right is `f x up`, NOT `up x f`: both are valid rotations with det +1,
+    # which is why the wrong one went unnoticed, but it renders the image
+    # rotated 180 degrees -- and a left/right check on a mirrored picture is
+    # worse than no picture.
+    right = normalize(np.cross(f, np.array([0.0, 0.0, 1.0])))
     if not np.any(right):
         right = np.array([1.0, 0.0, 0.0])
     down = normalize(np.cross(f, right))
@@ -583,6 +1040,12 @@ def render_pointcloud_view(scene: Scene, out_path: str,
     img[vv, uu] = cc
     zbuf[vv, uu] = zz
 
+    # The splatter already produced a z-buffer, so the same hidden-line test
+    # works here and synthetic rooms get occlusion for free.
+    zfilled = np.where(np.isfinite(zbuf), zbuf, 0.0).astype(np.float32)
+    dbuf = DepthBuffer(zfilled, (w, h), "points")
+    dbuf.depth = _close_holes(zfilled, radius=2)
+
     for o in sorted(scene.objects,
                     key=lambda o: -float(np.linalg.norm(o.center - eye))):
         if o.is_room_fixed and o.id not in highlight:
@@ -591,9 +1054,11 @@ def render_pointcloud_view(scene: Scene, out_path: str,
         cuv, cz, front, on = project_box(o.obb, K, pose, (w, h))
         if not front or not on:
             continue
-        draw_box(img, cuv, COLOURS.get(key, COLOURS["other"]),
-                 3 if key in ("target", "anchor") else 1,
-                 f"{o.label} #{o.id}" if key != "other" else None)
+        draw_box_hidden_line(img, o.obb, K, pose, dbuf,
+                             COLOURS.get(key, COLOURS["other"]),
+                             3 if key in ("target", "anchor") else 1,
+                             f"{o.label} #{o.id}" if key != "other" else None,
+                             tol=0.06, hidden_style=hidden_style)
 
     lines = list(caption or [])
     lines.insert(0, f"{scene.scene_id}  rendered view  "
