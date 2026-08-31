@@ -226,7 +226,9 @@ def cmd_annotate(args):
 
     annotate(items, get, args.out or args.items, annotator=args.annotator,
              show_prediction=args.show_prediction, resolver_for=resolver_for,
-             start=args.start, only_unannotated=not args.all)
+             start=args.start, only_unannotated=not args.all,
+             relation_types=args.relation_type, order=args.order,
+             target_count=args.goal, cfg=RelationConfig.load(args.config))
     return 0
 
 
@@ -646,6 +648,14 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--start", type=int, default=0)
     p.add_argument("--all", action="store_true",
                    help="revisit already-annotated items too")
+    p.add_argument("--relation-type", nargs="*", default=None,
+                   help="only annotate these types, e.g. projective_lateral")
+    p.add_argument("--order", default="informative",
+                   choices=["informative", "file"],
+                   help="'informative' puts queries whose frames currently "
+                        "disagree first")
+    p.add_argument("--goal", type=int, default=None,
+                   help="show progress against a target count")
     p.add_argument("--perception", default="gt", choices=["gt", "openvocab"])
     p.add_argument("--gt-fronts", action="store_true")
     p.add_argument("--forward", default="composite")

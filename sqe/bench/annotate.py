@@ -129,16 +129,76 @@ def _ask(prompt: str, default: str = "") -> str:
     return s or default
 
 
+#: Relation types in descending order of information per label. Lateral
+#: relations show the highest measured frame disagreement (24.8% vs 15.4% for
+#: frontal on the ScanNet++ scenes), so a fixed annotation budget spent there
+#: settles the frame question fastest.
+INFORMATIVE_TYPES = ("projective_lateral", "projective_frontal", "ordinal",
+                     "vertical", "proximity", "between", "comparative")
+
+
+def order_queue(items: List[BenchItem], indices: List[int], mode: str,
+                scene_for=None, cfg=None, verbose: bool = True) -> List[int]:
+    """Order the annotation queue.
+
+    `file` keeps the file's order. `informative` puts the items that actually
+    decide something first: queries where two reference frames currently select
+    *different* objects, then by relation type, hardest and most frame-relevant
+    first. Measuring the disagreement costs one pass over the queue (about 15 s
+    for 900 items) and is worth it -- a label on a query where every frame agrees
+    tells you almost nothing about the frame.
+    """
+    if mode == "file":
+        return indices
+    rank_type = {t: i for i, t in enumerate(INFORMATIVE_TYPES)}
+    rank_diff = {"hard": 0, "medium": 1, "easy": 2}
+
+    disagrees: Dict[str, bool] = {}
+    if mode == "informative" and scene_for is not None:
+        try:
+            from .sensitivity import measure
+            if verbose:
+                print("measuring which queries the frames currently disagree "
+                      "on, to put those first ...")
+            rows = measure([items[i] for i in indices], scene_for, cfg)
+            disagrees = {r.item_id: r.disagreed for r in rows}
+        except Exception as exc:
+            if verbose:
+                print(f"  (could not measure frame disagreement: {exc}; "
+                      f"falling back to relation-type order)")
+
+    def key(i: int):
+        it = items[i]
+        return (0 if disagrees.get(it.id) else 1,
+                rank_type.get(it.relation_type or "", 99),
+                rank_diff.get(it.difficulty, 9),
+                it.scene_id, it.id)
+
+    out = sorted(indices, key=key)
+    if verbose and disagrees:
+        n = sum(1 for i in out if disagrees.get(items[i].id))
+        print(f"  {n} of {len(out)} queries have frames that currently "
+              f"disagree; those come first")
+    return out
+
+
 def annotate(items: List[BenchItem], scene_for, out_path: str,
              annotator: str = "", show_prediction: bool = False,
              resolver_for=None, start: int = 0,
-             only_unannotated: bool = True) -> List[BenchItem]:
+             only_unannotated: bool = True,
+             relation_types: Optional[Sequence[str]] = None,
+             order: str = "informative", target_count: Optional[int] = None,
+             cfg=None) -> List[BenchItem]:
     """Interactive loop. Saves after every item, so an interrupt loses nothing."""
     todo = list(range(len(items)))
     if only_unannotated:
         todo = [i for i in todo
                 if not items[i].target_ids and not items[i].ambiguous]
-    todo = [i for i in todo if i >= start]
+    if relation_types:
+        want = set(relation_types)
+        todo = [i for i in todo if (items[i].relation_type or "") in want]
+    todo = order_queue(items, todo, order, scene_for, cfg)
+    todo = [i for i in todo if i >= 0][start:]
     if not todo:
         print("nothing left to annotate in this file")
         return items
@@ -164,9 +224,12 @@ def annotate(items: List[BenchItem], scene_for, out_path: str,
             vp = scene.trajectory.centers.mean(axis=0)
 
         cols = shutil.get_terminal_size((100, 30)).columns
+        n_done = sum(1 for x in items if x.target_ids or x.ambiguous)
+        goal = f" | goal {target_count}" if target_count else ""
         print("\n" + "=" * min(cols, 100))
         print(f"[{pos + 1}/{len(todo)}]  {it.id}   scene {it.scene_id}   "
-              f"({it.relation_type or '?'}, suggested {it.difficulty})")
+              f"({it.relation_type or '?'}, suggested {it.difficulty})"
+              f"   annotated so far: {n_done}{goal}")
         print(f'QUERY: "{it.text}"')
         if it.notes:
             visible = " | ".join(p for p in it.notes.split(" | ")
@@ -262,8 +325,11 @@ def annotate(items: List[BenchItem], scene_for, out_path: str,
         if problems:
             print(f"  ! item still has problems: {problems}")
         write_jsonl(items, out_path)
-        print(f"  saved ({sum(1 for x in items if x.target_ids or x.ambiguous)}"
-              f"/{len(items)} annotated)")
+        n_done = sum(1 for x in items if x.target_ids or x.ambiguous)
+        print(f"  saved ({n_done}/{len(items)} annotated)")
+        if target_count and n_done >= target_count:
+            print(f"\n  reached the goal of {target_count} annotated items. "
+                  f"Carry on, or press q to stop and run the benchmark.")
         pos += 1
 
     write_jsonl(items, out_path)

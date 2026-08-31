@@ -260,19 +260,25 @@ if [[ "$N_ANNOTATED" -lt 1 ]]; then
     Proposals are in:  $PROPOSALS
     Annotate them into: $ITEMS
 
-    In the terminal (blind by default, with a top-down map):
-      $PY -m sqe annotate --items $PROPOSALS --out $ITEMS
+    In the terminal (blind by default, with a top-down map). Start with
+    lateral relations: they show the highest measured frame disagreement, so
+    that is the most information per label.
+      $PY -m sqe annotate --items $PROPOSALS --out $ITEMS \\
+          --relation-type projective_lateral --goal 150
 
     Or in the browser, clicking the target object:
       $PY -m sqe viewer --cache $CACHE --scene ${SCENES%% *} --items $ITEMS
 
     Then run this script again to get the report.
 
-    Aim for 300-500 items. Annotate the 'hard' ones first: those are the
-    frame-sensitive queries the report turns on. What matters most is that
-    the 'frame' field says which reading the sentence means, and that
-    genuinely ambiguous queries are marked as such rather than forced to a
-    single answer.
+    150 items is one evening and already converts "the frame matters" into
+    "and here is how often getting it wrong costs you the right object".
+    The queue puts queries whose frames currently disagree first, so the
+    early labels are the ones that decide something.
+
+    What matters most is that the 'frame' field says which reading the
+    sentence means, and that genuinely ambiguous queries are marked as such
+    rather than forced to a single answer.
 EOM
   exit 0
 fi
