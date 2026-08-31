@@ -41,6 +41,14 @@ FRAME_GLOSS = {
     "world": "relative to the room's axes",
 }
 
+#: An ordinal counts along an axis, so what changes is where counting starts.
+ORDINAL_GLOSS = {
+    "egocentric": "counting from my {d}",
+    "intrinsic": "counting from the {a}'s own {d}",
+    "addressee": "counting from the {d} of someone facing the {a}",
+    "world": "counting from the {d} by the room's axes",
+}
+
 #: Plain-words gloss specialised by relation, where it differs.
 FRONT_GLOSS = {
     "egocentric": "between me and it",
@@ -158,7 +166,8 @@ def render_state(scene: Scene, src: FrameSource, frame_index: int,
                  anchor, answers: Sequence[Tuple[str, int]], selected: int,
                  query_text: str, pressed: Optional[int] = None,
                  width: int = 1000, max_distance: float = 8.0,
-                 max_context: int = 10,
+                 max_context: int = 0, anchor_hidden_style: str = "dashed",
+                 ordinal_from: Optional[str] = None,
                  relation: Optional[str] = None) -> np.ndarray:
     """One still: the answer under `answers[selected]` highlighted."""
     cv2 = _cv2()
@@ -176,8 +185,12 @@ def render_state(scene: Scene, src: FrameSource, frame_index: int,
     sel_id = answers[selected][1]
     others = [oid for _, oid in answers if oid != sel_id]
 
-    # context boxes, faint and capped -- they should say "this is a scene graph",
-    # not compete with the answer
+    # Context boxes, off by default. They were meant to say "this is a scene
+    # graph", but on the one image that has to carry the argument they read as
+    # "here are a lot of boxes, and two of them are wrong". The point of the
+    # figure is that both candidates are reasonable; anything not participating
+    # in the relation works against that. `max_context` turns them back on for
+    # debugging, where seeing the whole graph is the point.
     eye = pose[:3, 3]
     context = []
     for o in scene.objects:
@@ -210,8 +223,12 @@ def render_state(scene: Scene, src: FrameSource, frame_index: int,
                              f"{o.label} #{o.id}")
 
     # anchor, and the selected frame's axes read at it
+    # A big anchor -- a bed, a table -- throws long dashed hidden edges right
+    # across the frame. Informative when debugging, clutter on a figure whose
+    # job is to make two candidate answers comparable at a glance.
     draw_box_hidden_line(img, anchor.obb, K, pose, dbuf, COLOURS["anchor"], 3,
-                         f"anchor: {anchor.label} #{anchor.id}")
+                         f"anchor: {anchor.label} #{anchor.id}",
+                         hidden_style=anchor_hidden_style)
     kind = answers[selected][0]
     from ..frames.policy import build_frames
     frames, _ = build_frames(scene, anchor, (kind,),
@@ -233,7 +250,16 @@ def render_state(scene: Scene, src: FrameSource, frame_index: int,
     draw_box_hidden_line(img, sel.obb, K, pose, dbuf, COLOURS["target"], 4,
                          f"{sel.label} #{sel.id}", label_scale=0.72)
 
-    gloss = FRONT_GLOSS if relation in ("front", "behind") else FRAME_GLOSS
+    if ordinal_from:
+        # An ordinal does not name a direction between two objects; it counts
+        # along one. What the frame changes is which end counting starts from,
+        # so the gloss has to say that or the figure is unreadable.
+        gloss = {k: v.format(d=ordinal_from, a=anchor.canonical_label)
+                 for k, v in ORDINAL_GLOSS.items()}
+    elif relation in ("front", "behind"):
+        gloss = FRONT_GLOSS
+    else:
+        gloss = FRAME_GLOSS
     legend = "     ".join(
         f"{k}: {gloss.get(k, '')}" for k, _ in answers)
     _caption(img, [f'"{query_text}"', legend,
@@ -261,6 +287,8 @@ def frame_switch_gif(scene: Scene, src: FrameSource, query_text: str,
                      kinds: Sequence[str] = ("egocentric", "intrinsic"),
                      width: int = 1000, hold_ms: int = 1500,
                      click_ms: int = 260, colours: int = 128,
+                     max_context: int = 0, frame_index: Optional[int] = None,
+                     anchor_hidden_style: str = "dashed",
                      verbose: bool = True) -> Optional[str]:
     """Write the GIF. Returns the path, or None if the query is not frame-split."""
     from PIL import Image
@@ -285,8 +313,13 @@ def frame_switch_gif(scene: Scene, src: FrameSource, query_text: str,
         return None
 
     objs = [scene.by_id(i) for _, i in answers] + [anchor]
-    idx = best_joint_view(src, [o.obb for o in objs], scene.up,
-                          scene_background=scene.background)
+    # `best_joint_view` maximises visibility, which is the right default but
+    # will happily choose a frame where a box runs off the edge. For a figure
+    # that has to read at a glance, an override lets a frame be chosen for
+    # composition instead.
+    idx = (int(frame_index) if frame_index is not None else
+           best_joint_view(src, [o.obb for o in objs], scene.up,
+                           scene_background=scene.background))
     if idx < 0:
         if verbose:
             print("  no frame sees the anchor and both answers together")
@@ -295,17 +328,25 @@ def frame_switch_gif(scene: Scene, src: FrameSource, query_text: str,
         print(f"  frame {idx}, answers {answers}, anchor #{anchor.id}")
 
     relation = res.query.primary_relation
+    od = res.query.target.ordinal
+    ordinal_from = od.from_word if od is not None else None
     stills: List[np.ndarray] = []
     durations: List[int] = []
     n = len(answers)
     for i in range(n):
         stills.append(render_state(scene, src, idx, anchor, answers, i,
                                    query_text, None, width,
+                                   max_context=max_context,
+                                   anchor_hidden_style=anchor_hidden_style,
+                                   ordinal_from=ordinal_from,
                                    relation=relation))
         durations.append(hold_ms)
         nxt = (i + 1) % n
         stills.append(render_state(scene, src, idx, anchor, answers, i,
                                    query_text, nxt, width,
+                                   max_context=max_context,
+                                   anchor_hidden_style=anchor_hidden_style,
+                                   ordinal_from=ordinal_from,
                                    relation=relation))
         durations.append(click_ms)
 

@@ -1,4 +1,4 @@
-# Frame instructability — controls only
+# Frame instructability
 
 Minimal pairs: two sentences differing only in an explicit marker of whose left is meant, on scenes where the two readings pick different objects. **frame_blind** means the system gave the same answer to both -- it has no frame to instruct.
 
@@ -7,18 +7,34 @@ Minimal pairs: two sentences differing only in an explicit marker of whose left 
 | resolver (cue-following) | 35 | 100.0% | **  0.0%** |   0.0% |   0.0% |   0.0% | 100.0% |
 | pinned:egocentric | 35 |   0.0% | **100.0%** |   0.0% |   0.0% |   0.0% | 100.0% |
 | pinned:intrinsic | 35 |   0.0% | **100.0%** |   0.0% |   0.0% |   0.0% | 100.0% |
+| claude-opus-5 (self-administered) | 35 |  42.9% | ** 25.7%** |  11.4% |  20.0% |   0.0% |  80.0% |
+| claude-haiku-4.5 (self-administered) | 35 |   5.7% | ** 48.6%** |  14.3% |  25.7% |   5.7% |  37.1% |
 
 **`control stable` is load-bearing.** It is the fraction of *non-contrastive* paraphrase pairs -- equally awkward, matched for shape, differing in nothing that should change the answer -- that the system answers identically. A high `frame_blind` rate only means "has no frame to instruct" if `control stable` is also high. A system with low `control stable` is unstable to surface form, and its frame-blindness is unattributable.
+
+## The same table, restricted to control-matched pairs
+
+Each control is built from one pair, so every pair has an item-level check on whether that system's answers move for reasons unrelated to the frame. Restricting to the pairs that passed their own check is the reading of `frame_blind` that survives a noisy system: on these items the system answers the same sentence the same way twice.
+
+| system | pairs kept | dropped | switched correctly | frame blind | switched wrongly | partial |
+|---|---|---|---|---|---|---|
+| resolver (cue-following) | 35 | 0 | 100.0% | **  0.0%** |   0.0% |   0.0% |
+| pinned:egocentric | 35 | 0 |   0.0% | **100.0%** |   0.0% |   0.0% |
+| pinned:intrinsic | 35 | 0 |   0.0% | **100.0%** |   0.0% |   0.0% |
+| claude-opus-5 (self-administered) | 28 | 7 |  42.9% | ** 28.6%** |  10.7% |  17.9% |
+| claude-haiku-4.5 (self-administered) | 13 | 22 |   7.7% | ** 61.5%** |   0.0% |  23.1% |
 
 ## Default convention on the uncued sentence
 
 With no marker, which arm's answer does the system give?
 
-| system | egocentric | intrinsic |
-|---|---|---|
-| resolver (cue-following) | 18 | 17 |
-| pinned:egocentric | 35 | 0 |
-| pinned:intrinsic | 0 | 35 |
+| system | egocentric | intrinsic | neither |
+|---|---|---|---|
+| resolver (cue-following) | 18 | 17 | 0 |
+| pinned:egocentric | 35 | 0 | 0 |
+| pinned:intrinsic | 0 | 35 | 0 |
+| claude-opus-5 (self-administered) | 22 | 4 | 9 |
+| claude-haiku-4.5 (self-administered) | 11 | 10 | 14 |
 
 ## Reading the controls
 

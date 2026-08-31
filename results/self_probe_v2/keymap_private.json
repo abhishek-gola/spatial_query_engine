@@ -1,0 +1,1472 @@
+{
+ "1f1012530c44": {
+  "kind": "pair_arm",
+  "pair_id": "0a184cf634_front_35_jar",
+  "frame": "egocentric",
+  "gold": 107,
+  "text": "from where I am standing, the jar in front of the toilet",
+  "block": "a",
+  "scene_id": "0a184cf634"
+ },
+ "7dedfe9d9541": {
+  "kind": "pair_arm",
+  "pair_id": "0a184cf634_front_35_jar",
+  "frame": "intrinsic",
+  "gold": 87,
+  "text": "the jar in front of the toilet, from the toilet's point of view",
+  "block": "b",
+  "scene_id": "0a184cf634"
+ },
+ "47629917c499": {
+  "kind": "pair_neutral",
+  "pair_id": "0a184cf634_front_35_jar",
+  "frame_chosen_by_resolver": "intrinsic",
+  "text": "the jar in front of the toilet",
+  "block": "n",
+  "scene_id": "0a184cf634"
+ },
+ "16094689143d": {
+  "kind": "pair_arm",
+  "pair_id": "0a184cf634_right_41_book",
+  "frame": "egocentric",
+  "gold": 43,
+  "text": "from where I am standing, the book to the right of the heater",
+  "block": "a",
+  "scene_id": "0a184cf634"
+ },
+ "dca8021f8528": {
+  "kind": "pair_arm",
+  "pair_id": "0a184cf634_right_41_book",
+  "frame": "intrinsic",
+  "gold": 62,
+  "text": "the book to the heater's own right",
+  "block": "b",
+  "scene_id": "0a184cf634"
+ },
+ "ceaba4d1bcdc": {
+  "kind": "pair_neutral",
+  "pair_id": "0a184cf634_right_41_book",
+  "frame_chosen_by_resolver": "egocentric",
+  "text": "the book to the right of the heater",
+  "block": "n",
+  "scene_id": "0a184cf634"
+ },
+ "578f45c22821": {
+  "kind": "pair_arm",
+  "pair_id": "0a184cf634_left_41_table",
+  "frame": "egocentric",
+  "gold": 112,
+  "text": "from where I am standing, the table to the left of the heater",
+  "block": "a",
+  "scene_id": "0a184cf634"
+ },
+ "c6e486ecad91": {
+  "kind": "pair_arm",
+  "pair_id": "0a184cf634_left_41_table",
+  "frame": "intrinsic",
+  "gold": 40,
+  "text": "the table to the heater's own left",
+  "block": "b",
+  "scene_id": "0a184cf634"
+ },
+ "875049bbed20": {
+  "kind": "pair_neutral",
+  "pair_id": "0a184cf634_left_41_table",
+  "frame_chosen_by_resolver": "egocentric",
+  "text": "the table to the left of the heater",
+  "block": "n",
+  "scene_id": "0a184cf634"
+ },
+ "3d173225dad1": {
+  "kind": "pair_arm",
+  "pair_id": "0a184cf634_right_41_table",
+  "frame": "egocentric",
+  "gold": 40,
+  "text": "from where I am standing, the table to the right of the heater",
+  "block": "a",
+  "scene_id": "0a184cf634"
+ },
+ "409cc8bf9f93": {
+  "kind": "pair_arm",
+  "pair_id": "0a184cf634_right_41_table",
+  "frame": "intrinsic",
+  "gold": 112,
+  "text": "the table to the heater's own right",
+  "block": "b",
+  "scene_id": "0a184cf634"
+ },
+ "390661851641": {
+  "kind": "pair_neutral",
+  "pair_id": "0a184cf634_right_41_table",
+  "frame_chosen_by_resolver": "egocentric",
+  "text": "the table to the right of the heater",
+  "block": "n",
+  "scene_id": "0a184cf634"
+ },
+ "b9fd35cae30b": {
+  "kind": "pair_arm",
+  "pair_id": "0a184cf634_left_65_cabinet",
+  "frame": "egocentric",
+  "gold": 45,
+  "text": "from where I am standing, the cabinet to the left of the bed",
+  "block": "a",
+  "scene_id": "0a184cf634"
+ },
+ "52898371eea0": {
+  "kind": "pair_arm",
+  "pair_id": "0a184cf634_left_65_cabinet",
+  "frame": "intrinsic",
+  "gold": 34,
+  "text": "the cabinet to the bed's own left",
+  "block": "b",
+  "scene_id": "0a184cf634"
+ },
+ "31c347868d73": {
+  "kind": "pair_neutral",
+  "pair_id": "0a184cf634_left_65_cabinet",
+  "frame_chosen_by_resolver": "egocentric",
+  "text": "the cabinet to the left of the bed",
+  "block": "n",
+  "scene_id": "0a184cf634"
+ },
+ "9e0acb1186ca": {
+  "kind": "pair_arm",
+  "pair_id": "0a184cf634_right_65_cabinet",
+  "frame": "egocentric",
+  "gold": 34,
+  "text": "from where I am standing, the cabinet to the right of the bed",
+  "block": "a",
+  "scene_id": "0a184cf634"
+ },
+ "854ca9b6544f": {
+  "kind": "pair_arm",
+  "pair_id": "0a184cf634_right_65_cabinet",
+  "frame": "intrinsic",
+  "gold": 45,
+  "text": "the cabinet to the bed's own right",
+  "block": "b",
+  "scene_id": "0a184cf634"
+ },
+ "19eb8dac2560": {
+  "kind": "pair_neutral",
+  "pair_id": "0a184cf634_right_65_cabinet",
+  "frame_chosen_by_resolver": "egocentric",
+  "text": "the cabinet to the right of the bed",
+  "block": "n",
+  "scene_id": "0a184cf634"
+ },
+ "af92b5f60e0b": {
+  "kind": "pair_arm",
+  "pair_id": "0a184cf634_front_65_kitchen-cabinet",
+  "frame": "egocentric",
+  "gold": 103,
+  "text": "from where I am standing, the kitchen cabinet in front of the bed",
+  "block": "a",
+  "scene_id": "0a184cf634"
+ },
+ "01d2e7f62fbc": {
+  "kind": "pair_arm",
+  "pair_id": "0a184cf634_front_65_kitchen-cabinet",
+  "frame": "intrinsic",
+  "gold": 33,
+  "text": "the kitchen cabinet in front of the bed, from the bed's point of view",
+  "block": "b",
+  "scene_id": "0a184cf634"
+ },
+ "6ca8b68cbc94": {
+  "kind": "pair_neutral",
+  "pair_id": "0a184cf634_front_65_kitchen-cabinet",
+  "frame_chosen_by_resolver": "intrinsic",
+  "text": "the kitchen cabinet in front of the bed",
+  "block": "n",
+  "scene_id": "0a184cf634"
+ },
+ "0a608cf398a0": {
+  "kind": "pair_arm",
+  "pair_id": "0a184cf634_left_65_shelf",
+  "frame": "egocentric",
+  "gold": 113,
+  "text": "from where I am standing, the shelf to the left of the bed",
+  "block": "a",
+  "scene_id": "0a184cf634"
+ },
+ "86e3a835e426": {
+  "kind": "pair_arm",
+  "pair_id": "0a184cf634_left_65_shelf",
+  "frame": "intrinsic",
+  "gold": 105,
+  "text": "the shelf to the bed's own left",
+  "block": "b",
+  "scene_id": "0a184cf634"
+ },
+ "a4529f728193": {
+  "kind": "pair_neutral",
+  "pair_id": "0a184cf634_left_65_shelf",
+  "frame_chosen_by_resolver": "egocentric",
+  "text": "the shelf to the left of the bed",
+  "block": "n",
+  "scene_id": "0a184cf634"
+ },
+ "6d2b8623e6f6": {
+  "kind": "pair_arm",
+  "pair_id": "0a184cf634_right_65_shelf",
+  "frame": "egocentric",
+  "gold": 105,
+  "text": "from where I am standing, the shelf to the right of the bed",
+  "block": "a",
+  "scene_id": "0a184cf634"
+ },
+ "14bfb12393b6": {
+  "kind": "pair_arm",
+  "pair_id": "0a184cf634_right_65_shelf",
+  "frame": "intrinsic",
+  "gold": 6,
+  "text": "the shelf to the bed's own right",
+  "block": "b",
+  "scene_id": "0a184cf634"
+ },
+ "8b3af2c12cb4": {
+  "kind": "pair_neutral",
+  "pair_id": "0a184cf634_right_65_shelf",
+  "frame_chosen_by_resolver": "egocentric",
+  "text": "the shelf to the right of the bed",
+  "block": "n",
+  "scene_id": "0a184cf634"
+ },
+ "510ce3708fce": {
+  "kind": "pair_arm",
+  "pair_id": "0a184cf634_front_65_shelf",
+  "frame": "egocentric",
+  "gold": 105,
+  "text": "from where I am standing, the shelf in front of the bed",
+  "block": "a",
+  "scene_id": "0a184cf634"
+ },
+ "45ac830f2c3f": {
+  "kind": "pair_arm",
+  "pair_id": "0a184cf634_front_65_shelf",
+  "frame": "intrinsic",
+  "gold": 113,
+  "text": "the shelf in front of the bed, from the bed's point of view",
+  "block": "b",
+  "scene_id": "0a184cf634"
+ },
+ "febc686be360": {
+  "kind": "pair_neutral",
+  "pair_id": "0a184cf634_front_65_shelf",
+  "frame_chosen_by_resolver": "intrinsic",
+  "text": "the shelf in front of the bed",
+  "block": "n",
+  "scene_id": "0a184cf634"
+ },
+ "4b48b763d13d": {
+  "kind": "pair_arm",
+  "pair_id": "0a76e06478_right_13_backpack",
+  "frame": "egocentric",
+  "gold": 1,
+  "text": "from where I am standing, the backpack to the right of the bed",
+  "block": "a",
+  "scene_id": "0a76e06478"
+ },
+ "dc5369516c0f": {
+  "kind": "pair_arm",
+  "pair_id": "0a76e06478_right_13_backpack",
+  "frame": "intrinsic",
+  "gold": 59,
+  "text": "the backpack to the bed's own right",
+  "block": "b",
+  "scene_id": "0a76e06478"
+ },
+ "d3c1d40310a2": {
+  "kind": "pair_neutral",
+  "pair_id": "0a76e06478_right_13_backpack",
+  "frame_chosen_by_resolver": "egocentric",
+  "text": "the backpack to the right of the bed",
+  "block": "n",
+  "scene_id": "0a76e06478"
+ },
+ "6037f8222877": {
+  "kind": "pair_arm",
+  "pair_id": "0a76e06478_front_14_ornament",
+  "frame": "egocentric",
+  "gold": 40,
+  "text": "from where I am standing, the ornament in front of the office chair",
+  "block": "a",
+  "scene_id": "0a76e06478"
+ },
+ "7def8b16fde2": {
+  "kind": "pair_arm",
+  "pair_id": "0a76e06478_front_14_ornament",
+  "frame": "intrinsic",
+  "gold": 41,
+  "text": "the ornament in front of the office chair, from the office chair's point of view",
+  "block": "b",
+  "scene_id": "0a76e06478"
+ },
+ "75f36e19211a": {
+  "kind": "pair_neutral",
+  "pair_id": "0a76e06478_front_14_ornament",
+  "frame_chosen_by_resolver": "intrinsic",
+  "text": "the ornament in front of the office chair",
+  "block": "n",
+  "scene_id": "0a76e06478"
+ },
+ "360baa2ca3d5": {
+  "kind": "pair_arm",
+  "pair_id": "0a76e06478_behind_19_box",
+  "frame": "egocentric",
+  "gold": 72,
+  "text": "from where I am standing, the box behind the bookshelf",
+  "block": "a",
+  "scene_id": "0a76e06478"
+ },
+ "ab238ab908b8": {
+  "kind": "pair_arm",
+  "pair_id": "0a76e06478_behind_19_box",
+  "frame": "intrinsic",
+  "gold": 71,
+  "text": "the box behind the bookshelf, from the bookshelf's point of view",
+  "block": "b",
+  "scene_id": "0a76e06478"
+ },
+ "ecd103f5223f": {
+  "kind": "pair_neutral",
+  "pair_id": "0a76e06478_behind_19_box",
+  "frame_chosen_by_resolver": "intrinsic",
+  "text": "the box behind the bookshelf",
+  "block": "n",
+  "scene_id": "0a76e06478"
+ },
+ "d98405ff9fad": {
+  "kind": "pair_arm",
+  "pair_id": "0a76e06478_right_19_clothes",
+  "frame": "egocentric",
+  "gold": 67,
+  "text": "from where I am standing, the clothes to the right of the bookshelf",
+  "block": "a",
+  "scene_id": "0a76e06478"
+ },
+ "53d9b8bc83c8": {
+  "kind": "pair_arm",
+  "pair_id": "0a76e06478_right_19_clothes",
+  "frame": "intrinsic",
+  "gold": 70,
+  "text": "the clothes to the bookshelf's own right",
+  "block": "b",
+  "scene_id": "0a76e06478"
+ },
+ "667a8acc3c0e": {
+  "kind": "pair_neutral",
+  "pair_id": "0a76e06478_right_19_clothes",
+  "frame_chosen_by_resolver": "egocentric",
+  "text": "the clothes to the right of the bookshelf",
+  "block": "n",
+  "scene_id": "0a76e06478"
+ },
+ "4a53e89265ce": {
+  "kind": "pair_arm",
+  "pair_id": "0a76e06478_behind_19_clothes",
+  "frame": "egocentric",
+  "gold": 70,
+  "text": "from where I am standing, the clothes behind the bookshelf",
+  "block": "a",
+  "scene_id": "0a76e06478"
+ },
+ "6ebb8f1d4986": {
+  "kind": "pair_arm",
+  "pair_id": "0a76e06478_behind_19_clothes",
+  "frame": "intrinsic",
+  "gold": 67,
+  "text": "the clothes behind the bookshelf, from the bookshelf's point of view",
+  "block": "b",
+  "scene_id": "0a76e06478"
+ },
+ "b931e0704dba": {
+  "kind": "pair_neutral",
+  "pair_id": "0a76e06478_behind_19_clothes",
+  "frame_chosen_by_resolver": "intrinsic",
+  "text": "the clothes behind the bookshelf",
+  "block": "n",
+  "scene_id": "0a76e06478"
+ },
+ "f764ab022eb1": {
+  "kind": "pair_arm",
+  "pair_id": "0a76e06478_front_77_clothes",
+  "frame": "egocentric",
+  "gold": 70,
+  "text": "from where I am standing, the clothes in front of the chair",
+  "block": "a",
+  "scene_id": "0a76e06478"
+ },
+ "cb4318caa1fb": {
+  "kind": "pair_arm",
+  "pair_id": "0a76e06478_front_77_clothes",
+  "frame": "intrinsic",
+  "gold": 68,
+  "text": "the clothes in front of the chair, from the chair's point of view",
+  "block": "b",
+  "scene_id": "0a76e06478"
+ },
+ "fb43c9d78441": {
+  "kind": "pair_neutral",
+  "pair_id": "0a76e06478_front_77_clothes",
+  "frame_chosen_by_resolver": "intrinsic",
+  "text": "the clothes in front of the chair",
+  "block": "n",
+  "scene_id": "0a76e06478"
+ },
+ "9012b2fb028a": {
+  "kind": "pair_arm",
+  "pair_id": "0a7cc12c0e_front_11_bottle",
+  "frame": "egocentric",
+  "gold": 77,
+  "text": "from where I am standing, the bottle in front of the toilet",
+  "block": "a",
+  "scene_id": "0a7cc12c0e"
+ },
+ "bb65f608ae88": {
+  "kind": "pair_arm",
+  "pair_id": "0a7cc12c0e_front_11_bottle",
+  "frame": "intrinsic",
+  "gold": 79,
+  "text": "the bottle in front of the toilet, from the toilet's point of view",
+  "block": "b",
+  "scene_id": "0a7cc12c0e"
+ },
+ "ef10c3b9f2cc": {
+  "kind": "pair_neutral",
+  "pair_id": "0a7cc12c0e_front_11_bottle",
+  "frame_chosen_by_resolver": "intrinsic",
+  "text": "the bottle in front of the toilet",
+  "block": "n",
+  "scene_id": "0a7cc12c0e"
+ },
+ "529ef53eaa27": {
+  "kind": "pair_arm",
+  "pair_id": "0a7cc12c0e_behind_11_bottle",
+  "frame": "egocentric",
+  "gold": 119,
+  "text": "from where I am standing, the bottle behind the toilet",
+  "block": "a",
+  "scene_id": "0a7cc12c0e"
+ },
+ "74bb6e2f73bf": {
+  "kind": "pair_arm",
+  "pair_id": "0a7cc12c0e_behind_11_bottle",
+  "frame": "intrinsic",
+  "gold": 108,
+  "text": "the bottle behind the toilet, from the toilet's point of view",
+  "block": "b",
+  "scene_id": "0a7cc12c0e"
+ },
+ "929ded1a2dff": {
+  "kind": "pair_neutral",
+  "pair_id": "0a7cc12c0e_behind_11_bottle",
+  "frame_chosen_by_resolver": "intrinsic",
+  "text": "the bottle behind the toilet",
+  "block": "n",
+  "scene_id": "0a7cc12c0e"
+ },
+ "6365d854666d": {
+  "kind": "pair_arm",
+  "pair_id": "0a7cc12c0e_front_11_shelf",
+  "frame": "egocentric",
+  "gold": 86,
+  "text": "from where I am standing, the shelf in front of the toilet",
+  "block": "a",
+  "scene_id": "0a7cc12c0e"
+ },
+ "30bfc9781791": {
+  "kind": "pair_arm",
+  "pair_id": "0a7cc12c0e_front_11_shelf",
+  "frame": "intrinsic",
+  "gold": 72,
+  "text": "the shelf in front of the toilet, from the toilet's point of view",
+  "block": "b",
+  "scene_id": "0a7cc12c0e"
+ },
+ "fb0fc265d3a6": {
+  "kind": "pair_neutral",
+  "pair_id": "0a7cc12c0e_front_11_shelf",
+  "frame_chosen_by_resolver": "intrinsic",
+  "text": "the shelf in front of the toilet",
+  "block": "n",
+  "scene_id": "0a7cc12c0e"
+ },
+ "2ee6f79d8d2a": {
+  "kind": "pair_arm",
+  "pair_id": "0a7cc12c0e_front_30_bottle",
+  "frame": "egocentric",
+  "gold": 5,
+  "text": "from where I am standing, the bottle in front of the laptop",
+  "block": "a",
+  "scene_id": "0a7cc12c0e"
+ },
+ "4935d47081e2": {
+  "kind": "pair_arm",
+  "pair_id": "0a7cc12c0e_front_30_bottle",
+  "frame": "intrinsic",
+  "gold": 77,
+  "text": "the bottle in front of the laptop, from the laptop's point of view",
+  "block": "b",
+  "scene_id": "0a7cc12c0e"
+ },
+ "e39b14410219": {
+  "kind": "pair_neutral",
+  "pair_id": "0a7cc12c0e_front_30_bottle",
+  "frame_chosen_by_resolver": "intrinsic",
+  "text": "the bottle in front of the laptop",
+  "block": "n",
+  "scene_id": "0a7cc12c0e"
+ },
+ "b30cdc48ee05": {
+  "kind": "pair_arm",
+  "pair_id": "0a7cc12c0e_left_30_shelf",
+  "frame": "egocentric",
+  "gold": 72,
+  "text": "from where I am standing, the shelf to the left of the laptop",
+  "block": "a",
+  "scene_id": "0a7cc12c0e"
+ },
+ "2888917e3a26": {
+  "kind": "pair_arm",
+  "pair_id": "0a7cc12c0e_left_30_shelf",
+  "frame": "intrinsic",
+  "gold": 33,
+  "text": "the shelf to the laptop's own left",
+  "block": "b",
+  "scene_id": "0a7cc12c0e"
+ },
+ "860a0beb4cbf": {
+  "kind": "pair_neutral",
+  "pair_id": "0a7cc12c0e_left_30_shelf",
+  "frame_chosen_by_resolver": "egocentric",
+  "text": "the shelf to the left of the laptop",
+  "block": "n",
+  "scene_id": "0a7cc12c0e"
+ },
+ "4dcdb1ca9022": {
+  "kind": "pair_arm",
+  "pair_id": "0a7cc12c0e_right_123_box",
+  "frame": "egocentric",
+  "gold": 89,
+  "text": "from where I am standing, the box to the right of the bed",
+  "block": "a",
+  "scene_id": "0a7cc12c0e"
+ },
+ "46d0343419f7": {
+  "kind": "pair_arm",
+  "pair_id": "0a7cc12c0e_right_123_box",
+  "frame": "intrinsic",
+  "gold": 84,
+  "text": "the box to the bed's own right",
+  "block": "b",
+  "scene_id": "0a7cc12c0e"
+ },
+ "c50be2a6d3aa": {
+  "kind": "pair_neutral",
+  "pair_id": "0a7cc12c0e_right_123_box",
+  "frame_chosen_by_resolver": "egocentric",
+  "text": "the box to the right of the bed",
+  "block": "n",
+  "scene_id": "0a7cc12c0e"
+ },
+ "4fc9831cb2be": {
+  "kind": "pair_arm",
+  "pair_id": "0a7cc12c0e_left_123_shelf",
+  "frame": "egocentric",
+  "gold": 107,
+  "text": "from where I am standing, the shelf to the left of the bed",
+  "block": "a",
+  "scene_id": "0a7cc12c0e"
+ },
+ "d1fd9bfc61ae": {
+  "kind": "pair_arm",
+  "pair_id": "0a7cc12c0e_left_123_shelf",
+  "frame": "intrinsic",
+  "gold": 23,
+  "text": "the shelf to the bed's own left",
+  "block": "b",
+  "scene_id": "0a7cc12c0e"
+ },
+ "2e78c6357f94": {
+  "kind": "pair_neutral",
+  "pair_id": "0a7cc12c0e_left_123_shelf",
+  "frame_chosen_by_resolver": "egocentric",
+  "text": "the shelf to the left of the bed",
+  "block": "n",
+  "scene_id": "0a7cc12c0e"
+ },
+ "7ead2b35ee23": {
+  "kind": "pair_arm",
+  "pair_id": "0a7cc12c0e_right_123_shelf",
+  "frame": "egocentric",
+  "gold": 23,
+  "text": "from where I am standing, the shelf to the right of the bed",
+  "block": "a",
+  "scene_id": "0a7cc12c0e"
+ },
+ "4950539d36cc": {
+  "kind": "pair_arm",
+  "pair_id": "0a7cc12c0e_right_123_shelf",
+  "frame": "intrinsic",
+  "gold": 86,
+  "text": "the shelf to the bed's own right",
+  "block": "b",
+  "scene_id": "0a7cc12c0e"
+ },
+ "4fcf6eb597ac": {
+  "kind": "pair_neutral",
+  "pair_id": "0a7cc12c0e_right_123_shelf",
+  "frame_chosen_by_resolver": "egocentric",
+  "text": "the shelf to the right of the bed",
+  "block": "n",
+  "scene_id": "0a7cc12c0e"
+ },
+ "c63792e46743": {
+  "kind": "pair_arm",
+  "pair_id": "0a7cc12c0e_left_133_lamp",
+  "frame": "egocentric",
+  "gold": 34,
+  "text": "from where I am standing, the lamp to the left of the microwave",
+  "block": "a",
+  "scene_id": "0a7cc12c0e"
+ },
+ "13eb8398f66d": {
+  "kind": "pair_arm",
+  "pair_id": "0a7cc12c0e_left_133_lamp",
+  "frame": "intrinsic",
+  "gold": 101,
+  "text": "the lamp to the microwave's own left",
+  "block": "b",
+  "scene_id": "0a7cc12c0e"
+ },
+ "b6200b7879aa": {
+  "kind": "pair_neutral",
+  "pair_id": "0a7cc12c0e_left_133_lamp",
+  "frame_chosen_by_resolver": "egocentric",
+  "text": "the lamp to the left of the microwave",
+  "block": "n",
+  "scene_id": "0a7cc12c0e"
+ },
+ "ed8ba2785a08": {
+  "kind": "pair_arm",
+  "pair_id": "0a7cc12c0e_front_133_lamp",
+  "frame": "egocentric",
+  "gold": 101,
+  "text": "from where I am standing, the lamp in front of the microwave",
+  "block": "a",
+  "scene_id": "0a7cc12c0e"
+ },
+ "04aade692e26": {
+  "kind": "pair_arm",
+  "pair_id": "0a7cc12c0e_front_133_lamp",
+  "frame": "intrinsic",
+  "gold": 34,
+  "text": "the lamp in front of the microwave, from the microwave's point of view",
+  "block": "b",
+  "scene_id": "0a7cc12c0e"
+ },
+ "c6303ed2d0db": {
+  "kind": "pair_neutral",
+  "pair_id": "0a7cc12c0e_front_133_lamp",
+  "frame_chosen_by_resolver": "intrinsic",
+  "text": "the lamp in front of the microwave",
+  "block": "n",
+  "scene_id": "0a7cc12c0e"
+ },
+ "17f10503bc37": {
+  "kind": "pair_arm",
+  "pair_id": "0b031f3119_front_20_computer-tower",
+  "frame": "egocentric",
+  "gold": 85,
+  "text": "from where I am standing, the computer tower in front of the whiteboard",
+  "block": "a",
+  "scene_id": "0b031f3119"
+ },
+ "f006b4b7f247": {
+  "kind": "pair_arm",
+  "pair_id": "0b031f3119_front_20_computer-tower",
+  "frame": "intrinsic",
+  "gold": 69,
+  "text": "the computer tower in front of the whiteboard, from the whiteboard's point of view",
+  "block": "b",
+  "scene_id": "0b031f3119"
+ },
+ "f960392ed0b3": {
+  "kind": "pair_neutral",
+  "pair_id": "0b031f3119_front_20_computer-tower",
+  "frame_chosen_by_resolver": "intrinsic",
+  "text": "the computer tower in front of the whiteboard",
+  "block": "n",
+  "scene_id": "0b031f3119"
+ },
+ "267bc7c35420": {
+  "kind": "pair_arm",
+  "pair_id": "0b031f3119_front_20_keyboard",
+  "frame": "egocentric",
+  "gold": 31,
+  "text": "from where I am standing, the keyboard in front of the whiteboard",
+  "block": "a",
+  "scene_id": "0b031f3119"
+ },
+ "888c6b495c79": {
+  "kind": "pair_arm",
+  "pair_id": "0b031f3119_front_20_keyboard",
+  "frame": "intrinsic",
+  "gold": 30,
+  "text": "the keyboard in front of the whiteboard, from the whiteboard's point of view",
+  "block": "b",
+  "scene_id": "0b031f3119"
+ },
+ "2b130b62e10d": {
+  "kind": "pair_neutral",
+  "pair_id": "0b031f3119_front_20_keyboard",
+  "frame_chosen_by_resolver": "intrinsic",
+  "text": "the keyboard in front of the whiteboard",
+  "block": "n",
+  "scene_id": "0b031f3119"
+ },
+ "945614f67f3e": {
+  "kind": "pair_arm",
+  "pair_id": "0b031f3119_front_20_monitor",
+  "frame": "egocentric",
+  "gold": 40,
+  "text": "from where I am standing, the monitor in front of the whiteboard",
+  "block": "a",
+  "scene_id": "0b031f3119"
+ },
+ "3bea6f76341c": {
+  "kind": "pair_arm",
+  "pair_id": "0b031f3119_front_20_monitor",
+  "frame": "intrinsic",
+  "gold": 11,
+  "text": "the monitor in front of the whiteboard, from the whiteboard's point of view",
+  "block": "b",
+  "scene_id": "0b031f3119"
+ },
+ "25a0a1ba791b": {
+  "kind": "pair_neutral",
+  "pair_id": "0b031f3119_front_20_monitor",
+  "frame_chosen_by_resolver": "intrinsic",
+  "text": "the monitor in front of the whiteboard",
+  "block": "n",
+  "scene_id": "0b031f3119"
+ },
+ "16ac76d3aa32": {
+  "kind": "pair_arm",
+  "pair_id": "0b031f3119_front_20_mouse",
+  "frame": "egocentric",
+  "gold": 29,
+  "text": "from where I am standing, the mouse in front of the whiteboard",
+  "block": "a",
+  "scene_id": "0b031f3119"
+ },
+ "10f345e47e0b": {
+  "kind": "pair_arm",
+  "pair_id": "0b031f3119_front_20_mouse",
+  "frame": "intrinsic",
+  "gold": 51,
+  "text": "the mouse in front of the whiteboard, from the whiteboard's point of view",
+  "block": "b",
+  "scene_id": "0b031f3119"
+ },
+ "1032fdcc814f": {
+  "kind": "pair_neutral",
+  "pair_id": "0b031f3119_front_20_mouse",
+  "frame_chosen_by_resolver": "intrinsic",
+  "text": "the mouse in front of the whiteboard",
+  "block": "n",
+  "scene_id": "0b031f3119"
+ },
+ "4befa858d560": {
+  "kind": "pair_arm",
+  "pair_id": "0b031f3119_front_20_office-chair",
+  "frame": "egocentric",
+  "gold": 76,
+  "text": "from where I am standing, the office chair in front of the whiteboard",
+  "block": "a",
+  "scene_id": "0b031f3119"
+ },
+ "fdaf596da996": {
+  "kind": "pair_arm",
+  "pair_id": "0b031f3119_front_20_office-chair",
+  "frame": "intrinsic",
+  "gold": 75,
+  "text": "the office chair in front of the whiteboard, from the whiteboard's point of view",
+  "block": "b",
+  "scene_id": "0b031f3119"
+ },
+ "7a8f1637cd7a": {
+  "kind": "pair_neutral",
+  "pair_id": "0b031f3119_front_20_office-chair",
+  "frame_chosen_by_resolver": "intrinsic",
+  "text": "the office chair in front of the whiteboard",
+  "block": "n",
+  "scene_id": "0b031f3119"
+ },
+ "d2ccd5343895": {
+  "kind": "pair_arm",
+  "pair_id": "0b031f3119_left_20_table",
+  "frame": "egocentric",
+  "gold": 87,
+  "text": "from where I am standing, the table to the left of the whiteboard",
+  "block": "a",
+  "scene_id": "0b031f3119"
+ },
+ "6dd213cc15ed": {
+  "kind": "pair_arm",
+  "pair_id": "0b031f3119_left_20_table",
+  "frame": "intrinsic",
+  "gold": 79,
+  "text": "the table to the whiteboard's own left",
+  "block": "b",
+  "scene_id": "0b031f3119"
+ },
+ "d2431ec04b3e": {
+  "kind": "pair_neutral",
+  "pair_id": "0b031f3119_left_20_table",
+  "frame_chosen_by_resolver": "egocentric",
+  "text": "the table to the left of the whiteboard",
+  "block": "n",
+  "scene_id": "0b031f3119"
+ },
+ "44786f106f9a": {
+  "kind": "pair_arm",
+  "pair_id": "0b031f3119_right_20_table",
+  "frame": "egocentric",
+  "gold": 79,
+  "text": "from where I am standing, the table to the right of the whiteboard",
+  "block": "a",
+  "scene_id": "0b031f3119"
+ },
+ "e125fab13cf4": {
+  "kind": "pair_arm",
+  "pair_id": "0b031f3119_right_20_table",
+  "frame": "intrinsic",
+  "gold": 87,
+  "text": "the table to the whiteboard's own right",
+  "block": "b",
+  "scene_id": "0b031f3119"
+ },
+ "c2befb5612b6": {
+  "kind": "pair_neutral",
+  "pair_id": "0b031f3119_right_20_table",
+  "frame_chosen_by_resolver": "egocentric",
+  "text": "the table to the right of the whiteboard",
+  "block": "n",
+  "scene_id": "0b031f3119"
+ },
+ "e275d5130311": {
+  "kind": "pair_arm",
+  "pair_id": "0b031f3119_right_20_trash-can",
+  "frame": "egocentric",
+  "gold": 61,
+  "text": "from where I am standing, the trash can to the right of the whiteboard",
+  "block": "a",
+  "scene_id": "0b031f3119"
+ },
+ "508778308241": {
+  "kind": "pair_arm",
+  "pair_id": "0b031f3119_right_20_trash-can",
+  "frame": "intrinsic",
+  "gold": 16,
+  "text": "the trash can to the whiteboard's own right",
+  "block": "b",
+  "scene_id": "0b031f3119"
+ },
+ "0b7159c059b9": {
+  "kind": "pair_neutral",
+  "pair_id": "0b031f3119_right_20_trash-can",
+  "frame_chosen_by_resolver": "egocentric",
+  "text": "the trash can to the right of the whiteboard",
+  "block": "n",
+  "scene_id": "0b031f3119"
+ },
+ "b57f4fbb0304": {
+  "kind": "pair_arm",
+  "pair_id": "0b031f3119_right_58_monitor",
+  "frame": "egocentric",
+  "gold": 11,
+  "text": "from where I am standing, the monitor to the right of the wall clock",
+  "block": "a",
+  "scene_id": "0b031f3119"
+ },
+ "dcbfb436a6f2": {
+  "kind": "pair_arm",
+  "pair_id": "0b031f3119_right_58_monitor",
+  "frame": "intrinsic",
+  "gold": 64,
+  "text": "the monitor to the wall clock's own right",
+  "block": "b",
+  "scene_id": "0b031f3119"
+ },
+ "cdcbb2ee94bd": {
+  "kind": "pair_neutral",
+  "pair_id": "0b031f3119_right_58_monitor",
+  "frame_chosen_by_resolver": "egocentric",
+  "text": "the monitor to the right of the wall clock",
+  "block": "n",
+  "scene_id": "0b031f3119"
+ },
+ "890e689708ec": {
+  "kind": "control",
+  "control_id": "0a184cf634_front_35_jar__control",
+  "expected": 87,
+  "text": "as far as I can tell, the jar in front of the toilet",
+  "block": "c1",
+  "scene_id": "0a184cf634"
+ },
+ "f1b3710a0db0": {
+  "kind": "control",
+  "control_id": "0a184cf634_front_35_jar__control",
+  "expected": 87,
+  "text": "the jar in front of the toilet, if I am not mistaken",
+  "block": "c2",
+  "scene_id": "0a184cf634"
+ },
+ "62efc03208aa": {
+  "kind": "control",
+  "control_id": "0a184cf634_right_41_book__control",
+  "expected": 43,
+  "text": "as far as I can tell, the book to the right of the heater",
+  "block": "c1",
+  "scene_id": "0a184cf634"
+ },
+ "f18403c37cec": {
+  "kind": "control",
+  "control_id": "0a184cf634_right_41_book__control",
+  "expected": 43,
+  "text": "the book to the right of the heater, if I am not mistaken",
+  "block": "c2",
+  "scene_id": "0a184cf634"
+ },
+ "ad5af61fc9c9": {
+  "kind": "control",
+  "control_id": "0a184cf634_left_41_table__control",
+  "expected": 112,
+  "text": "as far as I can tell, the table to the left of the heater",
+  "block": "c1",
+  "scene_id": "0a184cf634"
+ },
+ "01cf9cade1e5": {
+  "kind": "control",
+  "control_id": "0a184cf634_left_41_table__control",
+  "expected": 112,
+  "text": "the table to the left of the heater, if I am not mistaken",
+  "block": "c2",
+  "scene_id": "0a184cf634"
+ },
+ "e66803dbaf53": {
+  "kind": "control",
+  "control_id": "0a184cf634_right_41_table__control",
+  "expected": 40,
+  "text": "as far as I can tell, the table to the right of the heater",
+  "block": "c1",
+  "scene_id": "0a184cf634"
+ },
+ "1d974375b421": {
+  "kind": "control",
+  "control_id": "0a184cf634_right_41_table__control",
+  "expected": 40,
+  "text": "the table to the right of the heater, if I am not mistaken",
+  "block": "c2",
+  "scene_id": "0a184cf634"
+ },
+ "64d9cd4048a6": {
+  "kind": "control",
+  "control_id": "0a184cf634_left_65_cabinet__control",
+  "expected": 45,
+  "text": "as far as I can tell, the cabinet to the left of the bed",
+  "block": "c1",
+  "scene_id": "0a184cf634"
+ },
+ "fa7adfdefad1": {
+  "kind": "control",
+  "control_id": "0a184cf634_left_65_cabinet__control",
+  "expected": 45,
+  "text": "the cabinet to the left of the bed, if I am not mistaken",
+  "block": "c2",
+  "scene_id": "0a184cf634"
+ },
+ "c3ece6ea8eec": {
+  "kind": "control",
+  "control_id": "0a184cf634_right_65_cabinet__control",
+  "expected": 34,
+  "text": "as far as I can tell, the cabinet to the right of the bed",
+  "block": "c1",
+  "scene_id": "0a184cf634"
+ },
+ "9176cfa093fd": {
+  "kind": "control",
+  "control_id": "0a184cf634_right_65_cabinet__control",
+  "expected": 34,
+  "text": "the cabinet to the right of the bed, if I am not mistaken",
+  "block": "c2",
+  "scene_id": "0a184cf634"
+ },
+ "e12c75e49190": {
+  "kind": "control",
+  "control_id": "0a184cf634_front_65_kitchen-cabinet__control",
+  "expected": 33,
+  "text": "as far as I can tell, the kitchen cabinet in front of the bed",
+  "block": "c1",
+  "scene_id": "0a184cf634"
+ },
+ "81d48065d370": {
+  "kind": "control",
+  "control_id": "0a184cf634_front_65_kitchen-cabinet__control",
+  "expected": 33,
+  "text": "the kitchen cabinet in front of the bed, if I am not mistaken",
+  "block": "c2",
+  "scene_id": "0a184cf634"
+ },
+ "e03d87de62e2": {
+  "kind": "control",
+  "control_id": "0a184cf634_left_65_shelf__control",
+  "expected": 113,
+  "text": "as far as I can tell, the shelf to the left of the bed",
+  "block": "c1",
+  "scene_id": "0a184cf634"
+ },
+ "d6ff4b320730": {
+  "kind": "control",
+  "control_id": "0a184cf634_left_65_shelf__control",
+  "expected": 113,
+  "text": "the shelf to the left of the bed, if I am not mistaken",
+  "block": "c2",
+  "scene_id": "0a184cf634"
+ },
+ "06a8d86ec4f1": {
+  "kind": "control",
+  "control_id": "0a184cf634_right_65_shelf__control",
+  "expected": 105,
+  "text": "as far as I can tell, the shelf to the right of the bed",
+  "block": "c1",
+  "scene_id": "0a184cf634"
+ },
+ "d8a9fa5bf04f": {
+  "kind": "control",
+  "control_id": "0a184cf634_right_65_shelf__control",
+  "expected": 105,
+  "text": "the shelf to the right of the bed, if I am not mistaken",
+  "block": "c2",
+  "scene_id": "0a184cf634"
+ },
+ "ac946697ab19": {
+  "kind": "control",
+  "control_id": "0a184cf634_front_65_shelf__control",
+  "expected": 113,
+  "text": "as far as I can tell, the shelf in front of the bed",
+  "block": "c1",
+  "scene_id": "0a184cf634"
+ },
+ "c96985cf4c10": {
+  "kind": "control",
+  "control_id": "0a184cf634_front_65_shelf__control",
+  "expected": 113,
+  "text": "the shelf in front of the bed, if I am not mistaken",
+  "block": "c2",
+  "scene_id": "0a184cf634"
+ },
+ "fd1043505e33": {
+  "kind": "control",
+  "control_id": "0a76e06478_right_13_backpack__control",
+  "expected": 1,
+  "text": "as far as I can tell, the backpack to the right of the bed",
+  "block": "c1",
+  "scene_id": "0a76e06478"
+ },
+ "4d8235a11dcd": {
+  "kind": "control",
+  "control_id": "0a76e06478_right_13_backpack__control",
+  "expected": 1,
+  "text": "the backpack to the right of the bed, if I am not mistaken",
+  "block": "c2",
+  "scene_id": "0a76e06478"
+ },
+ "e1df2ffbed5b": {
+  "kind": "control",
+  "control_id": "0a76e06478_front_14_ornament__control",
+  "expected": 41,
+  "text": "as far as I can tell, the ornament in front of the office chair",
+  "block": "c1",
+  "scene_id": "0a76e06478"
+ },
+ "43e89e2a1f18": {
+  "kind": "control",
+  "control_id": "0a76e06478_front_14_ornament__control",
+  "expected": 41,
+  "text": "the ornament in front of the office chair, if I am not mistaken",
+  "block": "c2",
+  "scene_id": "0a76e06478"
+ },
+ "c009d6cac33d": {
+  "kind": "control",
+  "control_id": "0a76e06478_behind_19_box__control",
+  "expected": 71,
+  "text": "as far as I can tell, the box behind the bookshelf",
+  "block": "c1",
+  "scene_id": "0a76e06478"
+ },
+ "481e9a4cac22": {
+  "kind": "control",
+  "control_id": "0a76e06478_behind_19_box__control",
+  "expected": 71,
+  "text": "the box behind the bookshelf, if I am not mistaken",
+  "block": "c2",
+  "scene_id": "0a76e06478"
+ },
+ "ed589e5cd583": {
+  "kind": "control",
+  "control_id": "0a76e06478_right_19_clothes__control",
+  "expected": 67,
+  "text": "as far as I can tell, the clothes to the right of the bookshelf",
+  "block": "c1",
+  "scene_id": "0a76e06478"
+ },
+ "21e8c9e87135": {
+  "kind": "control",
+  "control_id": "0a76e06478_right_19_clothes__control",
+  "expected": 67,
+  "text": "the clothes to the right of the bookshelf, if I am not mistaken",
+  "block": "c2",
+  "scene_id": "0a76e06478"
+ },
+ "47ef7d92cdab": {
+  "kind": "control",
+  "control_id": "0a76e06478_behind_19_clothes__control",
+  "expected": 67,
+  "text": "as far as I can tell, the clothes behind the bookshelf",
+  "block": "c1",
+  "scene_id": "0a76e06478"
+ },
+ "d41693926b4b": {
+  "kind": "control",
+  "control_id": "0a76e06478_behind_19_clothes__control",
+  "expected": 67,
+  "text": "the clothes behind the bookshelf, if I am not mistaken",
+  "block": "c2",
+  "scene_id": "0a76e06478"
+ },
+ "2eddc8abaf70": {
+  "kind": "control",
+  "control_id": "0a76e06478_front_77_clothes__control",
+  "expected": 68,
+  "text": "as far as I can tell, the clothes in front of the chair",
+  "block": "c1",
+  "scene_id": "0a76e06478"
+ },
+ "df8ede795a37": {
+  "kind": "control",
+  "control_id": "0a76e06478_front_77_clothes__control",
+  "expected": 68,
+  "text": "the clothes in front of the chair, if I am not mistaken",
+  "block": "c2",
+  "scene_id": "0a76e06478"
+ },
+ "7111214336b1": {
+  "kind": "control",
+  "control_id": "0a7cc12c0e_front_11_bottle__control",
+  "expected": 79,
+  "text": "as far as I can tell, the bottle in front of the toilet",
+  "block": "c1",
+  "scene_id": "0a7cc12c0e"
+ },
+ "158a301931cd": {
+  "kind": "control",
+  "control_id": "0a7cc12c0e_front_11_bottle__control",
+  "expected": 79,
+  "text": "the bottle in front of the toilet, if I am not mistaken",
+  "block": "c2",
+  "scene_id": "0a7cc12c0e"
+ },
+ "26c1a283f518": {
+  "kind": "control",
+  "control_id": "0a7cc12c0e_behind_11_bottle__control",
+  "expected": 108,
+  "text": "as far as I can tell, the bottle behind the toilet",
+  "block": "c1",
+  "scene_id": "0a7cc12c0e"
+ },
+ "143f87940ae0": {
+  "kind": "control",
+  "control_id": "0a7cc12c0e_behind_11_bottle__control",
+  "expected": 108,
+  "text": "the bottle behind the toilet, if I am not mistaken",
+  "block": "c2",
+  "scene_id": "0a7cc12c0e"
+ },
+ "1e9e41990e60": {
+  "kind": "control",
+  "control_id": "0a7cc12c0e_front_11_shelf__control",
+  "expected": 72,
+  "text": "as far as I can tell, the shelf in front of the toilet",
+  "block": "c1",
+  "scene_id": "0a7cc12c0e"
+ },
+ "f3b8e10584e9": {
+  "kind": "control",
+  "control_id": "0a7cc12c0e_front_11_shelf__control",
+  "expected": 72,
+  "text": "the shelf in front of the toilet, if I am not mistaken",
+  "block": "c2",
+  "scene_id": "0a7cc12c0e"
+ },
+ "2607d2a4969c": {
+  "kind": "control",
+  "control_id": "0a7cc12c0e_front_30_bottle__control",
+  "expected": 77,
+  "text": "as far as I can tell, the bottle in front of the laptop",
+  "block": "c1",
+  "scene_id": "0a7cc12c0e"
+ },
+ "5975d34b06fd": {
+  "kind": "control",
+  "control_id": "0a7cc12c0e_front_30_bottle__control",
+  "expected": 77,
+  "text": "the bottle in front of the laptop, if I am not mistaken",
+  "block": "c2",
+  "scene_id": "0a7cc12c0e"
+ },
+ "5923ce702598": {
+  "kind": "control",
+  "control_id": "0a7cc12c0e_left_30_shelf__control",
+  "expected": 72,
+  "text": "as far as I can tell, the shelf to the left of the laptop",
+  "block": "c1",
+  "scene_id": "0a7cc12c0e"
+ },
+ "67bda202f9e5": {
+  "kind": "control",
+  "control_id": "0a7cc12c0e_left_30_shelf__control",
+  "expected": 72,
+  "text": "the shelf to the left of the laptop, if I am not mistaken",
+  "block": "c2",
+  "scene_id": "0a7cc12c0e"
+ },
+ "3e09d199d6e1": {
+  "kind": "control",
+  "control_id": "0a7cc12c0e_right_123_box__control",
+  "expected": 89,
+  "text": "as far as I can tell, the box to the right of the bed",
+  "block": "c1",
+  "scene_id": "0a7cc12c0e"
+ },
+ "aac750afc481": {
+  "kind": "control",
+  "control_id": "0a7cc12c0e_right_123_box__control",
+  "expected": 89,
+  "text": "the box to the right of the bed, if I am not mistaken",
+  "block": "c2",
+  "scene_id": "0a7cc12c0e"
+ },
+ "63c21fa5e615": {
+  "kind": "control",
+  "control_id": "0a7cc12c0e_left_123_shelf__control",
+  "expected": 107,
+  "text": "as far as I can tell, the shelf to the left of the bed",
+  "block": "c1",
+  "scene_id": "0a7cc12c0e"
+ },
+ "7db8bf293765": {
+  "kind": "control",
+  "control_id": "0a7cc12c0e_left_123_shelf__control",
+  "expected": 107,
+  "text": "the shelf to the left of the bed, if I am not mistaken",
+  "block": "c2",
+  "scene_id": "0a7cc12c0e"
+ },
+ "136071f458d5": {
+  "kind": "control",
+  "control_id": "0a7cc12c0e_right_123_shelf__control",
+  "expected": 23,
+  "text": "as far as I can tell, the shelf to the right of the bed",
+  "block": "c1",
+  "scene_id": "0a7cc12c0e"
+ },
+ "b0877b41bfb4": {
+  "kind": "control",
+  "control_id": "0a7cc12c0e_right_123_shelf__control",
+  "expected": 23,
+  "text": "the shelf to the right of the bed, if I am not mistaken",
+  "block": "c2",
+  "scene_id": "0a7cc12c0e"
+ },
+ "0f0e192e63d9": {
+  "kind": "control",
+  "control_id": "0a7cc12c0e_left_133_lamp__control",
+  "expected": 34,
+  "text": "as far as I can tell, the lamp to the left of the microwave",
+  "block": "c1",
+  "scene_id": "0a7cc12c0e"
+ },
+ "7df79331aef0": {
+  "kind": "control",
+  "control_id": "0a7cc12c0e_left_133_lamp__control",
+  "expected": 34,
+  "text": "the lamp to the left of the microwave, if I am not mistaken",
+  "block": "c2",
+  "scene_id": "0a7cc12c0e"
+ },
+ "602ab06f2bd1": {
+  "kind": "control",
+  "control_id": "0a7cc12c0e_front_133_lamp__control",
+  "expected": 34,
+  "text": "as far as I can tell, the lamp in front of the microwave",
+  "block": "c1",
+  "scene_id": "0a7cc12c0e"
+ },
+ "62834d656282": {
+  "kind": "control",
+  "control_id": "0a7cc12c0e_front_133_lamp__control",
+  "expected": 34,
+  "text": "the lamp in front of the microwave, if I am not mistaken",
+  "block": "c2",
+  "scene_id": "0a7cc12c0e"
+ },
+ "3492b1f49b90": {
+  "kind": "control",
+  "control_id": "0b031f3119_front_20_computer-tower__control",
+  "expected": 69,
+  "text": "as far as I can tell, the computer tower in front of the whiteboard",
+  "block": "c1",
+  "scene_id": "0b031f3119"
+ },
+ "da88f10ca9dd": {
+  "kind": "control",
+  "control_id": "0b031f3119_front_20_computer-tower__control",
+  "expected": 69,
+  "text": "the computer tower in front of the whiteboard, if I am not mistaken",
+  "block": "c2",
+  "scene_id": "0b031f3119"
+ },
+ "55a8c438c465": {
+  "kind": "control",
+  "control_id": "0b031f3119_front_20_keyboard__control",
+  "expected": 30,
+  "text": "as far as I can tell, the keyboard in front of the whiteboard",
+  "block": "c1",
+  "scene_id": "0b031f3119"
+ },
+ "e461a1b56db0": {
+  "kind": "control",
+  "control_id": "0b031f3119_front_20_keyboard__control",
+  "expected": 30,
+  "text": "the keyboard in front of the whiteboard, if I am not mistaken",
+  "block": "c2",
+  "scene_id": "0b031f3119"
+ },
+ "805f25b2dfaa": {
+  "kind": "control",
+  "control_id": "0b031f3119_front_20_monitor__control",
+  "expected": 11,
+  "text": "as far as I can tell, the monitor in front of the whiteboard",
+  "block": "c1",
+  "scene_id": "0b031f3119"
+ },
+ "d6061d056726": {
+  "kind": "control",
+  "control_id": "0b031f3119_front_20_monitor__control",
+  "expected": 11,
+  "text": "the monitor in front of the whiteboard, if I am not mistaken",
+  "block": "c2",
+  "scene_id": "0b031f3119"
+ },
+ "e13f1fd2d630": {
+  "kind": "control",
+  "control_id": "0b031f3119_front_20_mouse__control",
+  "expected": 51,
+  "text": "as far as I can tell, the mouse in front of the whiteboard",
+  "block": "c1",
+  "scene_id": "0b031f3119"
+ },
+ "7c9b73de5ba6": {
+  "kind": "control",
+  "control_id": "0b031f3119_front_20_mouse__control",
+  "expected": 51,
+  "text": "the mouse in front of the whiteboard, if I am not mistaken",
+  "block": "c2",
+  "scene_id": "0b031f3119"
+ },
+ "87447aa97551": {
+  "kind": "control",
+  "control_id": "0b031f3119_front_20_office-chair__control",
+  "expected": 75,
+  "text": "as far as I can tell, the office chair in front of the whiteboard",
+  "block": "c1",
+  "scene_id": "0b031f3119"
+ },
+ "d44587506829": {
+  "kind": "control",
+  "control_id": "0b031f3119_front_20_office-chair__control",
+  "expected": 75,
+  "text": "the office chair in front of the whiteboard, if I am not mistaken",
+  "block": "c2",
+  "scene_id": "0b031f3119"
+ },
+ "759ef91e0f00": {
+  "kind": "control",
+  "control_id": "0b031f3119_left_20_table__control",
+  "expected": 87,
+  "text": "as far as I can tell, the table to the left of the whiteboard",
+  "block": "c1",
+  "scene_id": "0b031f3119"
+ },
+ "43cc4eda3dcb": {
+  "kind": "control",
+  "control_id": "0b031f3119_left_20_table__control",
+  "expected": 87,
+  "text": "the table to the left of the whiteboard, if I am not mistaken",
+  "block": "c2",
+  "scene_id": "0b031f3119"
+ },
+ "abe5b521b2d4": {
+  "kind": "control",
+  "control_id": "0b031f3119_right_20_table__control",
+  "expected": 79,
+  "text": "as far as I can tell, the table to the right of the whiteboard",
+  "block": "c1",
+  "scene_id": "0b031f3119"
+ },
+ "41762e9ea4c0": {
+  "kind": "control",
+  "control_id": "0b031f3119_right_20_table__control",
+  "expected": 79,
+  "text": "the table to the right of the whiteboard, if I am not mistaken",
+  "block": "c2",
+  "scene_id": "0b031f3119"
+ },
+ "99a13a62ffff": {
+  "kind": "control",
+  "control_id": "0b031f3119_right_20_trash-can__control",
+  "expected": 61,
+  "text": "as far as I can tell, the trash can to the right of the whiteboard",
+  "block": "c1",
+  "scene_id": "0b031f3119"
+ },
+ "b2e816695b9c": {
+  "kind": "control",
+  "control_id": "0b031f3119_right_20_trash-can__control",
+  "expected": 61,
+  "text": "the trash can to the right of the whiteboard, if I am not mistaken",
+  "block": "c2",
+  "scene_id": "0b031f3119"
+ },
+ "788fef6bf4e8": {
+  "kind": "control",
+  "control_id": "0b031f3119_right_58_monitor__control",
+  "expected": 11,
+  "text": "as far as I can tell, the monitor to the right of the wall clock",
+  "block": "c1",
+  "scene_id": "0b031f3119"
+ },
+ "71280f080a94": {
+  "kind": "control",
+  "control_id": "0b031f3119_right_58_monitor__control",
+  "expected": 11,
+  "text": "the monitor to the right of the wall clock, if I am not mistaken",
+  "block": "c2",
+  "scene_id": "0b031f3119"
+ }
+}

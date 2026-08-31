@@ -42,7 +42,7 @@ from typing import Callable, Dict, List, Optional, Sequence, Tuple
 import numpy as np
 
 from ..frames.cues import extract_cues
-from ..frames.policy import ViewpointSpec
+from ..frames.policy import ViewpointSpec, resolve_viewpoint
 from ..query.parser_rules import parse
 from ..query.resolver import MIN_ANSWER_SCORE, Resolver
 from ..relations.base import RelationConfig
@@ -363,6 +363,19 @@ def generate_for_scene(scene: Scene, cfg: Optional[RelationConfig] = None,
                              and counts.get(o.canonical_label, 0) >= 2})
 
     for anchor in anchors:
+        # Pin the observer to a concrete position, per anchor. `best_view` is a
+        # *rule* for finding a camera, and a rule is not a stimulus: any external
+        # system scored on these pairs is handed a scene listing and told where
+        # the observer stands, so if the pair only records "best_view" the
+        # egocentric gold answer was computed from a viewpoint the system was
+        # never told about, and its egocentric arm is unanswerable by
+        # construction. Resolving it here makes the pair self-describing.
+        rv = resolve_viewpoint(viewpoint, scene, anchor.center)
+        if not rv.ok or rv.eye is None:
+            reject(f"no concrete viewpoint for the anchor ({rv.reason[:40]})")
+            continue
+        pinned_vp = ViewpointSpec(mode="position", position=rv.eye,
+                                  look_at=rv.eye + rv.look_dir)
         for cls in target_classes:
             if cls == anchor.canonical_label:
                 continue
@@ -387,7 +400,7 @@ def generate_for_scene(scene: Scene, cfg: Optional[RelationConfig] = None,
                         reject(f"parse lost something: {pb[0][:48]}")
                         ok = False
                         break
-                    res = r.resolve(parse(text), viewpoint, force_frame=frame,
+                    res = r.resolve(parse(text), pinned_vp, force_frame=frame,
                                     evaluate_alternative_frames=False)
                     if res.target is None or not res.candidates:
                         reject("no answer under a forced frame")
@@ -418,7 +431,7 @@ def generate_for_scene(scene: Scene, cfg: Optional[RelationConfig] = None,
 
                 neutral_text = tpl["neutral"].format(
                     t=cls, a=anchor.canonical_label, d=surface)
-                nres = r.resolve(parse(neutral_text), viewpoint,
+                nres = r.resolve(parse(neutral_text), pinned_vp,
                                  evaluate_alternative_frames=False)
 
                 if require_visible_together and frame_source is not None:
@@ -440,7 +453,7 @@ def generate_for_scene(scene: Scene, cfg: Optional[RelationConfig] = None,
                     neutral_frame_chosen=nres.frame_used,
                     candidate_ids=sorted(set(ids)),
                     n_class_instances=counts.get(cls, 0),
-                    viewpoint=viewpoint.to_dict(),
+                    viewpoint=pinned_vp.to_dict(),
                     notes=[f"anchor front confidence "
                            f"{anchor.front_confidence:.2f} "
                            f"({anchor.front_method})"]))

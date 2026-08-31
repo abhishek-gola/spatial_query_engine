@@ -1,0 +1,27 @@
+{
+ "n_trials": 175,
+ "blocks": {
+  "a": {
+   "path": "results/self_probe/trials/block_a.json",
+   "n": 35
+  },
+  "b": {
+   "path": "results/self_probe/trials/block_b.json",
+   "n": 35
+  },
+  "n": {
+   "path": "results/self_probe/trials/block_n.json",
+   "n": 35
+  },
+  "c1": {
+   "path": "results/self_probe/trials/block_c1.json",
+   "n": 35
+  },
+  "c2": {
+   "path": "results/self_probe/trials/block_c2.json",
+   "n": 35
+  }
+ },
+ "seed": 0,
+ "block_seed": 7
+}

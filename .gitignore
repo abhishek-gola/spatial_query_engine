@@ -24,3 +24,11 @@ results/*
 !results/robustness/
 !results/frame_probe/
 !results/synthetic_example/
+
+# The probe's raw answers and its keymap are evidence, not scratch -- they cannot
+# be regenerated, only re-collected. The trial files can (from the pairs plus the
+# scene cache) and are 1.2 MB of duplicated scene listings, so they stay out.
+!results/self_probe/
+!results/self_probe_v2/
+results/self_probe/trials/
+results/self_probe_v2/trials/

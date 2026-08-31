@@ -1,0 +1,28 @@
+{
+ "n_trials": 175,
+ "blocks": {
+  "a": {
+   "path": "results/self_probe_v2/trials/block_a.json",
+   "n": 4
+  },
+  "b": {
+   "path": "results/self_probe_v2/trials/block_b.json",
+   "n": 4
+  },
+  "n": {
+   "path": "results/self_probe_v2/trials/block_n.json",
+   "n": 4
+  },
+  "c1": {
+   "path": "results/self_probe_v2/trials/block_c1.json",
+   "n": 4
+  },
+  "c2": {
+   "path": "results/self_probe_v2/trials/block_c2.json",
+   "n": 4
+  }
+ },
+ "seed": 0,
+ "block_seed": 7,
+ "n_skipped": 155
+}

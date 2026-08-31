@@ -158,18 +158,38 @@ the Nr3D/Sr3D CSVs and Scan2CAD annotations.
 
 ### E2 — minimal-pair instructability probe
 
-Built: `sqe/bench/minimal_pairs.py`, `sqe/bench/frame_probe.py`.
-35 validated pairs from 5 scenes. Controls calibrated: cue-following resolver
-100% `switched_correctly`, all four pinned frames 100% `frame_blind`.
+Built and **run**: `sqe/bench/minimal_pairs.py`, `sqe/bench/frame_probe.py`,
+`sqe/bench/selfprobe.py`, `sqe/bench/vendors.py`. Protocol written up in
+[FRAME_PROBE_PROTOCOL.md](FRAME_PROBE_PROTOCOL.md).
 
-**Still required before any model result is meaningful:** a control set of
-paraphrases that are *equally awkward but not frame-contrastive*, with the same
-correct answer. Without it, `frame_blind` cannot be separated from "the model
-failed to parse an unusual sentence". This is the difference between a result and
-an artefact.
+35 validated pairs from 4 of the 5 scenes, plus **35 non-contrastive controls**
+— the requirement recorded here previously, now met. Calibration holds:
+cue-following resolver 100% `switched_correctly`, all four pinned frames 100%
+`frame_blind` at 100% control stability.
 
-Budget: two weeks, not one. Most of the work is normalising inputs across a 2-D
-VLM, a region VLM and a 3-D grounder — not the probe.
+Result, self-administered arm (Claude Opus 5 / Claude Haiku 4.5, each block of
+trials answered by an isolated agent that never saw the other arm of any pair):
+Opus 42.9% `switched_correctly`, 25.7% `frame_blind`, 80% control-stable; on the
+28 control-matched pairs, 8 `frame_blind`. Haiku fails the control-stability
+precondition (37%) and its row is reported as uninterpretable rather than as a
+finding.
+
+Two decisions made while running it, both of which changed the numbers:
+
+* **Pairs now record a concrete observer position**, not the rule that found one.
+  A pair storing `viewpoint: best_view` marks its egocentric arm against a
+  viewpoint the answerer was never told about, so that arm was unanswerable by
+  construction. Fixed in `generate_for_scene`; `build_prompt` now refuses a pair
+  without a concrete position rather than silently defaulting.
+* **The object listing must contain the anchor and every candidate.** The listing
+  filter dropped room-fixed objects and some anchors are room-fixed, so four
+  trials asked about a heater or a wall clock that was not in the list. Four
+  independent answerers reported it. Fixed and tested.
+
+**Still open:** an independent, multi-vendor API run. The harness dispatches on a
+vendor-prefixed model name and has a `--preflight` reachability check; it needs
+`ANTHROPIC_API_KEY` / `OPENAI_API_KEY` / `GEMINI_API_KEY`. Until that runs, the
+result is a pilot from one model family and is labelled as such everywhere.
 
 ### E3 — human disagreement, run first
 

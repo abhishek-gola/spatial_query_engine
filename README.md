@@ -96,7 +96,7 @@ from my policy, which is itself unvalidated.
 
 `sqe minimal-pairs` builds sentences differing **only** in an explicit marker of
 whose left is meant, on scenes where the two readings provably pick different
-objects — 35 validated pairs from 5 scenes, plus 35 non-contrastive control
+objects — 35 validated pairs from 4 of the 5 scenes, plus 35 non-contrastive control
 paraphrases matched for awkwardness.
 
 The metric is calibrated against systems whose behaviour is known in advance: the
@@ -106,8 +106,59 @@ well-formed), and all four pinned-frame controls score **100% frame-blind** with
 **100% control-stability**, which is what makes the `frame_blind` label
 attributable rather than a parse artefact.
 
-**No model has been run.** It needs an API key. `sqe frame-probe --model <name>`
-is the command.
+### The result
+
+Two models, given the scene as a listing of ids, classes, box centres and sizes,
+plus the observer's stated position:
+
+| system | pairs | switched correctly | frame blind | switched wrongly | partial | control stable |
+|---|---|---|---|---|---|---|
+| resolver, cue-following *(circularity check)* | 35 | 100.0% | 0.0% | 0.0% | 0.0% | 100.0% |
+| resolver, frame pinned *(positive control)* | 35 | 0.0% | **100.0%** | 0.0% | 0.0% | 100.0% |
+| Claude Opus 5 *(self-administered)* | 35 | 42.9% | **25.7%** | 11.4% | 20.0% | 80.0% |
+| Claude Haiku 4.5 *(self-administered)* | 35 | 5.7% | **48.6%** | 14.3% | 25.7% | 37.1% |
+
+Restricted to the pairs where each system answered its **own** control pair
+consistently — the item-level stability check, and the only reading of
+`frame_blind` that survives a noisy system:
+
+| system | pairs kept | switched correctly | frame blind | partial |
+|---|---|---|---|---|
+| Claude Opus 5 | 28 of 35 | 12 (42.9%) | **8 (28.6%)** | 5 (17.9%) |
+| Claude Haiku 4.5 | 13 of 35 | 1 (7.7%) | **8 (61.5%)** | 3 (23.1%) |
+
+Told explicitly which frame to use, the stronger model gave the **identical
+answer to both arms** on 8 of 28 pairs, and got both arms right on 12. Split by
+relation, it followed an explicit *lateral* cue far more often than an explicit
+*frontal* one (8 of 11 `right` pairs correct; 6 of 14 `front` pairs frame-blind)
+— which is what the front/back-is-intrinsic default predicts. With no marker at
+all, its answer matches the egocentric reading on 22 of 35.
+
+**Read the Haiku row as a failed precondition, not a finding.** 37% control
+stability means it answers two identical-in-meaning paraphrases differently, so
+its frame-blindness is unattributable. That is what the negative control is for.
+
+**Three caveats, none of them optional:**
+
+1. This arm is **self-administered** — each block of trials went to an isolated
+   agent of the same model family that wrote the stimulus. Blocking removes the
+   side-by-side comparison; it does not remove the author's knowledge of what was
+   being tested. It is a pilot. `sqe frame-probe --model frontier --preflight`
+   then `--model anthropic:… openai:… google:…` runs the independent version and
+   needs only an API key.
+2. On the **control** sentences — plain, no frame marker — Opus agreed with this
+   resolver on only 16 of 35. The controls test stability, not correctness, so
+   this says the model and I disagree on ordinary sentences about half the time,
+   and *which of us is right is unmeasured*. The probe supports "an explicit
+   frame instruction often does nothing"; it does not support "the model is worse
+   at spatial language than this resolver".
+3. Four trials named an anchor missing from the object listing (room-fixed
+   objects were filtered out, and some anchors are room-fixed). Four answerers
+   reported it independently with no shared context and no access to the key.
+   Fixed, tested (`tests/test_selfprobe.py`), affected trials re-asked.
+
+Protocol, blocking discipline and every design decision:
+`docs/FRAME_PROBE_PROTOCOL.md`. Full table: `results/frame_probe/frame_probe.md`.
 
 This repo makes the reference frame an explicit, first-class, **measured** part
 of the pipeline: a frame-aware relation resolver, a hand-annotated benchmark
@@ -124,13 +175,21 @@ not the contribution.
 
 ![one query, two frames, two different objects](renders/gif/frame_switch.gif)
 
-*"The bottle in front of the laptop."* Intrinsic reads it as the side the laptop
-faces; egocentric as between me and the laptop. Same scene, same camera, same
-geometry — only the frame changes. Regenerate with
-`sqe gif --root DATA --scene 0a7cc12c0e "the bottle in front of the laptop"`,
+*"The first pillow from the left on the bed."* Two pillows, side by side. From
+where I am standing, the first from the left is the near one. Counting from the
+bed's own left -- the left of someone lying in it -- it is the other one. Both
+readings are ordinary English and both are right; the sentence does not say
+which is meant. Same scene, same camera, same geometry, and the only thing that
+changes between the two states is the reference frame. Regenerate with
+
+    sqe gif --root DATA --scene 0a184cf634 --frame 1686 --anchor-hidden hide \
+        "the first pillow from the left on the bed"
+
 or `sqe find-gif --items <proposals>` to list other queries that work as a
-picture. It is a rendering of the resolver's output, not a screen recording of
-the viewer.
+picture. It is a rendering of the resolver's output on a real capture frame, not
+a screen recording of the viewer. Boxes are drawn only on the objects the
+relation involves, and their occluded edges are removed against sensor depth --
+a half-hidden object does not get a complete box.
 
 
 Same sentence, same scene, same geometry. Only the frame changes.
@@ -398,6 +457,16 @@ Stated plainly, because these are the things a reviewer will find:
   repeatedly.
 * **Five scenes.** Enough for a real finding, not enough to claim it
   generalises. Per-scene tables are in the report so the variance is visible.
+* **The frame probe is self-administered.** Both model rows were collected by
+  giving each block of trials to an isolated agent of the same model family that
+  wrote the stimulus. Blocking means no answerer saw both arms of a pair; it does
+  not make the run independent. It is a pilot, and the multi-vendor command is
+  built and waiting on a key. The Haiku row additionally fails its own
+  control-stability precondition and should not be quoted.
+* **On plain control sentences the stronger model and this resolver disagree
+  about half the time** (16 of 35 agreements). Which of the two is right is
+  unmeasured, so the probe supports "an explicit frame instruction often does
+  nothing" and nothing about relative accuracy.
 * **Ambiguity flags fire on 74% of queries**, dominated by `anchor` (401 of 882)
   and `score_tie` (297) — real rooms contain five keyboards and four tables. The
   claimed kind, `frame`, fires on 96. The report scores each kind separately for

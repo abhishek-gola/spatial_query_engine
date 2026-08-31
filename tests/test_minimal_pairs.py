@@ -11,6 +11,7 @@ import numpy as np
 import pytest
 
 from sqe.bench.frame_probe import (OUTCOMES, ResolverProbe, classify_pair,
+                                   stable_only,
                                    render)
 from sqe.bench.frame_probe import run as probe_run
 from sqe.bench.frame_probe import summarise as probe_summarise
@@ -148,3 +149,26 @@ def test_probe_records_an_error_rather_than_raising(studio, studio_pairs):
     res = probe_run(studio_pairs[:2], lambda s: studio, Broken(), verbose=False)
     assert all(r.outcome == "error" for r in res)
     assert probe_summarise(res)["n_errors"] == len(res)
+
+
+def test_stable_only_drops_the_pairs_whose_control_moved():
+    """The item-level check is what makes a noisy system's row readable."""
+    from sqe.bench.frame_probe import ControlResult, PairResult
+
+    pairs = [PairResult(f"p{i}", "s", "left", {}, {}, None, None,
+                        "frame_blind") for i in range(4)]
+    controls = [ControlResult(f"p{i}__control", [1, 1], 1, i < 2, i < 2)
+                for i in range(4)]
+    out = stable_only(pairs, controls)
+    assert out["n_pairs"] == 2
+    assert out["n_dropped"] == 2
+    assert out["outcomes"]["frame_blind"] == 2
+
+
+def test_stable_only_keeps_nothing_when_no_control_is_stable():
+    from sqe.bench.frame_probe import ControlResult, PairResult
+
+    pairs = [PairResult("p0", "s", "left", {}, {}, None, None, "frame_blind")]
+    controls = [ControlResult("p0__control", [1, 2], 1, False, False)]
+    out = stable_only(pairs, controls)
+    assert out["n_pairs"] == 0 and out["n_dropped"] == 1

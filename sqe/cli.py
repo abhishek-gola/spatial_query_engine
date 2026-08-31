@@ -10,6 +10,7 @@
     sqe sensitivity --items FILE               how much the frame matters
     sqe minimal-pairs --scene ID               pairs differing only in the cue
     sqe frame-probe --pairs FILE               can a system be instructed?
+    sqe self-probe export --out DIR            blocked trials for an offline answerer
     sqe render    --scene ID --root DATA "..."  boxes drawn on real frames
     sqe audit     --scene ID                   flag dubious annotations
     sqe viewer    --scene ID                   web viewer
@@ -415,8 +416,9 @@ def cmd_frame_probe(args):
     """Can a system be instructed into a reference frame?"""
     import json as _json
     from .bench.minimal_pairs import ControlPair, read_jsonl
-    from .bench.frame_probe import (LLMProbe, ResolverProbe, render, run,
-                                    run_controls, save, summarise,
+    from .bench.frame_probe import (FileProbe, LLMProbe, ResolverProbe,
+                                    render, run, run_controls, save,
+                                    stable_only, summarise,
                                     summarise_controls)
     get = _scene_getter(args)
     cfg = RelationConfig.load(args.config)
@@ -425,19 +427,46 @@ def cmd_frame_probe(args):
     if args.controls and os.path.exists(args.controls):
         controls = [ControlPair.from_dict(_json.loads(l))
                     for l in open(args.controls) if l.strip()]
+    models: List[str] = []
+    for m in args.model:
+        if m == "frontier":
+            from .bench.vendors import FRONTIER
+            models.extend(FRONTIER)
+        else:
+            models.append(m)
+    if args.preflight:
+        from .bench.vendors import preflight
+        if not models:
+            print("nothing to preflight; pass --model")
+            return 1
+        print("reachability:")
+        rows = preflight(models)
+        ok = [k for k, v in rows.items() if v["reachable"]]
+        print(f"\n{len(ok)}/{len(rows)} reachable")
+        if len(ok) < len(rows):
+            print("set the missing key(s) and re-run without --preflight")
+        return 0 if ok else 1
+
     probes = [ResolverProbe(get, cfg)]
     for fk in args.pinned:
         probes.append(ResolverProbe(get, cfg, pinned=fk))
-    for m in args.model:
+    for m in models:
         probes.append(LLMProbe(model=m, cache_path=args.cache_file))
+    for spec in args.answers:
+        if "=" not in spec:
+            print(f"--answers wants LABEL=FILE, got {spec!r}")
+            return 2
+        label, path = spec.split("=", 1)
+        probes.append(FileProbe.load(label, path))
 
     summaries, results = {}, {}
     for probe in probes:
         res = run(pairs, get, probe, verbose=not args.quiet)
         s = summarise(res)
         if controls:
-            s["controls"] = summarise_controls(
-                run_controls(controls, get, probe, verbose=not args.quiet))
+            cres = run_controls(controls, get, probe, verbose=not args.quiet)
+            s["controls"] = summarise_controls(cres)
+            s["stable_only"] = stable_only(res, cres)
         summaries[probe.name] = s
         results[probe.name] = res
         print(f"  {probe.name}: {s['outcomes']}")
@@ -462,6 +491,63 @@ def cmd_frame_probe(args):
                   f"frame_blind label is picking up something other than the "
                   f"frame and the metric is not calibrated.")
     return 0
+
+
+def cmd_self_probe(args):
+    """Export trials for an offline answerer, or fold answers back in."""
+    import json as _json
+
+    from .bench.minimal_pairs import ControlPair, read_jsonl
+    from .bench.selfprobe import audit_answers, export_trials, merge_answers
+
+    out = args.out
+    merged = args.merged or os.path.join(out, "answers_merged.json")
+    if args.action == "export":
+        get = _scene_getter(args)
+        pairs = read_jsonl(args.pairs)
+        controls = [ControlPair.from_dict(_json.loads(l))
+                    for l in open(args.controls) if l.strip()] \
+            if os.path.exists(args.controls) else []
+        skip = set()
+        if args.skip_answered and os.path.exists(args.skip_answered):
+            d = _json.load(open(args.skip_answered))
+            skip = set((d.get("answers", d)).keys())
+        man = export_trials(pairs, controls, get, out, skip_keys=skip)
+        print(f"{man['n_trials']} trials in {len(man['blocks'])} blocks "
+              f"under {out}/trials/"
+              + (f"  ({man['n_skipped']} already answered, left out)"
+                 if man["n_skipped"] else ""))
+        for name, b in sorted(man["blocks"].items()):
+            print(f"  block {name:<3} {b['n']:>3} trials  {b['path']}")
+        print("\nNo block holds two sentences from the same pair, so an "
+              "answerer given one block cannot see the contrast being tested. "
+              "Give each block to a separate, isolated answerer.")
+        print(f"the answer key is {out}/keymap_private.json -- keep it away "
+              f"from whoever answers")
+        return 0
+
+    if args.action == "merge":
+        files = args.answer_files or sorted(
+            os.path.join(out, "answers", f)
+            for f in os.listdir(os.path.join(out, "answers")))
+        rows = merge_answers(files, merged)
+        print(f"merged {len(rows)} answers from {len(files)} files -> {merged}")
+        args.action = "audit"
+
+    a = _json.load(open(merged))
+    rows = a.get("answers", a)
+    rep = audit_answers({k: v for k, v in rows.items()},
+                        os.path.join(out, "keymap_private.json"))
+    print(f"{rep['n_answered']}/{rep['n_expected']} trials answered")
+    for b, v in sorted(rep["by_block"].items()):
+        print(f"  block {b:<3} {v['answered']}/{v['n']} answered, "
+              f"{v['null']} null")
+    if rep["missing"]:
+        print(f"MISSING {len(rep['missing'])} trials -- the probe will error on "
+              f"these rather than score them as no-answer")
+    if rep["extra"]:
+        print(f"WARNING {len(rep['extra'])} answers do not match any trial")
+    return 0 if not rep["missing"] else 1
 
 
 def cmd_vlm_baseline(args):
@@ -533,7 +619,10 @@ def cmd_gif(args):
     p = frame_switch_gif(scene, src, args.text, out,
                          cfg=RelationConfig.load(args.config),
                          kinds=tuple(args.frames), width=args.width,
-                         hold_ms=args.hold, colours=args.colours)
+                         hold_ms=args.hold, colours=args.colours,
+                         max_context=args.context,
+                         frame_index=args.frame,
+                         anchor_hidden_style=args.anchor_hidden)
     if p is None:
         print("no GIF written: the frames agree on this query, or no single "
               "camera frame shows the anchor and every candidate answer. Try "
@@ -975,7 +1064,14 @@ def build_parser() -> argparse.ArgumentParser:
                    default="benchmark/minimal_pairs/controls.jsonl")
     p.add_argument("--out", default="results/frame_probe")
     p.add_argument("--model", nargs="*", default=[],
-                   help="LLM names to probe; needs ANTHROPIC_API_KEY")
+                   help="models to probe, vendor-prefixed: "
+                        "anthropic:NAME / openai:NAME / google:NAME, "
+                        "or 'frontier' for the suggested set")
+    p.add_argument("--answers", nargs="*", default=[], metavar="LABEL=FILE",
+                   help="score answers collected out of band "
+                        "(see `sqe self-probe export`)")
+    p.add_argument("--preflight", action="store_true",
+                   help="check which --model names are reachable, then exit")
     p.add_argument("--pinned", nargs="*",
                    default=["egocentric", "intrinsic"],
                    help="pinned-frame controls to include")
@@ -985,6 +1081,28 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--gt-fronts", action="store_true")
     p.add_argument("--forward", default="composite")
     p.set_defaults(func=cmd_frame_probe)
+
+    p = sub.add_parser("self-probe",
+                       help="export blocked trial files for an offline answerer")
+    _add_common(p)
+    p.add_argument("action", choices=["export", "merge", "audit"])
+    p.add_argument("--root", default=None)
+    p.add_argument("--pairs",
+                   default="benchmark/minimal_pairs/egocentric_vs_intrinsic.jsonl")
+    p.add_argument("--controls",
+                   default="benchmark/minimal_pairs/controls.jsonl")
+    p.add_argument("--out", default="results/self_probe")
+    p.add_argument("--answer-files", nargs="*", default=[],
+                   help="merge: per-block answer files to combine")
+    p.add_argument("--merged", default=None,
+                   help="merge/audit: combined answers path")
+    p.add_argument("--skip-answered", default=None, metavar="FILE",
+                   help="export: leave out trials already answered in FILE, so "
+                        "a prompt fix can be topped up instead of re-run")
+    p.add_argument("--perception", default="gt", choices=["gt", "openvocab"])
+    p.add_argument("--gt-fronts", action="store_true")
+    p.add_argument("--forward", default="composite")
+    p.set_defaults(func=cmd_self_probe)
 
     p = sub.add_parser("vlm-baseline",
                        help="which reference frame does an LLM implicitly use?")
@@ -1016,6 +1134,15 @@ def build_parser() -> argparse.ArgumentParser:
                    help="which frames to cycle between")
     p.add_argument("--width", type=int, default=1000)
     p.add_argument("--hold", type=int, default=1500, help="ms per state")
+    p.add_argument("--context", type=int, default=0,
+                   help="faint boxes on this many non-participating objects; "
+                        "0 (the default) keeps the figure to the relation")
+    p.add_argument("--frame", type=int, default=None,
+                   help="camera frame to draw on; default picks the frame that "
+                        "shows the anchor and every candidate most fully")
+    p.add_argument("--anchor-hidden", default="dashed",
+                   choices=["dashed", "dim", "hide"],
+                   help="how to draw the anchor box's occluded edges")
     p.add_argument("--colours", type=int, default=160)
     p.add_argument("--perception", default="gt", choices=["gt", "openvocab"])
     p.add_argument("--gt-fronts", action="store_true")
