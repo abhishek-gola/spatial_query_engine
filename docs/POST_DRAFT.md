@@ -23,14 +23,25 @@ viewer; describe it as such if anyone asks.
 > frame as an explicit parameter rather than an accident. Then I measured how
 > much it matters.
 >
-> **On 882 queries over 5 ScanNet++ scenes, with ground-truth perception: two
-> plausible reference frames pick different objects on 12–20% of the
-> frame-dependent queries.** Highest for left/right (24.8%), lower for
-> front/behind (15.4%).
+> **Sr3D — 83,572 template utterances, the standard benchmark for spatial
+> reference in 3-D — has a relation class named `allocentric` covering
+> "left/right/front/back", about 6,700 utterances. Its own supplementary defines
+> it as computed "with respect to the anchor orientation", from Scan2CAD 9DoF
+> alignments. That is the *intrinsic* frame. "Allocentric" means the world frame
+> — the opposite.**
 >
-> That number makes no reference to which frame is *correct*, so it doesn't
-> depend on my system being right. And it's a lower bound — a frame that can't be
-> built at all (the anchor's facing wasn't estimable) counts as agreement.
+> The words "camera", "viewer", "observer" and "point of view" appear nowhere in
+> the 13-page supplementary. Sr3D contains no viewer-relative projective
+> utterances at all — and viewer-relative is the dominant reading of "left of X"
+> in ordinary English. A model evaluated on Sr3D is rewarded for one reading and
+> penalised for the other, and no headline number says so.
+>
+> To be fair: it *is* documented, in the supplementary. The problem isn't
+> concealment, it's that a single convention is applied to ~6,700 utterances
+> under a name meaning the opposite frame.
+>
+> On my own five ScanNet++ scenes, forcing that intrinsic convention changes
+> **34%** of answerable frame-dependent answers.
 >
 > Why this matters: when a grounding pipeline gets one of these wrong, the
 > failure looks like a wrong object. So it gets counted as a perception error and
@@ -125,16 +136,34 @@ blocks the accuracy number.
 
 **"47 hand-tuned constants and no labelled data?"** Fair, and it's in the README's
 "What is not established". The partial answer is `sqe robustness`: jitter all 43
-query-time constants by ±30% and the disagreement rate stays in 11.3–26.0%
-(median 16.1%). So the *size* of the frame problem doesn't hinge on my choices.
-It says nothing about whether my resolver's answers are the ones a person would
-give — only annotation can.
+query-time constants by ±30% and the unenriched disagreement rate stays in
+2.0–6.8% (median 3.7%, configured 4.1%). So the *size* of the frame problem
+doesn't hinge on my choices. It says nothing about whether my resolver's answers
+are the ones a person would give — only annotation can.
+
+**"Where does 4.1% come from, and didn't you say 18.8%?"** I did, and it was
+wrong. That figure came from an item set my generator had enriched for frame
+sensitivity — sensitive candidates sorted first, then capped — so it was a rate
+over queries *selected for being frame-sensitive*, inflated 4.6×. The unenriched
+population rate is 4.1%. Both runs are kept and every report now declares which
+kind of sample it used. The enriched number still says something true — look for
+frame-ambiguous queries and you find 96 in 512 — it just isn't a population rate.
+
+**"Isn't the item set your own generator's?"** Yes, and that's the main
+limitation of the measurement rather than of the idea. The recorded decision is
+that the benchmark scores the field, not my resolver, which means items must come
+from real Nr3D utterances. The Sr3D finding above needs none of my items, which
+is why it leads.
 
 ---
 
 ## Not in this draft, deliberately
 
 * **Any accuracy number.** Needs annotation.
+* **Any minimal-pair model result.** The stimulus is built and the metric is
+  calibrated (35 pairs, 35 non-contrastive controls; cue-following resolver 100%
+  switched, pinned frames 100% frame-blind at 100% control-stability). No model
+  has been run — it needs an API key. `sqe frame-probe --model <name>`.
 * **The VLM baseline.** The harness is built and tested (`sqe vlm-baseline`) —
   hand a model the same scene graph, ask which object the sentence refers to,
   then classify its answer by which frame it matches. The prompt never mentions

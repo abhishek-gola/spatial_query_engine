@@ -20,5 +20,7 @@ renders/gif/*
 # in an untracked file is not a claim anyone can check.
 results/*
 !results/sensitivity/
+!results/sensitivity_unenriched/
 !results/robustness/
+!results/frame_probe/
 !results/synthetic_example/

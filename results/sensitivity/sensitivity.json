@@ -17,25 +17,33 @@
    "n_considered": 512,
    "n_changed": 198,
    "flip_rate": 0.38671875,
-   "n_no_answer_under_this_frame": 158
+   "n_no_answer_under_this_frame": 158,
+   "n_answered": 354,
+   "flip_rate_excluding_no_answer": 0.11299435028248588
   },
   "intrinsic": {
    "n_considered": 512,
    "n_changed": 301,
    "flip_rate": 0.587890625,
-   "n_no_answer_under_this_frame": 185
+   "n_no_answer_under_this_frame": 185,
+   "n_answered": 327,
+   "flip_rate_excluding_no_answer": 0.3547400611620795
   },
   "addressee": {
    "n_considered": 512,
    "n_changed": 273,
    "flip_rate": 0.533203125,
-   "n_no_answer_under_this_frame": 181
+   "n_no_answer_under_this_frame": 181,
+   "n_answered": 331,
+   "flip_rate_excluding_no_answer": 0.27794561933534745
   },
   "world": {
    "n_considered": 512,
    "n_changed": 300,
    "flip_rate": 0.5859375,
-   "n_no_answer_under_this_frame": 118
+   "n_no_answer_under_this_frame": 118,
+   "n_answered": 394,
+   "flip_rate_excluding_no_answer": 0.4619289340101523
   }
  },
  "by_relation_type": {
@@ -64,5 +72,6 @@
   "level_even": 5,
   "ordinal_degenerate": 10
  },
- "n_flagged_ambiguous": 653
+ "n_flagged_ambiguous": 653,
+ "enriched": true
 }

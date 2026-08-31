@@ -42,7 +42,7 @@ sqe = "sqe.cli:main"
 include = ["sqe*"]
 
 [tool.setuptools.package-data]
-sqe = ["viewer/static/*"]
+sqe = ["viewer/static/*", "annotate_ui/static/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

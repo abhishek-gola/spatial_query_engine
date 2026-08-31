@@ -1,0 +1,1933 @@
+{
+ "summaries": {
+  "resolver (cue-following)": {
+   "n_pairs": 35,
+   "outcomes": {
+    "switched_correctly": 35,
+    "switched_incorrectly": 0,
+    "frame_blind": 0,
+    "partial": 0,
+    "no_answer": 0,
+    "error": 0
+   },
+   "rates": {
+    "switched_correctly": 1.0,
+    "switched_incorrectly": 0.0,
+    "frame_blind": 0.0,
+    "partial": 0.0,
+    "no_answer": 0.0,
+    "error": 0.0
+   },
+   "by_relation": {
+    "behind": {
+     "switched_correctly": 3
+    },
+    "front": {
+     "switched_correctly": 14
+    },
+    "left": {
+     "switched_correctly": 7
+    },
+    "right": {
+     "switched_correctly": 11
+    }
+   },
+   "neutral_implies": {
+    "intrinsic": 17,
+    "egocentric": 18
+   },
+   "n_errors": 0,
+   "controls": {
+    "n_controls": 35,
+    "n_stable": 35,
+    "stable_rate": 1.0,
+    "n_correct": 35,
+    "correct_rate": 1.0,
+    "n_errors": 0
+   }
+  },
+  "pinned:egocentric": {
+   "n_pairs": 35,
+   "outcomes": {
+    "switched_correctly": 0,
+    "switched_incorrectly": 0,
+    "frame_blind": 35,
+    "partial": 0,
+    "no_answer": 0,
+    "error": 0
+   },
+   "rates": {
+    "switched_correctly": 0.0,
+    "switched_incorrectly": 0.0,
+    "frame_blind": 1.0,
+    "partial": 0.0,
+    "no_answer": 0.0,
+    "error": 0.0
+   },
+   "by_relation": {
+    "behind": {
+     "frame_blind": 3
+    },
+    "front": {
+     "frame_blind": 14
+    },
+    "left": {
+     "frame_blind": 7
+    },
+    "right": {
+     "frame_blind": 11
+    }
+   },
+   "neutral_implies": {
+    "egocentric": 35
+   },
+   "n_errors": 0,
+   "controls": {
+    "n_controls": 35,
+    "n_stable": 35,
+    "stable_rate": 1.0,
+    "n_correct": 18,
+    "correct_rate": 0.5142857142857142,
+    "n_errors": 0
+   }
+  },
+  "pinned:intrinsic": {
+   "n_pairs": 35,
+   "outcomes": {
+    "switched_correctly": 0,
+    "switched_incorrectly": 0,
+    "frame_blind": 35,
+    "partial": 0,
+    "no_answer": 0,
+    "error": 0
+   },
+   "rates": {
+    "switched_correctly": 0.0,
+    "switched_incorrectly": 0.0,
+    "frame_blind": 1.0,
+    "partial": 0.0,
+    "no_answer": 0.0,
+    "error": 0.0
+   },
+   "by_relation": {
+    "behind": {
+     "frame_blind": 3
+    },
+    "front": {
+     "frame_blind": 14
+    },
+    "left": {
+     "frame_blind": 7
+    },
+    "right": {
+     "frame_blind": 11
+    }
+   },
+   "neutral_implies": {
+    "intrinsic": 35
+   },
+   "n_errors": 0,
+   "controls": {
+    "n_controls": 35,
+    "n_stable": 35,
+    "stable_rate": 1.0,
+    "n_correct": 17,
+    "correct_rate": 0.4857142857142857,
+    "n_errors": 0
+   }
+  }
+ },
+ "results": {
+  "resolver (cue-following)": [
+   {
+    "pair_id": "0a184cf634_front_35_jar",
+    "scene_id": "0a184cf634",
+    "relation": "front",
+    "answers": {
+     "egocentric": 107,
+     "intrinsic": 87
+    },
+    "gold": {
+     "egocentric": 107,
+     "intrinsic": 87
+    },
+    "neutral_answer": 87,
+    "neutral_implies": "intrinsic",
+    "outcome": "switched_correctly",
+    "error": ""
+   },
+   {
+    "pair_id": "0a184cf634_right_41_book",
+    "scene_id": "0a184cf634",
+    "relation": "right",
+    "answers": {
+     "egocentric": 43,
+     "intrinsic": 62
+    },
+    "gold": {
+     "egocentric": 43,
+     "intrinsic": 62
+    },
+    "neutral_answer": 43,
+    "neutral_implies": "egocentric",
+    "outcome": "switched_correctly",
+    "error": ""
+   },
+   {
+    "pair_id": "0a184cf634_left_41_table",
+    "scene_id": "0a184cf634",
+    "relation": "left",
+    "answers": {
+     "egocentric": 112,
+     "intrinsic": 40
+    },
+    "gold": {
+     "egocentric": 112,
+     "intrinsic": 40
+    },
+    "neutral_answer": 112,
+    "neutral_implies": "egocentric",
+    "outcome": "switched_correctly",
+    "error": ""
+   },
+   {
+    "pair_id": "0a184cf634_right_41_table",
+    "scene_id": "0a184cf634",
+    "relation": "right",
+    "answers": {
+     "egocentric": 40,
+     "intrinsic": 112
+    },
+    "gold": {
+     "egocentric": 40,
+     "intrinsic": 112
+    },
+    "neutral_answer": 40,
+    "neutral_implies": "egocentric",
+    "outcome": "switched_correctly",
+    "error": ""
+   },
+   {
+    "pair_id": "0a184cf634_left_65_cabinet",
+    "scene_id": "0a184cf634",
+    "relation": "left",
+    "answers": {
+     "egocentric": 45,
+     "intrinsic": 34
+    },
+    "gold": {
+     "egocentric": 45,
+     "intrinsic": 34
+    },
+    "neutral_answer": 45,
+    "neutral_implies": "egocentric",
+    "outcome": "switched_correctly",
+    "error": ""
+   },
+   {
+    "pair_id": "0a184cf634_right_65_cabinet",
+    "scene_id": "0a184cf634",
+    "relation": "right",
+    "answers": {
+     "egocentric": 34,
+     "intrinsic": 45
+    },
+    "gold": {
+     "egocentric": 34,
+     "intrinsic": 45
+    },
+    "neutral_answer": 34,
+    "neutral_implies": "egocentric",
+    "outcome": "switched_correctly",
+    "error": ""
+   },
+   {
+    "pair_id": "0a184cf634_front_65_kitchen-cabinet",
+    "scene_id": "0a184cf634",
+    "relation": "front",
+    "answers": {
+     "egocentric": 103,
+     "intrinsic": 33
+    },
+    "gold": {
+     "egocentric": 103,
+     "intrinsic": 33
+    },
+    "neutral_answer": 33,
+    "neutral_implies": "intrinsic",
+    "outcome": "switched_correctly",
+    "error": ""
+   },
+   {
+    "pair_id": "0a184cf634_left_65_shelf",
+    "scene_id": "0a184cf634",
+    "relation": "left",
+    "answers": {
+     "egocentric": 113,
+     "intrinsic": 105
+    },
+    "gold": {
+     "egocentric": 113,
+     "intrinsic": 105
+    },
+    "neutral_answer": 113,
+    "neutral_implies": "egocentric",
+    "outcome": "switched_correctly",
+    "error": ""
+   },
+   {
+    "pair_id": "0a184cf634_right_65_shelf",
+    "scene_id": "0a184cf634",
+    "relation": "right",
+    "answers": {
+     "egocentric": 105,
+     "intrinsic": 6
+    },
+    "gold": {
+     "egocentric": 105,
+     "intrinsic": 6
+    },
+    "neutral_answer": 105,
+    "neutral_implies": "egocentric",
+    "outcome": "switched_correctly",
+    "error": ""
+   },
+   {
+    "pair_id": "0a184cf634_front_65_shelf",
+    "scene_id": "0a184cf634",
+    "relation": "front",
+    "answers": {
+     "egocentric": 105,
+     "intrinsic": 113
+    },
+    "gold": {
+     "egocentric": 105,
+     "intrinsic": 113
+    },
+    "neutral_answer": 113,
+    "neutral_implies": "intrinsic",
+    "outcome": "switched_correctly",
+    "error": ""
+   },
+   {
+    "pair_id": "0a76e06478_right_13_backpack",
+    "scene_id": "0a76e06478",
+    "relation": "right",
+    "answers": {
+     "egocentric": 1,
+     "intrinsic": 59
+    },
+    "gold": {
+     "egocentric": 1,
+     "intrinsic": 59
+    },
+    "neutral_answer": 1,
+    "neutral_implies": "egocentric",
+    "outcome": "switched_correctly",
+    "error": ""
+   },
+   {
+    "pair_id": "0a76e06478_front_14_ornament",
+    "scene_id": "0a76e06478",
+    "relation": "front",
+    "answers": {
+     "egocentric": 40,
+     "intrinsic": 41
+    },
+    "gold": {
+     "egocentric": 40,
+     "intrinsic": 41
+    },
+    "neutral_answer": 41,
+    "neutral_implies": "intrinsic",
+    "outcome": "switched_correctly",
+    "error": ""
+   },
+   {
+    "pair_id": "0a76e06478_behind_19_box",
+    "scene_id": "0a76e06478",
+    "relation": "behind",
+    "answers": {
+     "egocentric": 72,
+     "intrinsic": 71
+    },
+    "gold": {
+     "egocentric": 72,
+     "intrinsic": 71
+    },
+    "neutral_answer": 71,
+    "neutral_implies": "intrinsic",
+    "outcome": "switched_correctly",
+    "error": ""
+   },
+   {
+    "pair_id": "0a76e06478_right_19_clothes",
+    "scene_id": "0a76e06478",
+    "relation": "right",
+    "answers": {
+     "egocentric": 67,
+     "intrinsic": 70
+    },
+    "gold": {
+     "egocentric": 67,
+     "intrinsic": 70
+    },
+    "neutral_answer": 67,
+    "neutral_implies": "egocentric",
+    "outcome": "switched_correctly",
+    "error": ""
+   },
+   {
+    "pair_id": "0a76e06478_behind_19_clothes",
+    "scene_id": "0a76e06478",
+    "relation": "behind",
+    "answers": {
+     "egocentric": 70,
+     "intrinsic": 67
+    },
+    "gold": {
+     "egocentric": 70,
+     "intrinsic": 67
+    },
+    "neutral_answer": 67,
+    "neutral_implies": "intrinsic",
+    "outcome": "switched_correctly",
+    "error": ""
+   },
+   {
+    "pair_id": "0a76e06478_front_77_clothes",
+    "scene_id": "0a76e06478",
+    "relation": "front",
+    "answers": {
+     "egocentric": 70,
+     "intrinsic": 68
+    },
+    "gold": {
+     "egocentric": 70,
+     "intrinsic": 68
+    },
+    "neutral_answer": 68,
+    "neutral_implies": "intrinsic",
+    "outcome": "switched_correctly",
+    "error": ""
+   },
+   {
+    "pair_id": "0a7cc12c0e_front_11_bottle",
+    "scene_id": "0a7cc12c0e",
+    "relation": "front",
+    "answers": {
+     "egocentric": 77,
+     "intrinsic": 79
+    },
+    "gold": {
+     "egocentric": 77,
+     "intrinsic": 79
+    },
+    "neutral_answer": 79,
+    "neutral_implies": "intrinsic",
+    "outcome": "switched_correctly",
+    "error": ""
+   },
+   {
+    "pair_id": "0a7cc12c0e_behind_11_bottle",
+    "scene_id": "0a7cc12c0e",
+    "relation": "behind",
+    "answers": {
+     "egocentric": 119,
+     "intrinsic": 108
+    },
+    "gold": {
+     "egocentric": 119,
+     "intrinsic": 108
+    },
+    "neutral_answer": 108,
+    "neutral_implies": "intrinsic",
+    "outcome": "switched_correctly",
+    "error": ""
+   },
+   {
+    "pair_id": "0a7cc12c0e_front_11_shelf",
+    "scene_id": "0a7cc12c0e",
+    "relation": "front",
+    "answers": {
+     "egocentric": 86,
+     "intrinsic": 72
+    },
+    "gold": {
+     "egocentric": 86,
+     "intrinsic": 72
+    },
+    "neutral_answer": 72,
+    "neutral_implies": "intrinsic",
+    "outcome": "switched_correctly",
+    "error": ""
+   },
+   {
+    "pair_id": "0a7cc12c0e_front_30_bottle",
+    "scene_id": "0a7cc12c0e",
+    "relation": "front",
+    "answers": {
+     "egocentric": 5,
+     "intrinsic": 77
+    },
+    "gold": {
+     "egocentric": 5,
+     "intrinsic": 77
+    },
+    "neutral_answer": 77,
+    "neutral_implies": "intrinsic",
+    "outcome": "switched_correctly",
+    "error": ""
+   },
+   {
+    "pair_id": "0a7cc12c0e_left_30_shelf",
+    "scene_id": "0a7cc12c0e",
+    "relation": "left",
+    "answers": {
+     "egocentric": 72,
+     "intrinsic": 33
+    },
+    "gold": {
+     "egocentric": 72,
+     "intrinsic": 33
+    },
+    "neutral_answer": 72,
+    "neutral_implies": "egocentric",
+    "outcome": "switched_correctly",
+    "error": ""
+   },
+   {
+    "pair_id": "0a7cc12c0e_right_123_box",
+    "scene_id": "0a7cc12c0e",
+    "relation": "right",
+    "answers": {
+     "egocentric": 89,
+     "intrinsic": 84
+    },
+    "gold": {
+     "egocentric": 89,
+     "intrinsic": 84
+    },
+    "neutral_answer": 89,
+    "neutral_implies": "egocentric",
+    "outcome": "switched_correctly",
+    "error": ""
+   },
+   {
+    "pair_id": "0a7cc12c0e_left_123_shelf",
+    "scene_id": "0a7cc12c0e",
+    "relation": "left",
+    "answers": {
+     "egocentric": 107,
+     "intrinsic": 23
+    },
+    "gold": {
+     "egocentric": 107,
+     "intrinsic": 23
+    },
+    "neutral_answer": 107,
+    "neutral_implies": "egocentric",
+    "outcome": "switched_correctly",
+    "error": ""
+   },
+   {
+    "pair_id": "0a7cc12c0e_right_123_shelf",
+    "scene_id": "0a7cc12c0e",
+    "relation": "right",
+    "answers": {
+     "egocentric": 23,
+     "intrinsic": 86
+    },
+    "gold": {
+     "egocentric": 23,
+     "intrinsic": 86
+    },
+    "neutral_answer": 23,
+    "neutral_implies": "egocentric",
+    "outcome": "switched_correctly",
+    "error": ""
+   },
+   {
+    "pair_id": "0a7cc12c0e_left_133_lamp",
+    "scene_id": "0a7cc12c0e",
+    "relation": "left",
+    "answers": {
+     "egocentric": 34,
+     "intrinsic": 101
+    },
+    "gold": {
+     "egocentric": 34,
+     "intrinsic": 101
+    },
+    "neutral_answer": 34,
+    "neutral_implies": "egocentric",
+    "outcome": "switched_correctly",
+    "error": ""
+   },
+   {
+    "pair_id": "0a7cc12c0e_front_133_lamp",
+    "scene_id": "0a7cc12c0e",
+    "relation": "front",
+    "answers": {
+     "egocentric": 101,
+     "intrinsic": 34
+    },
+    "gold": {
+     "egocentric": 101,
+     "intrinsic": 34
+    },
+    "neutral_answer": 34,
+    "neutral_implies": "intrinsic",
+    "outcome": "switched_correctly",
+    "error": ""
+   },
+   {
+    "pair_id": "0b031f3119_front_20_computer-tower",
+    "scene_id": "0b031f3119",
+    "relation": "front",
+    "answers": {
+     "egocentric": 85,
+     "intrinsic": 69
+    },
+    "gold": {
+     "egocentric": 85,
+     "intrinsic": 69
+    },
+    "neutral_answer": 69,
+    "neutral_implies": "intrinsic",
+    "outcome": "switched_correctly",
+    "error": ""
+   },
+   {
+    "pair_id": "0b031f3119_front_20_keyboard",
+    "scene_id": "0b031f3119",
+    "relation": "front",
+    "answers": {
+     "egocentric": 31,
+     "intrinsic": 30
+    },
+    "gold": {
+     "egocentric": 31,
+     "intrinsic": 30
+    },
+    "neutral_answer": 30,
+    "neutral_implies": "intrinsic",
+    "outcome": "switched_correctly",
+    "error": ""
+   },
+   {
+    "pair_id": "0b031f3119_front_20_monitor",
+    "scene_id": "0b031f3119",
+    "relation": "front",
+    "answers": {
+     "egocentric": 40,
+     "intrinsic": 11
+    },
+    "gold": {
+     "egocentric": 40,
+     "intrinsic": 11
+    },
+    "neutral_answer": 11,
+    "neutral_implies": "intrinsic",
+    "outcome": "switched_correctly",
+    "error": ""
+   },
+   {
+    "pair_id": "0b031f3119_front_20_mouse",
+    "scene_id": "0b031f3119",
+    "relation": "front",
+    "answers": {
+     "egocentric": 29,
+     "intrinsic": 51
+    },
+    "gold": {
+     "egocentric": 29,
+     "intrinsic": 51
+    },
+    "neutral_answer": 51,
+    "neutral_implies": "intrinsic",
+    "outcome": "switched_correctly",
+    "error": ""
+   },
+   {
+    "pair_id": "0b031f3119_front_20_office-chair",
+    "scene_id": "0b031f3119",
+    "relation": "front",
+    "answers": {
+     "egocentric": 76,
+     "intrinsic": 75
+    },
+    "gold": {
+     "egocentric": 76,
+     "intrinsic": 75
+    },
+    "neutral_answer": 75,
+    "neutral_implies": "intrinsic",
+    "outcome": "switched_correctly",
+    "error": ""
+   },
+   {
+    "pair_id": "0b031f3119_left_20_table",
+    "scene_id": "0b031f3119",
+    "relation": "left",
+    "answers": {
+     "egocentric": 87,
+     "intrinsic": 79
+    },
+    "gold": {
+     "egocentric": 87,
+     "intrinsic": 79
+    },
+    "neutral_answer": 87,
+    "neutral_implies": "egocentric",
+    "outcome": "switched_correctly",
+    "error": ""
+   },
+   {
+    "pair_id": "0b031f3119_right_20_table",
+    "scene_id": "0b031f3119",
+    "relation": "right",
+    "answers": {
+     "egocentric": 79,
+     "intrinsic": 87
+    },
+    "gold": {
+     "egocentric": 79,
+     "intrinsic": 87
+    },
+    "neutral_answer": 79,
+    "neutral_implies": "egocentric",
+    "outcome": "switched_correctly",
+    "error": ""
+   },
+   {
+    "pair_id": "0b031f3119_right_20_trash-can",
+    "scene_id": "0b031f3119",
+    "relation": "right",
+    "answers": {
+     "egocentric": 61,
+     "intrinsic": 16
+    },
+    "gold": {
+     "egocentric": 61,
+     "intrinsic": 16
+    },
+    "neutral_answer": 61,
+    "neutral_implies": "egocentric",
+    "outcome": "switched_correctly",
+    "error": ""
+   },
+   {
+    "pair_id": "0b031f3119_right_58_monitor",
+    "scene_id": "0b031f3119",
+    "relation": "right",
+    "answers": {
+     "egocentric": 11,
+     "intrinsic": 64
+    },
+    "gold": {
+     "egocentric": 11,
+     "intrinsic": 64
+    },
+    "neutral_answer": 11,
+    "neutral_implies": "egocentric",
+    "outcome": "switched_correctly",
+    "error": ""
+   }
+  ],
+  "pinned:egocentric": [
+   {
+    "pair_id": "0a184cf634_front_35_jar",
+    "scene_id": "0a184cf634",
+    "relation": "front",
+    "answers": {
+     "egocentric": 107,
+     "intrinsic": 107
+    },
+    "gold": {
+     "egocentric": 107,
+     "intrinsic": 87
+    },
+    "neutral_answer": 107,
+    "neutral_implies": "egocentric",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a184cf634_right_41_book",
+    "scene_id": "0a184cf634",
+    "relation": "right",
+    "answers": {
+     "egocentric": 43,
+     "intrinsic": 43
+    },
+    "gold": {
+     "egocentric": 43,
+     "intrinsic": 62
+    },
+    "neutral_answer": 43,
+    "neutral_implies": "egocentric",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a184cf634_left_41_table",
+    "scene_id": "0a184cf634",
+    "relation": "left",
+    "answers": {
+     "egocentric": 112,
+     "intrinsic": 112
+    },
+    "gold": {
+     "egocentric": 112,
+     "intrinsic": 40
+    },
+    "neutral_answer": 112,
+    "neutral_implies": "egocentric",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a184cf634_right_41_table",
+    "scene_id": "0a184cf634",
+    "relation": "right",
+    "answers": {
+     "egocentric": 40,
+     "intrinsic": 40
+    },
+    "gold": {
+     "egocentric": 40,
+     "intrinsic": 112
+    },
+    "neutral_answer": 40,
+    "neutral_implies": "egocentric",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a184cf634_left_65_cabinet",
+    "scene_id": "0a184cf634",
+    "relation": "left",
+    "answers": {
+     "egocentric": 45,
+     "intrinsic": 45
+    },
+    "gold": {
+     "egocentric": 45,
+     "intrinsic": 34
+    },
+    "neutral_answer": 45,
+    "neutral_implies": "egocentric",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a184cf634_right_65_cabinet",
+    "scene_id": "0a184cf634",
+    "relation": "right",
+    "answers": {
+     "egocentric": 34,
+     "intrinsic": 34
+    },
+    "gold": {
+     "egocentric": 34,
+     "intrinsic": 45
+    },
+    "neutral_answer": 34,
+    "neutral_implies": "egocentric",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a184cf634_front_65_kitchen-cabinet",
+    "scene_id": "0a184cf634",
+    "relation": "front",
+    "answers": {
+     "egocentric": 103,
+     "intrinsic": 103
+    },
+    "gold": {
+     "egocentric": 103,
+     "intrinsic": 33
+    },
+    "neutral_answer": 103,
+    "neutral_implies": "egocentric",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a184cf634_left_65_shelf",
+    "scene_id": "0a184cf634",
+    "relation": "left",
+    "answers": {
+     "egocentric": 113,
+     "intrinsic": 113
+    },
+    "gold": {
+     "egocentric": 113,
+     "intrinsic": 105
+    },
+    "neutral_answer": 113,
+    "neutral_implies": "egocentric",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a184cf634_right_65_shelf",
+    "scene_id": "0a184cf634",
+    "relation": "right",
+    "answers": {
+     "egocentric": 105,
+     "intrinsic": 105
+    },
+    "gold": {
+     "egocentric": 105,
+     "intrinsic": 6
+    },
+    "neutral_answer": 105,
+    "neutral_implies": "egocentric",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a184cf634_front_65_shelf",
+    "scene_id": "0a184cf634",
+    "relation": "front",
+    "answers": {
+     "egocentric": 105,
+     "intrinsic": 105
+    },
+    "gold": {
+     "egocentric": 105,
+     "intrinsic": 113
+    },
+    "neutral_answer": 105,
+    "neutral_implies": "egocentric",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a76e06478_right_13_backpack",
+    "scene_id": "0a76e06478",
+    "relation": "right",
+    "answers": {
+     "egocentric": 1,
+     "intrinsic": 1
+    },
+    "gold": {
+     "egocentric": 1,
+     "intrinsic": 59
+    },
+    "neutral_answer": 1,
+    "neutral_implies": "egocentric",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a76e06478_front_14_ornament",
+    "scene_id": "0a76e06478",
+    "relation": "front",
+    "answers": {
+     "egocentric": 40,
+     "intrinsic": 40
+    },
+    "gold": {
+     "egocentric": 40,
+     "intrinsic": 41
+    },
+    "neutral_answer": 40,
+    "neutral_implies": "egocentric",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a76e06478_behind_19_box",
+    "scene_id": "0a76e06478",
+    "relation": "behind",
+    "answers": {
+     "egocentric": 72,
+     "intrinsic": 72
+    },
+    "gold": {
+     "egocentric": 72,
+     "intrinsic": 71
+    },
+    "neutral_answer": 72,
+    "neutral_implies": "egocentric",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a76e06478_right_19_clothes",
+    "scene_id": "0a76e06478",
+    "relation": "right",
+    "answers": {
+     "egocentric": 67,
+     "intrinsic": 67
+    },
+    "gold": {
+     "egocentric": 67,
+     "intrinsic": 70
+    },
+    "neutral_answer": 67,
+    "neutral_implies": "egocentric",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a76e06478_behind_19_clothes",
+    "scene_id": "0a76e06478",
+    "relation": "behind",
+    "answers": {
+     "egocentric": 70,
+     "intrinsic": 70
+    },
+    "gold": {
+     "egocentric": 70,
+     "intrinsic": 67
+    },
+    "neutral_answer": 70,
+    "neutral_implies": "egocentric",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a76e06478_front_77_clothes",
+    "scene_id": "0a76e06478",
+    "relation": "front",
+    "answers": {
+     "egocentric": 70,
+     "intrinsic": 70
+    },
+    "gold": {
+     "egocentric": 70,
+     "intrinsic": 68
+    },
+    "neutral_answer": 70,
+    "neutral_implies": "egocentric",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a7cc12c0e_front_11_bottle",
+    "scene_id": "0a7cc12c0e",
+    "relation": "front",
+    "answers": {
+     "egocentric": 77,
+     "intrinsic": 77
+    },
+    "gold": {
+     "egocentric": 77,
+     "intrinsic": 79
+    },
+    "neutral_answer": 77,
+    "neutral_implies": "egocentric",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a7cc12c0e_behind_11_bottle",
+    "scene_id": "0a7cc12c0e",
+    "relation": "behind",
+    "answers": {
+     "egocentric": 119,
+     "intrinsic": 119
+    },
+    "gold": {
+     "egocentric": 119,
+     "intrinsic": 108
+    },
+    "neutral_answer": 119,
+    "neutral_implies": "egocentric",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a7cc12c0e_front_11_shelf",
+    "scene_id": "0a7cc12c0e",
+    "relation": "front",
+    "answers": {
+     "egocentric": 86,
+     "intrinsic": 86
+    },
+    "gold": {
+     "egocentric": 86,
+     "intrinsic": 72
+    },
+    "neutral_answer": 86,
+    "neutral_implies": "egocentric",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a7cc12c0e_front_30_bottle",
+    "scene_id": "0a7cc12c0e",
+    "relation": "front",
+    "answers": {
+     "egocentric": 5,
+     "intrinsic": 5
+    },
+    "gold": {
+     "egocentric": 5,
+     "intrinsic": 77
+    },
+    "neutral_answer": 5,
+    "neutral_implies": "egocentric",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a7cc12c0e_left_30_shelf",
+    "scene_id": "0a7cc12c0e",
+    "relation": "left",
+    "answers": {
+     "egocentric": 72,
+     "intrinsic": 72
+    },
+    "gold": {
+     "egocentric": 72,
+     "intrinsic": 33
+    },
+    "neutral_answer": 72,
+    "neutral_implies": "egocentric",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a7cc12c0e_right_123_box",
+    "scene_id": "0a7cc12c0e",
+    "relation": "right",
+    "answers": {
+     "egocentric": 89,
+     "intrinsic": 89
+    },
+    "gold": {
+     "egocentric": 89,
+     "intrinsic": 84
+    },
+    "neutral_answer": 89,
+    "neutral_implies": "egocentric",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a7cc12c0e_left_123_shelf",
+    "scene_id": "0a7cc12c0e",
+    "relation": "left",
+    "answers": {
+     "egocentric": 107,
+     "intrinsic": 107
+    },
+    "gold": {
+     "egocentric": 107,
+     "intrinsic": 23
+    },
+    "neutral_answer": 107,
+    "neutral_implies": "egocentric",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a7cc12c0e_right_123_shelf",
+    "scene_id": "0a7cc12c0e",
+    "relation": "right",
+    "answers": {
+     "egocentric": 23,
+     "intrinsic": 23
+    },
+    "gold": {
+     "egocentric": 23,
+     "intrinsic": 86
+    },
+    "neutral_answer": 23,
+    "neutral_implies": "egocentric",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a7cc12c0e_left_133_lamp",
+    "scene_id": "0a7cc12c0e",
+    "relation": "left",
+    "answers": {
+     "egocentric": 34,
+     "intrinsic": 34
+    },
+    "gold": {
+     "egocentric": 34,
+     "intrinsic": 101
+    },
+    "neutral_answer": 34,
+    "neutral_implies": "egocentric",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a7cc12c0e_front_133_lamp",
+    "scene_id": "0a7cc12c0e",
+    "relation": "front",
+    "answers": {
+     "egocentric": 101,
+     "intrinsic": 101
+    },
+    "gold": {
+     "egocentric": 101,
+     "intrinsic": 34
+    },
+    "neutral_answer": 101,
+    "neutral_implies": "egocentric",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0b031f3119_front_20_computer-tower",
+    "scene_id": "0b031f3119",
+    "relation": "front",
+    "answers": {
+     "egocentric": 85,
+     "intrinsic": 85
+    },
+    "gold": {
+     "egocentric": 85,
+     "intrinsic": 69
+    },
+    "neutral_answer": 85,
+    "neutral_implies": "egocentric",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0b031f3119_front_20_keyboard",
+    "scene_id": "0b031f3119",
+    "relation": "front",
+    "answers": {
+     "egocentric": 31,
+     "intrinsic": 31
+    },
+    "gold": {
+     "egocentric": 31,
+     "intrinsic": 30
+    },
+    "neutral_answer": 31,
+    "neutral_implies": "egocentric",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0b031f3119_front_20_monitor",
+    "scene_id": "0b031f3119",
+    "relation": "front",
+    "answers": {
+     "egocentric": 40,
+     "intrinsic": 40
+    },
+    "gold": {
+     "egocentric": 40,
+     "intrinsic": 11
+    },
+    "neutral_answer": 40,
+    "neutral_implies": "egocentric",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0b031f3119_front_20_mouse",
+    "scene_id": "0b031f3119",
+    "relation": "front",
+    "answers": {
+     "egocentric": 29,
+     "intrinsic": 29
+    },
+    "gold": {
+     "egocentric": 29,
+     "intrinsic": 51
+    },
+    "neutral_answer": 29,
+    "neutral_implies": "egocentric",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0b031f3119_front_20_office-chair",
+    "scene_id": "0b031f3119",
+    "relation": "front",
+    "answers": {
+     "egocentric": 76,
+     "intrinsic": 76
+    },
+    "gold": {
+     "egocentric": 76,
+     "intrinsic": 75
+    },
+    "neutral_answer": 76,
+    "neutral_implies": "egocentric",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0b031f3119_left_20_table",
+    "scene_id": "0b031f3119",
+    "relation": "left",
+    "answers": {
+     "egocentric": 87,
+     "intrinsic": 87
+    },
+    "gold": {
+     "egocentric": 87,
+     "intrinsic": 79
+    },
+    "neutral_answer": 87,
+    "neutral_implies": "egocentric",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0b031f3119_right_20_table",
+    "scene_id": "0b031f3119",
+    "relation": "right",
+    "answers": {
+     "egocentric": 79,
+     "intrinsic": 79
+    },
+    "gold": {
+     "egocentric": 79,
+     "intrinsic": 87
+    },
+    "neutral_answer": 79,
+    "neutral_implies": "egocentric",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0b031f3119_right_20_trash-can",
+    "scene_id": "0b031f3119",
+    "relation": "right",
+    "answers": {
+     "egocentric": 61,
+     "intrinsic": 61
+    },
+    "gold": {
+     "egocentric": 61,
+     "intrinsic": 16
+    },
+    "neutral_answer": 61,
+    "neutral_implies": "egocentric",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0b031f3119_right_58_monitor",
+    "scene_id": "0b031f3119",
+    "relation": "right",
+    "answers": {
+     "egocentric": 11,
+     "intrinsic": 11
+    },
+    "gold": {
+     "egocentric": 11,
+     "intrinsic": 64
+    },
+    "neutral_answer": 11,
+    "neutral_implies": "egocentric",
+    "outcome": "frame_blind",
+    "error": ""
+   }
+  ],
+  "pinned:intrinsic": [
+   {
+    "pair_id": "0a184cf634_front_35_jar",
+    "scene_id": "0a184cf634",
+    "relation": "front",
+    "answers": {
+     "egocentric": 87,
+     "intrinsic": 87
+    },
+    "gold": {
+     "egocentric": 107,
+     "intrinsic": 87
+    },
+    "neutral_answer": 87,
+    "neutral_implies": "intrinsic",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a184cf634_right_41_book",
+    "scene_id": "0a184cf634",
+    "relation": "right",
+    "answers": {
+     "egocentric": 62,
+     "intrinsic": 62
+    },
+    "gold": {
+     "egocentric": 43,
+     "intrinsic": 62
+    },
+    "neutral_answer": 62,
+    "neutral_implies": "intrinsic",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a184cf634_left_41_table",
+    "scene_id": "0a184cf634",
+    "relation": "left",
+    "answers": {
+     "egocentric": 40,
+     "intrinsic": 40
+    },
+    "gold": {
+     "egocentric": 112,
+     "intrinsic": 40
+    },
+    "neutral_answer": 40,
+    "neutral_implies": "intrinsic",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a184cf634_right_41_table",
+    "scene_id": "0a184cf634",
+    "relation": "right",
+    "answers": {
+     "egocentric": 112,
+     "intrinsic": 112
+    },
+    "gold": {
+     "egocentric": 40,
+     "intrinsic": 112
+    },
+    "neutral_answer": 112,
+    "neutral_implies": "intrinsic",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a184cf634_left_65_cabinet",
+    "scene_id": "0a184cf634",
+    "relation": "left",
+    "answers": {
+     "egocentric": 34,
+     "intrinsic": 34
+    },
+    "gold": {
+     "egocentric": 45,
+     "intrinsic": 34
+    },
+    "neutral_answer": 34,
+    "neutral_implies": "intrinsic",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a184cf634_right_65_cabinet",
+    "scene_id": "0a184cf634",
+    "relation": "right",
+    "answers": {
+     "egocentric": 45,
+     "intrinsic": 45
+    },
+    "gold": {
+     "egocentric": 34,
+     "intrinsic": 45
+    },
+    "neutral_answer": 45,
+    "neutral_implies": "intrinsic",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a184cf634_front_65_kitchen-cabinet",
+    "scene_id": "0a184cf634",
+    "relation": "front",
+    "answers": {
+     "egocentric": 33,
+     "intrinsic": 33
+    },
+    "gold": {
+     "egocentric": 103,
+     "intrinsic": 33
+    },
+    "neutral_answer": 33,
+    "neutral_implies": "intrinsic",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a184cf634_left_65_shelf",
+    "scene_id": "0a184cf634",
+    "relation": "left",
+    "answers": {
+     "egocentric": 105,
+     "intrinsic": 105
+    },
+    "gold": {
+     "egocentric": 113,
+     "intrinsic": 105
+    },
+    "neutral_answer": 105,
+    "neutral_implies": "intrinsic",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a184cf634_right_65_shelf",
+    "scene_id": "0a184cf634",
+    "relation": "right",
+    "answers": {
+     "egocentric": 6,
+     "intrinsic": 6
+    },
+    "gold": {
+     "egocentric": 105,
+     "intrinsic": 6
+    },
+    "neutral_answer": 6,
+    "neutral_implies": "intrinsic",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a184cf634_front_65_shelf",
+    "scene_id": "0a184cf634",
+    "relation": "front",
+    "answers": {
+     "egocentric": 113,
+     "intrinsic": 113
+    },
+    "gold": {
+     "egocentric": 105,
+     "intrinsic": 113
+    },
+    "neutral_answer": 113,
+    "neutral_implies": "intrinsic",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a76e06478_right_13_backpack",
+    "scene_id": "0a76e06478",
+    "relation": "right",
+    "answers": {
+     "egocentric": 59,
+     "intrinsic": 59
+    },
+    "gold": {
+     "egocentric": 1,
+     "intrinsic": 59
+    },
+    "neutral_answer": 59,
+    "neutral_implies": "intrinsic",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a76e06478_front_14_ornament",
+    "scene_id": "0a76e06478",
+    "relation": "front",
+    "answers": {
+     "egocentric": 41,
+     "intrinsic": 41
+    },
+    "gold": {
+     "egocentric": 40,
+     "intrinsic": 41
+    },
+    "neutral_answer": 41,
+    "neutral_implies": "intrinsic",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a76e06478_behind_19_box",
+    "scene_id": "0a76e06478",
+    "relation": "behind",
+    "answers": {
+     "egocentric": 71,
+     "intrinsic": 71
+    },
+    "gold": {
+     "egocentric": 72,
+     "intrinsic": 71
+    },
+    "neutral_answer": 71,
+    "neutral_implies": "intrinsic",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a76e06478_right_19_clothes",
+    "scene_id": "0a76e06478",
+    "relation": "right",
+    "answers": {
+     "egocentric": 70,
+     "intrinsic": 70
+    },
+    "gold": {
+     "egocentric": 67,
+     "intrinsic": 70
+    },
+    "neutral_answer": 70,
+    "neutral_implies": "intrinsic",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a76e06478_behind_19_clothes",
+    "scene_id": "0a76e06478",
+    "relation": "behind",
+    "answers": {
+     "egocentric": 67,
+     "intrinsic": 67
+    },
+    "gold": {
+     "egocentric": 70,
+     "intrinsic": 67
+    },
+    "neutral_answer": 67,
+    "neutral_implies": "intrinsic",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a76e06478_front_77_clothes",
+    "scene_id": "0a76e06478",
+    "relation": "front",
+    "answers": {
+     "egocentric": 68,
+     "intrinsic": 68
+    },
+    "gold": {
+     "egocentric": 70,
+     "intrinsic": 68
+    },
+    "neutral_answer": 68,
+    "neutral_implies": "intrinsic",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a7cc12c0e_front_11_bottle",
+    "scene_id": "0a7cc12c0e",
+    "relation": "front",
+    "answers": {
+     "egocentric": 79,
+     "intrinsic": 79
+    },
+    "gold": {
+     "egocentric": 77,
+     "intrinsic": 79
+    },
+    "neutral_answer": 79,
+    "neutral_implies": "intrinsic",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a7cc12c0e_behind_11_bottle",
+    "scene_id": "0a7cc12c0e",
+    "relation": "behind",
+    "answers": {
+     "egocentric": 108,
+     "intrinsic": 108
+    },
+    "gold": {
+     "egocentric": 119,
+     "intrinsic": 108
+    },
+    "neutral_answer": 108,
+    "neutral_implies": "intrinsic",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a7cc12c0e_front_11_shelf",
+    "scene_id": "0a7cc12c0e",
+    "relation": "front",
+    "answers": {
+     "egocentric": 72,
+     "intrinsic": 72
+    },
+    "gold": {
+     "egocentric": 86,
+     "intrinsic": 72
+    },
+    "neutral_answer": 72,
+    "neutral_implies": "intrinsic",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a7cc12c0e_front_30_bottle",
+    "scene_id": "0a7cc12c0e",
+    "relation": "front",
+    "answers": {
+     "egocentric": 77,
+     "intrinsic": 77
+    },
+    "gold": {
+     "egocentric": 5,
+     "intrinsic": 77
+    },
+    "neutral_answer": 77,
+    "neutral_implies": "intrinsic",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a7cc12c0e_left_30_shelf",
+    "scene_id": "0a7cc12c0e",
+    "relation": "left",
+    "answers": {
+     "egocentric": 33,
+     "intrinsic": 33
+    },
+    "gold": {
+     "egocentric": 72,
+     "intrinsic": 33
+    },
+    "neutral_answer": 33,
+    "neutral_implies": "intrinsic",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a7cc12c0e_right_123_box",
+    "scene_id": "0a7cc12c0e",
+    "relation": "right",
+    "answers": {
+     "egocentric": 84,
+     "intrinsic": 84
+    },
+    "gold": {
+     "egocentric": 89,
+     "intrinsic": 84
+    },
+    "neutral_answer": 84,
+    "neutral_implies": "intrinsic",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a7cc12c0e_left_123_shelf",
+    "scene_id": "0a7cc12c0e",
+    "relation": "left",
+    "answers": {
+     "egocentric": 23,
+     "intrinsic": 23
+    },
+    "gold": {
+     "egocentric": 107,
+     "intrinsic": 23
+    },
+    "neutral_answer": 23,
+    "neutral_implies": "intrinsic",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a7cc12c0e_right_123_shelf",
+    "scene_id": "0a7cc12c0e",
+    "relation": "right",
+    "answers": {
+     "egocentric": 86,
+     "intrinsic": 86
+    },
+    "gold": {
+     "egocentric": 23,
+     "intrinsic": 86
+    },
+    "neutral_answer": 86,
+    "neutral_implies": "intrinsic",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a7cc12c0e_left_133_lamp",
+    "scene_id": "0a7cc12c0e",
+    "relation": "left",
+    "answers": {
+     "egocentric": 101,
+     "intrinsic": 101
+    },
+    "gold": {
+     "egocentric": 34,
+     "intrinsic": 101
+    },
+    "neutral_answer": 101,
+    "neutral_implies": "intrinsic",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0a7cc12c0e_front_133_lamp",
+    "scene_id": "0a7cc12c0e",
+    "relation": "front",
+    "answers": {
+     "egocentric": 34,
+     "intrinsic": 34
+    },
+    "gold": {
+     "egocentric": 101,
+     "intrinsic": 34
+    },
+    "neutral_answer": 34,
+    "neutral_implies": "intrinsic",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0b031f3119_front_20_computer-tower",
+    "scene_id": "0b031f3119",
+    "relation": "front",
+    "answers": {
+     "egocentric": 69,
+     "intrinsic": 69
+    },
+    "gold": {
+     "egocentric": 85,
+     "intrinsic": 69
+    },
+    "neutral_answer": 69,
+    "neutral_implies": "intrinsic",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0b031f3119_front_20_keyboard",
+    "scene_id": "0b031f3119",
+    "relation": "front",
+    "answers": {
+     "egocentric": 30,
+     "intrinsic": 30
+    },
+    "gold": {
+     "egocentric": 31,
+     "intrinsic": 30
+    },
+    "neutral_answer": 30,
+    "neutral_implies": "intrinsic",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0b031f3119_front_20_monitor",
+    "scene_id": "0b031f3119",
+    "relation": "front",
+    "answers": {
+     "egocentric": 11,
+     "intrinsic": 11
+    },
+    "gold": {
+     "egocentric": 40,
+     "intrinsic": 11
+    },
+    "neutral_answer": 11,
+    "neutral_implies": "intrinsic",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0b031f3119_front_20_mouse",
+    "scene_id": "0b031f3119",
+    "relation": "front",
+    "answers": {
+     "egocentric": 51,
+     "intrinsic": 51
+    },
+    "gold": {
+     "egocentric": 29,
+     "intrinsic": 51
+    },
+    "neutral_answer": 51,
+    "neutral_implies": "intrinsic",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0b031f3119_front_20_office-chair",
+    "scene_id": "0b031f3119",
+    "relation": "front",
+    "answers": {
+     "egocentric": 75,
+     "intrinsic": 75
+    },
+    "gold": {
+     "egocentric": 76,
+     "intrinsic": 75
+    },
+    "neutral_answer": 75,
+    "neutral_implies": "intrinsic",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0b031f3119_left_20_table",
+    "scene_id": "0b031f3119",
+    "relation": "left",
+    "answers": {
+     "egocentric": 79,
+     "intrinsic": 79
+    },
+    "gold": {
+     "egocentric": 87,
+     "intrinsic": 79
+    },
+    "neutral_answer": 79,
+    "neutral_implies": "intrinsic",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0b031f3119_right_20_table",
+    "scene_id": "0b031f3119",
+    "relation": "right",
+    "answers": {
+     "egocentric": 87,
+     "intrinsic": 87
+    },
+    "gold": {
+     "egocentric": 79,
+     "intrinsic": 87
+    },
+    "neutral_answer": 87,
+    "neutral_implies": "intrinsic",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0b031f3119_right_20_trash-can",
+    "scene_id": "0b031f3119",
+    "relation": "right",
+    "answers": {
+     "egocentric": 16,
+     "intrinsic": 16
+    },
+    "gold": {
+     "egocentric": 61,
+     "intrinsic": 16
+    },
+    "neutral_answer": 16,
+    "neutral_implies": "intrinsic",
+    "outcome": "frame_blind",
+    "error": ""
+   },
+   {
+    "pair_id": "0b031f3119_right_58_monitor",
+    "scene_id": "0b031f3119",
+    "relation": "right",
+    "answers": {
+     "egocentric": 64,
+     "intrinsic": 64
+    },
+    "gold": {
+     "egocentric": 11,
+     "intrinsic": 64
+    },
+    "neutral_answer": 64,
+    "neutral_implies": "intrinsic",
+    "outcome": "frame_blind",
+    "error": ""
+   }
+  ]
+ }
+}

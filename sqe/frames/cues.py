@@ -114,7 +114,11 @@ LANDMARK_VIEWPOINT_RE = re.compile(
 #: in "the chair, seen from the door" and a counting origin in "the third chair
 #: from the door". Tagged separately so the parser can drop it when the sentence
 #: is counting something.
-LANDMARK_VIEWPOINT_FROM_RE = re.compile(rf"\bfrom (?:the )?({_LANDMARKS})\b")
+#: The `(?!'s)` matters. "from the bed's point of view" names the bed's own
+#: frame, not a place a person stands, and without the lookahead this pattern
+#: fired inside it and silently relocated the observer to the bed.
+LANDMARK_VIEWPOINT_FROM_RE = re.compile(
+    rf"\bfrom (?:the )?({_LANDMARKS})\b(?!'s)")
 ENTERING_RE = re.compile(
     r"\b(?:as|when) (?:you|i|we) (?:walk|come|enter|step) (?:in|into|inside|"
     r"through the door)\b")

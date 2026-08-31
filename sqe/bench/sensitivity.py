@@ -137,11 +137,22 @@ def summarise(rows: Sequence[SensitivityRow],
                       if r.policy_answer is not None and fk in r.forced]
         changed = [r for r in considered if r.forced[fk] != r.policy_answer]
         no_answer = [r for r in considered if r.forced[fk] is None]
+        # Two flip rates. The plain one counts "no answer under this frame" as a
+        # change, because None != an object id -- so a frame that simply cannot
+        # be built inflates it. The second excludes those, and is the one to
+        # read. An earlier version of this report claimed no-answer cases were
+        # counted as unchanged, which was the opposite of what the code did.
+        answered = [r for r in considered if r.forced[fk] is not None]
+        changed_answered = [r for r in answered
+                            if r.forced[fk] != r.policy_answer]
         flips[fk] = {
             "n_considered": len(considered),
             "n_changed": len(changed),
             "flip_rate": (len(changed) / len(considered)) if considered else None,
             "n_no_answer_under_this_frame": len(no_answer),
+            "n_answered": len(answered),
+            "flip_rate_excluding_no_answer": (
+                len(changed_answered) / len(answered)) if answered else None,
         }
     out["flip_rate_vs_fixed_frame"] = flips
 
@@ -190,6 +201,19 @@ def render(summary: Dict, title: str = "Frame sensitivity") -> str:
 
     d = summary["disagreement"]
     L = [f"# {title}", ""]
+    if summary.get("enriched") is not None:
+        if summary["enriched"]:
+            L.append("> **This item set is ENRICHED for frame sensitivity.** The "
+                     "proposal generator sorts frame-sensitive candidates first "
+                     "before capping, which makes annotation efficient and makes "
+                     "any rate measured here a rate over *queries selected for "
+                     "being frame-sensitive*, not over queries. Do not quote it "
+                     "as a population rate; see the unenriched run.")
+        else:
+            L.append("> Item set sampled **without** frame-sensitivity "
+                     "enrichment, so rates here are population rates over the "
+                     "generator's candidate space.")
+        L.append("")
     L.append("Measured without annotation. **This is not accuracy.** It is how "
              "much the answer depends on which reference frame is used, which "
              "is the precondition for any accuracy claim: if the frame never "
@@ -231,19 +255,20 @@ def render(summary: Dict, title: str = "Frame sensitivity") -> str:
              "how much the frame choice could matter, not as a measurement of "
              "how much anyone gets wrong.")
     L.append("")
-    L.append("| forced frame | queries | answer changed | flip rate | "
-             "no answer under this frame |")
+    L.append("| forced frame | queries | no answer under it | flip rate "
+             "(counting no-answer as a change) | flip rate (answered only) |")
     L.append("|---|---|---|---|---|")
     for fk, v in summary["flip_rate_vs_fixed_frame"].items():
-        L.append(f"| {fk} | {v['n_considered']} | {v['n_changed']} | "
+        L.append(f"| {fk} | {v['n_considered']} | "
+                 f"{v['n_no_answer_under_this_frame']} | "
                  f"{pct(v['flip_rate'])} | "
-                 f"{v['n_no_answer_under_this_frame']} |")
+                 f"{pct(v.get('flip_rate_excluding_no_answer'))} |")
     L.append("")
-    L.append("The last column matters as much as the flip rate: those queries "
-             "have no answer at all under that frame, usually because the "
-             "anchor's front could not be estimated. They are counted as "
-             "unchanged above, which is another reason the flip rate is not an "
-             "error rate.")
+    L.append("Read the last column. The middle one counts a query with **no "
+             "answer at all** under the forced frame as a change, so a frame "
+             "that simply cannot be constructed -- usually because the anchor's "
+             "front is not estimable -- inflates it. That is a third reason the "
+             "flip rate is the weaker statistic.")
     L.append("")
 
     L.append("## Frames the policy chose")

@@ -1,0 +1,77 @@
+{
+ "n_queries": 882,
+ "n_frame_dependent": 512,
+ "n_frame_independent": 370,
+ "policy_frames_used": {
+  "egocentric": 387,
+  "intrinsic": 120,
+  "world": 1
+ },
+ "disagreement": {
+  "n": 21,
+  "rate": 0.041015625,
+  "note": "two plausible frames, both available and confident, pick different objects"
+ },
+ "flip_rate_vs_fixed_frame": {
+  "egocentric": {
+   "n_considered": 512,
+   "n_changed": 245,
+   "flip_rate": 0.478515625,
+   "n_no_answer_under_this_frame": 233,
+   "n_answered": 279,
+   "flip_rate_excluding_no_answer": 0.043010752688172046
+  },
+  "intrinsic": {
+   "n_considered": 512,
+   "n_changed": 388,
+   "flip_rate": 0.7578125,
+   "n_no_answer_under_this_frame": 324,
+   "n_answered": 188,
+   "flip_rate_excluding_no_answer": 0.3404255319148936
+  },
+  "addressee": {
+   "n_considered": 512,
+   "n_changed": 381,
+   "flip_rate": 0.744140625,
+   "n_no_answer_under_this_frame": 324,
+   "n_answered": 188,
+   "flip_rate_excluding_no_answer": 0.30319148936170215
+  },
+  "world": {
+   "n_considered": 512,
+   "n_changed": 304,
+   "flip_rate": 0.59375,
+   "n_no_answer_under_this_frame": 196,
+   "n_answered": 316,
+   "flip_rate_excluding_no_answer": 0.34177215189873417
+  }
+ },
+ "by_relation_type": {
+  "ordinal": {
+   "n": 54,
+   "disagreement_rate": 0.07407407407407407,
+   "worst_fixed_frame_flip_rate": 0.7777777777777778
+  },
+  "projective_frontal": {
+   "n": 228,
+   "disagreement_rate": 0.02631578947368421,
+   "worst_fixed_frame_flip_rate": 0.6929824561403509
+  },
+  "projective_lateral": {
+   "n": 230,
+   "disagreement_rate": 0.04782608695652174,
+   "worst_fixed_frame_flip_rate": 0.8173913043478261
+  }
+ },
+ "ambiguity_kinds": {
+  "anchor": 354,
+  "weak_match": 236,
+  "score_tie": 272,
+  "frame": 21,
+  "ordinal_tie": 28,
+  "level_even": 5,
+  "ordinal_degenerate": 10
+ },
+ "n_flagged_ambiguous": 640,
+ "enriched": false
+}

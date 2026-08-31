@@ -207,7 +207,9 @@ def _difficulty(n_targets_satisfying: int, frame_sensitive: bool,
 
 def propose_projective(scene: Scene, cfg: RelationConfig,
                        viewpoint: Optional[ViewpointSpec] = None,
-                       max_per_relation: int = 25) -> List[Proposal]:
+                       max_per_relation: int = 25,
+                       enrich: bool = True,
+                       seed: int = 0) -> List[Proposal]:
     """Lateral and frontal proposals, frame-disagreement cases first.
 
     Anchor classes with several instances are allowed. In a real office almost
@@ -250,10 +252,20 @@ def propose_projective(scene: Scene, cfg: RelationConfig,
                     note=(("the frames disagree here; " if sensitive else "")
                           + f"{len(t_objs)} {t_cls}(s), {len(a_objs)} "
                             f"{a_cls}(s) in the scene")))
-        found.sort(key=lambda p: (not p.frame_sensitive,
-                                  -sum(1 for v in p.answers_by_frame.values()
-                                       if v is not None)))
-        out.extend(found[:max_per_relation])
+        # `enrich` puts frame-sensitive candidates first before the cap, which
+        # makes annotation efficient -- and biases any rate measured over the
+        # result. Any statistic computed on an enriched set is a rate over
+        # "queries chosen for being frame-sensitive", not over queries. Use
+        # enrich=False for the unbiased denominator; both are reported.
+        if enrich:
+            found.sort(key=lambda p: (not p.frame_sensitive,
+                                      -sum(1 for v in p.answers_by_frame.values()
+                                           if v is not None)))
+            out.extend(found[:max_per_relation])
+        else:
+            rng = np.random.default_rng(seed + hash(relation) % 10_000)
+            idx = rng.permutation(len(found))[:max_per_relation]
+            out.extend([found[int(i)] for i in idx])
     return out
 
 
@@ -429,9 +441,11 @@ def propose_controls(scene: Scene, cfg: RelationConfig,
 def propose_scene(scene: Scene, cfg: Optional[RelationConfig] = None,
                   viewpoint: Optional[ViewpointSpec] = None,
                   max_projective: int = 25, max_ordinal: int = 30,
-                  max_controls: int = 70) -> List[Proposal]:
+                  max_controls: int = 70, enrich: bool = True,
+                  seed: int = 0) -> List[Proposal]:
     cfg = cfg or RelationConfig.load()
-    props = (propose_projective(scene, cfg, viewpoint, max_projective)
+    props = (propose_projective(scene, cfg, viewpoint, max_projective,
+                                enrich=enrich, seed=seed)
              + propose_ordinals(scene, cfg, viewpoint, max_ordinal)
              + propose_controls(scene, cfg, max_controls))
     seen, out = set(), []

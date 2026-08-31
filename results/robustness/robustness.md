@@ -1,4 +1,4 @@
-# Threshold robustness: 882 queries, 5 ScanNet++ scenes
+# Threshold robustness: unenriched sample, 5 ScanNet++ scenes
 
 The resolver has 47 hand-set numeric constants and, until the benchmark is annotated, no labelled examples they could have been fitted on. So the question is whether the headline sensitivity number is a property of the scenes or of the thresholds.
 
@@ -6,16 +6,16 @@ The resolver has 47 hand-set numeric constants and, until the benchmark is annot
 
 | | frame disagreement rate |
 |---|---|
-| **as configured** | **18.8%** |
-| perturbed, median | 16.1% |
-| perturbed, 10th–90th pct | 12.7% – 19.4% |
-| perturbed, full range | 11.3% – 26.0% |
+| **as configured** | **4.1%** |
+| perturbed, median | 3.7% |
+| perturbed, 10th–90th pct | 2.9% – 5.1% |
+| perturbed, full range | 2.0% – 6.8% |
 
 | relation type | median | min | max |
 |---|---|---|---|
 | ordinal | 7.4% | 7.4% | 7.4% |
-| projective_frontal | 14.0% | 11.0% | 30.7% |
-| projective_lateral | 20.4% | 11.7% | 25.7% |
+| projective_frontal | 3.3% | 1.8% | 6.6% |
+| projective_lateral | 3.9% | 0.4% | 7.0% |
 
 Held fixed, because they act at scene-build time rather than query time and varying them means rebuilding every scene per trial:
 

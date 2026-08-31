@@ -26,37 +26,88 @@ The frame trichotomy itself is not new — it is standard in linguistics, and
 Levinson (2003) devotes a chapter to it. **The contribution here is making it
 operational in a 3-D pipeline and measuring it, not discovering it.**
 
-## How often does the frame actually change the answer?
+## The strongest finding: Sr3D fixes the frame and mislabels it
 
-On **882 queries over 5 ScanNet++ scenes with ground-truth perception**:
+**Sr3D** — 83,572 template-generated utterances, the field's standard spatial-
+reference benchmark for 3-D grounding — has a relation class called
+**`allocentric`** covering "left", "right", "front", "back", at ~8% of the data,
+so **≈6,700 projective utterances**. The ReferIt3D ECCV 2020 supplementary
+(§2.5, p.9) defines it:
 
-### Two plausible frames pick different objects on 12–20% of frame-dependent queries
-#### 512 frame-dependent queries · **5 ScanNet++ scenes** · **ground-truth perception** · no annotation used
+> "These relations indicate where a target object might exist **with respect to
+> the anchor orientation** […] whether the anchor objects have an **intrinsic
+> front view** […] we utilized the **Scan2CAD** annotations that provide **9DOF
+> alignments** […] we create **four oriented sections** (front, back, left, and
+> right)."
 
-18.8% as configured; median 16.1% and never below 11.3% across 20 trials that
-jitter all 43 query-time constants by ±30%
-([results/robustness/](results/robustness/robustness.md)).
-Highest for lateral relations (24.8%), lower for frontal (15.4%).
+That is the **intrinsic** frame. *Allocentric*, in the standard taxonomy
+(Levinson 2003, ch. 2), means the world frame — the opposite. And searching the
+whole 13-page supplementary for `camera`, `viewer`, `observer`, `point of view`
+and `egocentric` returns **zero matches**: Sr3D contains no viewer-relative
+projective utterances at all, not a few, none. The relative reading — the
+dominant one for "left of X" in ordinary English — is absent by construction.
 
-Five scenes is thin and ground-truth perception is generous — both are stated
-here rather than in a limitations section further down, because they are the
-first two things a reader should weigh. Per-scene numbers are in
-[results/sensitivity/](results/sensitivity/sensitivity.md).
+To be fair to the authors: the convention **is** documented, in supplementary
+material. So the claim is not "they never say so". It is that a single intrinsic
+convention is applied uniformly to ~6,700 utterances under a name that denotes
+the opposite frame, so a model evaluated on Sr3D is rewarded for the intrinsic
+reading and penalised for the relative one, and no headline number reveals it.
 
-This is the number to quote, for two reasons. It makes no reference to *which*
-frame is correct, so it does not depend on my policy being right. And it is a
-lower bound: a frame that could not be constructed at all — because an anchor's
-front was not estimable — counts as agreement here, not as disagreement.
+How much does that choice cost? On my five ScanNet++ scenes, forcing the
+intrinsic frame changes **34.0%** of answerable frame-dependent answers relative
+to the natural-default policy. Details and what remains to be checked:
+**[docs/EXTERNAL_BENCHMARK_AUDIT.md](docs/EXTERNAL_BENCHMARK_AUDIT.md)**.
 
-A second, **weaker** statistic: forcing one fixed convention changes the answer
-on 38.7–58.8% of frame-dependent queries depending on the convention. That is
-*not* an error rate — it measures divergence from my policy's answer, and the
-policy has not yet been validated against human labels. Full table and caveats
-in [results/sensitivity/](results/sensitivity/sensitivity.md).
+## How often does the frame change the answer?
 
-**No accuracy number is claimed yet.** Accuracy needs the hand-annotated frame
-labels; 882 proposals are generated and waiting. See
-[the benchmark section](#the-benchmark).
+On **882 queries over 5 ScanNet++ scenes, ground-truth perception, no annotation
+used**:
+
+### Two plausible frames pick different objects on 4.1% of frame-dependent queries
+#### unenriched random sample · 21 of 512 · lateral 4.8%, frontal 2.6%
+#### stable under threshold perturbation: median 3.7%, 2.9–5.1% at the 10th–90th percentile
+
+Across 20 trials jittering all 43 query-time constants by ±30%, the rate stays in
+**2.0–6.8%** ([results/robustness/](results/robustness/robustness.md)). Unlike the
+enriched figure, 4.1% sits *near* the perturbed median rather than above it, so it
+is not a lucky threshold setting.
+
+**Correction.** An earlier version of this README said 18.8%. That number came
+from an item set the proposal generator had **enriched for frame sensitivity** —
+it sorts frame-sensitive candidates first, then caps — so 18.8% was a rate over
+*queries selected for being frame-sensitive*, inflated **4.6×**. Both runs are
+kept: [unenriched](results/sensitivity_unenriched/sensitivity.md) (the population
+rate, quote this) and [enriched](results/sensitivity/sensitivity.md) (which says
+only that deliberately looking for such queries finds 96 in 512). Every report
+now prints a banner declaring which it is, and `sqe propose --no-enrich` samples
+at random.
+
+The mutual-disagreement rate is the one to quote: it makes no reference to which
+frame is *correct*, so it does not depend on my policy being right, and it is a
+lower bound — a frame that cannot be constructed counts as agreement.
+
+Forcing a single fixed convention changes **34.0%** (intrinsic), **30.3%**
+(addressee) or **34.2%** (world) of *answerable* frame-dependent answers, against
+4.3% for egocentric — which is low only because the policy already chooses
+egocentric on 387 of 512. That is **not** an error rate: it measures divergence
+from my policy, which is itself unvalidated.
+
+## Can a system be instructed into a frame?
+
+`sqe minimal-pairs` builds sentences differing **only** in an explicit marker of
+whose left is meant, on scenes where the two readings provably pick different
+objects — 35 validated pairs from 5 scenes, plus 35 non-contrastive control
+paraphrases matched for awkwardness.
+
+The metric is calibrated against systems whose behaviour is known in advance: the
+cue-following resolver scores **100% switched-correctly** (a circularity check —
+the pairs were built from its own frames, so this only proves the stimulus is
+well-formed), and all four pinned-frame controls score **100% frame-blind** with
+**100% control-stability**, which is what makes the `frame_blind` label
+attributable rather than a parse artefact.
+
+**No model has been run.** It needs an API key. `sqe frame-probe --model <name>`
+is the command.
 
 This repo makes the reference frame an explicit, first-class, **measured** part
 of the pipeline: a frame-aware relation resolver, a hand-annotated benchmark
@@ -259,11 +310,13 @@ sqe annotate --items benchmark/queries/proposals_5scenes.jsonl \
 sqe viewer --scene 0b031f3119 --items benchmark/queries/scannetpp_5scenes.jsonl
 ```
 
-**The annotation tool is blind by default** — it does not show what the resolver
-would answer. A human confirming a system's own prediction produces a benchmark
-that measures agreement rather than correctness, and that is the easiest way to
-make the headline number meaningless. `--show-prediction` exists for debugging
-and stamps the items so the report can separate them.
+**Annotation is blind by construction, not by convention.** Neither tool shows
+what the resolver would answer: the terminal tool never asks it, and the viewer's
+resolution endpoints return 403 while `--items` is set, with the resolve controls
+hidden. A human confirming a system's own prediction produces a benchmark that
+measures agreement rather than correctness — the easiest way to make the headline
+number meaningless. `--show-prediction` exists for debugging in the terminal tool
+and stamps every item it touches so the report can separate them.
 
 Aim for 300–500 items, hard ones first. What matters most is that the `frame`
 field says which reading the sentence means, and that genuinely ambiguous queries
@@ -306,7 +359,9 @@ exact ground truth:
 | Front estimation vs annotation `dominantNormal` | **83–86% same axis** on real scenes |
 | Self-test | **46/46** hand-derived frame checks |
 | Room-canonical forward margin, office `0b031f3119` | **0.024** — the allocentric frame is undetermined |
-| Frame disagreement, 512 frame-dependent queries | **18.8%** (12.7–19.4% under ±30% threshold jitter) |
+| Frame disagreement, 512 frame-dependent queries | **4.1%** unenriched (18.8% on a frame-sensitivity-enriched sample) |
+| Sr3D `allocentric` class | ~6,700 utterances, intrinsic frame, zero viewer-relative — verified from the supplementary |
+| Minimal-pair probe controls | cue-following 100% switched; all pinned frames 100% frame-blind at 100% control-stability |
 | Scene build / query latency | ~7 s per scene / **~2–15 ms** per query |
 | Box overlays on real frames | boxes land on the objects across all scenes checked (see `renders/`) |
 | Dubious GT instances found | **15 of 495 (3.0%)**, excluded from proposals |
@@ -329,9 +384,13 @@ Stated plainly, because these are the things a reviewer will find:
   mean and from the geometry of ordinary rooms, and documented with rationales —
   but pre-registration only earns credibility once an evaluation has run against
   it. `sqe robustness` is the partial answer: the sensitivity result holds
-  (11.3–26.0%) under ±30% jitter of all 43 query-time constants, so the *size of
+  (2.0–6.8%) under ±30% jitter of all 43 query-time constants, so the *size of
   the frame problem* does not hinge on my choices. It says nothing about whether
   the resolver's answers are the ones a person would give.
+* **The item set is mine, so it scores my resolver, not the field.** The
+  recorded decision is to move the benchmark onto real Nr3D utterances; until
+  that happens, every rate here is a property of my generator's candidate space.
+  See [docs/EXTERNAL_BENCHMARK_AUDIT.md](docs/EXTERNAL_BENCHMARK_AUDIT.md).
 * **The synthetic suite is saturated and partly circular.** 100% on 25
   hand-derived items is a regression test, not evidence of generalisation — the
   rooms were built by me, and the thresholds were adjusted while looking at them.

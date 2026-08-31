@@ -128,6 +128,13 @@ def _viewpoint_from(body: dict) -> ViewpointSpec:
 
 def make_handler(scenes: Dict[str, Scene], cfg: RelationConfig,
                  items_path: Optional[str]):
+    #: In annotation mode the resolution endpoints are switched off. Blindness
+    #: was previously a matter of convention: `--items` turned the annotation
+    #: panel on but left /api/query serving the answer, the runner-up and the
+    #: ambiguity flags, so an annotator could resolve first and label second
+    #: without meaning to. The README claimed the tool was blind by default,
+    #: which was true of the terminal tool and overstated for the viewer.
+    annotating = bool(items_path)
     resolvers: Dict[str, Resolver] = {}
     lock = threading.Lock()
 
@@ -180,7 +187,8 @@ def make_handler(scenes: Dict[str, Scene], cfg: RelationConfig,
                 return self._file("style.css", "text/css")
             if path == "/api/scenes":
                 return self._json({"scenes": sorted(scenes),
-                                   "annotating": bool(items_path)})
+                                   "annotating": annotating,
+                                   "resolution_disabled": annotating})
             m = re.fullmatch(r"/api/scene/(.+)", path)
             if m:
                 sid = m.group(1)
@@ -200,8 +208,20 @@ def make_handler(scenes: Dict[str, Scene], cfg: RelationConfig,
             path = unquote(urlparse(self.path).path)
             body = self._read_body()
             if path == "/api/query":
+                if annotating:
+                    return self._json(
+                        {"error": "resolution is disabled while annotating, so "
+                                  "the label cannot be influenced by the "
+                                  "system's answer. Restart the viewer without "
+                                  "--items to explore resolutions."}, 403)
                 return self._query(body)
             if path == "/api/frames":
+                if annotating:
+                    # the frame axes alone are fine, but this endpoint is how the
+                    # front end learns which frames are available and confident,
+                    # which is a hint about the answer
+                    return self._json(
+                        {"error": "disabled while annotating"}, 403)
                 return self._frames(body)
             if path == "/api/annotate":
                 return self._annotate(body)

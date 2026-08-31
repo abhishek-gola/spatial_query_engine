@@ -298,3 +298,75 @@ def test_best_joint_view_returns_minus_one_when_nothing_shows_all():
     assert best_joint_view(src, [near], np.array([0.0, 0.0, 1.0]), stride=1) == 0
     assert best_joint_view(src, [near, far_left], np.array([0.0, 0.0, 1.0]),
                            stride=1) == -1
+
+
+def test_viewer_refuses_to_resolve_while_annotating(studio, tmp_path):
+    """Blindness must be structural, not a convention the annotator can break.
+
+    With --items set, the resolution endpoints return 403. Previously they served
+    the answer, the runner-up and the ambiguity flags, so an annotator could
+    resolve first and label second without meaning to -- while the README claimed
+    the tool was blind.
+    """
+    import json
+    import threading
+    import time
+    import urllib.error
+    import urllib.request
+    from http.server import ThreadingHTTPServer
+
+    from sqe.relations.base import RelationConfig
+    from sqe.viewer.server import make_handler
+
+    items = str(tmp_path / "items.jsonl")
+    scenes = {"synth_studio": studio}
+
+    def start(items_path, port):
+        h = make_handler(scenes, RelationConfig(), items_path)
+        srv = ThreadingHTTPServer(("127.0.0.1", port), h)
+        threading.Thread(target=srv.serve_forever, daemon=True).start()
+        time.sleep(0.3)
+        return srv
+
+    def post(port, path, body):
+        req = urllib.request.Request(
+            f"http://127.0.0.1:{port}{path}",
+            data=json.dumps(body).encode(),
+            headers={"Content-Type": "application/json"})
+        try:
+            with urllib.request.urlopen(req, timeout=10) as r:
+                return r.status, json.loads(r.read())
+        except urllib.error.HTTPError as e:
+            return e.code, json.loads(e.read())
+
+    body = {"scene_id": "synth_studio",
+            "text": "the remote on the coffee table"}
+
+    # annotating: refused
+    srv = start(items, 8811)
+    try:
+        code, out = post(8811, "/api/query", body)
+        assert code == 403, out
+        assert "disabled while annotating" in out["error"]
+        code, out = post(8811, "/api/frames",
+                         {"scene_id": "synth_studio", "object_id": 0})
+        assert code == 403
+        with urllib.request.urlopen("http://127.0.0.1:8811/api/scenes",
+                                    timeout=10) as r:
+            info = json.loads(r.read())
+        assert info["annotating"] and info["resolution_disabled"]
+    finally:
+        srv.shutdown()
+
+    # not annotating: resolution works
+    srv = start(None, 8812)
+    try:
+        code, out = post(8812, "/api/query", body)
+        assert code == 200
+        assert out["target_id"] is not None
+        with urllib.request.urlopen("http://127.0.0.1:8812/api/scenes",
+                                    timeout=10) as r:
+            info = json.loads(r.read())
+        assert not info["annotating"] and not info["resolution_disabled"]
+    finally:
+        srv.shutdown()

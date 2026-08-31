@@ -8,6 +8,8 @@
     sqe annotate  --items FILE                 annotate them (blind by default)
     sqe evaluate  --items FILE --out DIR       run the benchmark and report
     sqe sensitivity --items FILE               how much the frame matters
+    sqe minimal-pairs --scene ID               pairs differing only in the cue
+    sqe frame-probe --pairs FILE               can a system be instructed?
     sqe render    --scene ID --root DATA "..."  boxes drawn on real frames
     sqe audit     --scene ID                   flag dubious annotations
     sqe viewer    --scene ID                   web viewer
@@ -199,7 +201,8 @@ def cmd_propose(args):
         scene = get(sid)
         props = propose_scene(scene, RelationConfig.load(args.config), vp,
                               args.max_projective, args.max_ordinal,
-                              args.max_controls)
+                              args.max_controls, enrich=not args.no_enrich,
+                              seed=args.seed)
         got = to_items(scene, props, viewpoint=vp)
         print(f"{sid}: {len(got)} proposals "
               f"({sum(1 for p in props if p.frame_sensitive)} frame-sensitive)")
@@ -377,6 +380,87 @@ def cmd_robustness(args):
         with open(os.path.join(args.out, "robustness.json"), "w") as f:
             _json.dump(res, f, indent=1, default=float)
         print(f"\nwrote {args.out}/robustness.md and robustness.json")
+    return 0
+
+
+def cmd_minimal_pairs(args):
+    """Generate minimal pairs that differ only in the frame cue."""
+    import json as _json
+    from .bench.minimal_pairs import (generate, make_controls, summarise,
+                                      validate_templates, write_jsonl)
+    problems = validate_templates()
+    if problems:
+        print("the phrasing templates do not read as intended:")
+        for pb in problems:
+            print(f"  {pb}")
+        return 2
+    get = _scene_getter(args)
+    pairs = generate(args.scene, get, RelationConfig.load(args.config),
+                     frames=tuple(args.frames), max_per_scene=args.max_per_scene,
+                     verbose=not args.quiet)
+    write_jsonl(pairs, args.out)
+    print(f"\nwrote {len(pairs)} minimal pairs -> {args.out}")
+    print(_json.dumps(summarise(pairs), indent=1))
+    if args.controls:
+        controls = make_controls(pairs, get, RelationConfig.load(args.config),
+                                 verbose=not args.quiet)
+        with open(args.controls, "w") as f:
+            for c in controls:
+                f.write(_json.dumps(c.to_dict(), sort_keys=True) + "\n")
+        print(f"wrote {len(controls)} control pairs -> {args.controls}")
+    return 0
+
+
+def cmd_frame_probe(args):
+    """Can a system be instructed into a reference frame?"""
+    import json as _json
+    from .bench.minimal_pairs import ControlPair, read_jsonl
+    from .bench.frame_probe import (LLMProbe, ResolverProbe, render, run,
+                                    run_controls, save, summarise,
+                                    summarise_controls)
+    get = _scene_getter(args)
+    cfg = RelationConfig.load(args.config)
+    pairs = read_jsonl(args.pairs)
+    controls = []
+    if args.controls and os.path.exists(args.controls):
+        controls = [ControlPair.from_dict(_json.loads(l))
+                    for l in open(args.controls) if l.strip()]
+    probes = [ResolverProbe(get, cfg)]
+    for fk in args.pinned:
+        probes.append(ResolverProbe(get, cfg, pinned=fk))
+    for m in args.model:
+        probes.append(LLMProbe(model=m, cache_path=args.cache_file))
+
+    summaries, results = {}, {}
+    for probe in probes:
+        res = run(pairs, get, probe, verbose=not args.quiet)
+        s = summarise(res)
+        if controls:
+            s["controls"] = summarise_controls(
+                run_controls(controls, get, probe, verbose=not args.quiet))
+        summaries[probe.name] = s
+        results[probe.name] = res
+        print(f"  {probe.name}: {s['outcomes']}")
+
+    text = render(summaries, args.title)
+    print()
+    print(text)
+    if args.out:
+        save(args.out, summaries, results, text)
+        print(f"\nwrote {args.out}/frame_probe.md and frame_probe.json")
+
+    # the controls are assertions, not decoration
+    cf = summaries.get("resolver (cue-following)", {}).get("rates", {})
+    if cf and cf.get("switched_correctly", 0) < 0.98:
+        print("\nWARNING: the cue-following resolver did not switch on ~all "
+              "pairs, so the stimulus is malformed and no row above is "
+              "interpretable.")
+    for name, s in summaries.items():
+        if name.startswith("pinned:") and s["rates"]["frame_blind"] < 1.0:
+            print(f"\nWARNING: {name} is not 100% frame-blind "
+                  f"({100 * s['rates']['frame_blind']:.1f}%), so the "
+                  f"frame_blind label is picking up something other than the "
+                  f"frame and the metric is not calibrated.")
     return 0
 
 
@@ -666,6 +750,8 @@ def cmd_sensitivity(args):
     rows = measure(items, get, RelationConfig.load(args.config),
                    progress=not args.quiet)
     summary = summarise(rows)
+    if args.enriched is not None:
+        summary["enriched"] = args.enriched == "yes"
     text = render(summary, args.title)
     print()
     print(text)
@@ -686,6 +772,30 @@ def cmd_viewer(args):
     serve(scenes, host=args.host, port=args.port,
           cfg=RelationConfig.load(args.config),
           items_path=args.items, open_browser=not args.no_browser)
+    return 0
+
+
+def cmd_annotate_ui(args):
+    from .annotate_ui.server import serve
+    from .viz.overlay import scannetpp_frame_source
+    get = _scene_getter(args)
+    sources: Dict[str, object] = {}
+
+    def src_for(sid):
+        if sid not in sources:
+            if not args.root:
+                raise SystemExit(
+                    "the annotation UI needs --root: the pictures come from the "
+                    "capture's rgb.mp4, which is not in the scene cache")
+            sources[sid] = scannetpp_frame_source(args.root, sid)
+        return sources[sid]
+
+    serve(args.items, args.out or args.items, get, src_for,
+          relation_types=args.relation_type, order=args.order,
+          goal=args.goal, annotator=args.annotator,
+          cfg=RelationConfig.load(args.config),
+          host=args.host, port=args.port,
+          open_browser=not args.no_browser)
     return 0
 
 
@@ -765,6 +875,10 @@ def build_parser() -> argparse.ArgumentParser:
                    help="per relation, so x4 for left/right/front/behind")
     p.add_argument("--max-ordinal", type=int, default=30)
     p.add_argument("--max-controls", type=int, default=70)
+    p.add_argument("--no-enrich", action="store_true",
+                   help="sample projective candidates at random instead of "
+                        "frame-sensitive-first; use this for an unbiased rate")
+    p.add_argument("--seed", type=int, default=0)
     _vp(p)
     p.set_defaults(func=cmd_propose)
 
@@ -828,10 +942,49 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--out", default=None)
     p.add_argument("--limit", type=int, default=None)
     p.add_argument("--title", default="Frame sensitivity")
+    p.add_argument("--enriched", default=None, choices=["yes", "no"],
+                   help="declare whether the item set was enriched for frame "
+                        "sensitivity; prints a banner either way")
     p.add_argument("--perception", default="gt", choices=["gt", "openvocab"])
     p.add_argument("--gt-fronts", action="store_true")
     p.add_argument("--forward", default="composite")
     p.set_defaults(func=cmd_sensitivity)
+
+    p = sub.add_parser("minimal-pairs",
+                       help="generate pairs differing only in the frame cue")
+    _add_common(p)
+    p.add_argument("--root", default=None)
+    p.add_argument("--scene", nargs="+", required=True)
+    p.add_argument("--out", default="benchmark/minimal_pairs/pairs.jsonl")
+    p.add_argument("--controls",
+                   default="benchmark/minimal_pairs/controls.jsonl",
+                   help="also write non-contrastive control paraphrases")
+    p.add_argument("--frames", nargs="*", default=["egocentric", "intrinsic"])
+    p.add_argument("--max-per-scene", type=int, default=None)
+    p.add_argument("--perception", default="gt", choices=["gt", "openvocab"])
+    p.add_argument("--gt-fronts", action="store_true")
+    p.add_argument("--forward", default="composite")
+    p.set_defaults(func=cmd_minimal_pairs)
+
+    p = sub.add_parser("frame-probe",
+                       help="can a system be instructed into a frame?")
+    _add_common(p)
+    p.add_argument("--root", default=None)
+    p.add_argument("--pairs", default="benchmark/minimal_pairs/pairs.jsonl")
+    p.add_argument("--controls",
+                   default="benchmark/minimal_pairs/controls.jsonl")
+    p.add_argument("--out", default="results/frame_probe")
+    p.add_argument("--model", nargs="*", default=[],
+                   help="LLM names to probe; needs ANTHROPIC_API_KEY")
+    p.add_argument("--pinned", nargs="*",
+                   default=["egocentric", "intrinsic"],
+                   help="pinned-frame controls to include")
+    p.add_argument("--cache-file", default="results/frame_probe/cache.json")
+    p.add_argument("--title", default="Frame instructability")
+    p.add_argument("--perception", default="gt", choices=["gt", "openvocab"])
+    p.add_argument("--gt-fronts", action="store_true")
+    p.add_argument("--forward", default="composite")
+    p.set_defaults(func=cmd_frame_probe)
 
     p = sub.add_parser("vlm-baseline",
                        help="which reference frame does an LLM implicitly use?")
@@ -940,6 +1093,28 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--forward", default="composite")
     _vp(p)
     p.set_defaults(func=cmd_render)
+
+    p = sub.add_parser("annotate-ui",
+                       help="blind click-to-label annotation UI in the browser")
+    _add_common(p)
+    p.add_argument("--root", default=None,
+                   help="dataset root; needed for the capture frames")
+    p.add_argument("--items", required=True)
+    p.add_argument("--out", default=None)
+    p.add_argument("--annotator", default=os.environ.get("USER", ""))
+    p.add_argument("--relation-type", nargs="*", default=None,
+                   help="only queue these types, e.g. projective_lateral")
+    p.add_argument("--order", default="informative",
+                   choices=["informative", "file"])
+    p.add_argument("--goal", type=int, default=None,
+                   help="queue only this many unannotated items")
+    p.add_argument("--host", default="127.0.0.1")
+    p.add_argument("--port", type=int, default=8766)
+    p.add_argument("--no-browser", action="store_true")
+    p.add_argument("--perception", default="gt", choices=["gt", "openvocab"])
+    p.add_argument("--gt-fronts", action="store_true")
+    p.add_argument("--forward", default="composite")
+    p.set_defaults(func=cmd_annotate_ui)
 
     p = sub.add_parser("viewer", help="serve the web viewer")
     _add_common(p)

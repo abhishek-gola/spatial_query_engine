@@ -51,6 +51,23 @@ WRAPPERS = [
 
 TRAILING = [r"\s*\?$", r"\s*\.$", r"^\s*", r"\s*$"]
 
+#: Epistemic hedges, removed wherever they appear. They carry no spatial content,
+#: and left in place a trailing one lands inside the anchor noun phrase -- "the
+#: mug to the left of the laptop, as far as I can tell" parsed its anchor as
+#: "laptop as far as i can tell". Closed list on purpose: a general subordinate-
+#: clause stripper would eat real content.
+HEDGES = [
+    r"as far as i can tell",
+    r"if i am not mistaken",
+    r"if i'm not mistaken",
+    r"as best i can tell",
+    r"i think",
+    r"i believe",
+    r"i would say",
+    r"presumably",
+    r"apparently",
+]
+
 ATTRIBUTES = {
     # colours
     "red", "green", "blue", "yellow", "black", "white", "grey", "gray",
@@ -162,6 +179,9 @@ def _clean(text: str) -> str:
         if new != s:
             s = " ".join(new.split())
             break
+    for h in HEDGES:
+        s = re.sub(r"\b" + h + r"\b", " ", s)
+    s = " ".join(s.split())
     # "the chair on the left" is not a relation with the anchor "left"; it means
     # the leftmost chair. Rewrite the post-nominal form into the superlative the
     # ordinal extractor already understands. The "of" lookahead keeps the real

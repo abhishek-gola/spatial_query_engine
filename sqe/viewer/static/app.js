@@ -29,6 +29,8 @@ const COL = { dim: 0x39414d, target: 0xffd166, anchor: 0xef476f,
 
 /* ---------------------------------------------------------------- utils */
 const $ = (id) => document.getElementById(id);
+const el2 = (tag, cls, txt) => { const e = document.createElement(tag);
+  if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
 const el = (tag, cls, txt) => { const e = document.createElement(tag);
   if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
 
@@ -561,7 +563,22 @@ async function boot() {
   $('boot').style.display = 'none';
   const info = await getJSON('/api/scenes');
   S.annotating = !!info.annotating;
-  if (S.annotating) $('annotate-box').classList.remove('hidden');
+  if (S.annotating) {
+    $('annotate-box').classList.remove('hidden');
+    // Blind annotation: the server refuses to resolve while --items is set, so
+    // hide the controls that would ask it to. Leaving them visible would just
+    // produce a 403 and look broken.
+    for (const id of ['run', 'force-frame', 'use-camera', 'examples']) {
+      const el = $(id);
+      if (el) el.style.display = 'none';
+    }
+    $('q').placeholder = 'type the query, then click the object it refers to';
+    const note = el2('div', 'small',
+      'blind annotation mode: the resolver is disabled so the label cannot ' +
+      'be influenced by the system\'s answer. Restart without --items to ' +
+      'explore resolutions.');
+    $('annotate-box').insertBefore(note, $('annotate-box').children[1]);
+  }
   const sel = $('scene');
   for (const s of info.scenes) sel.appendChild(el('option', null, s));
   sel.onchange = () => loadScene(sel.value);
