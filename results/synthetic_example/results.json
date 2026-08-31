@@ -1,0 +1,715 @@
+{
+ "generated": "2026-08-31T23:56:08",
+ "split": {
+  "n_items": 25,
+  "n_scenes": 2,
+  "by_relation_type": {
+   "ordinal": 6,
+   "projective_lateral": 6,
+   "projective_frontal": 2,
+   "vertical": 7,
+   "between": 1,
+   "proximity": 2,
+   "containment": 1
+  },
+  "by_frame": {
+   "egocentric": 8,
+   "intrinsic": 5,
+   "any": 11,
+   "world": 1
+  },
+  "by_scene": {
+   "synth_studio": 20,
+   "synth_square": 5
+  },
+  "by_difficulty": {
+   "hard": 10,
+   "medium": 8,
+   "easy": 7
+  },
+  "n_ambiguous": 8,
+  "fraction_ambiguous": 0.32,
+  "n_frame_stated_in_text": 3,
+  "n_frame_dependent": 14,
+  "fraction_frame_dependent": 0.56,
+  "n_with_answers_by_frame": 7,
+  "n_with_gold_parse": 25
+ },
+ "conditions": {
+  "ours (policy frame)": {
+   "n": 25,
+   "accuracy": 1.0,
+   "accuracy_unambiguous_only": 1.0,
+   "accuracy_ambiguous_only": 1.0,
+   "accuracy_frame_dependent": 1.0,
+   "accuracy_frame_independent": 1.0,
+   "accuracy_frame_stated": 1.0,
+   "accuracy_frame_unstated": 1.0,
+   "n_frame_dependent": 14,
+   "n_frame_independent": 11,
+   "by_relation_type": {
+    "between": {
+     "n": 1,
+     "accuracy": 1.0
+    },
+    "containment": {
+     "n": 1,
+     "accuracy": 1.0
+    },
+    "ordinal": {
+     "n": 6,
+     "accuracy": 1.0
+    },
+    "projective_frontal": {
+     "n": 2,
+     "accuracy": 1.0
+    },
+    "projective_lateral": {
+     "n": 6,
+     "accuracy": 1.0
+    },
+    "proximity": {
+     "n": 2,
+     "accuracy": 1.0
+    },
+    "vertical": {
+     "n": 7,
+     "accuracy": 1.0
+    }
+   },
+   "by_gold_frame": {
+    "any": {
+     "n": 11,
+     "accuracy": 1.0
+    },
+    "egocentric": {
+     "n": 8,
+     "accuracy": 1.0
+    },
+    "intrinsic": {
+     "n": 5,
+     "accuracy": 1.0
+    },
+    "world": {
+     "n": 1,
+     "accuracy": 1.0
+    }
+   },
+   "by_difficulty": {
+    "easy": {
+     "n": 7,
+     "accuracy": 1.0
+    },
+    "hard": {
+     "n": 10,
+     "accuracy": 1.0
+    },
+    "medium": {
+     "n": 8,
+     "accuracy": 1.0
+    }
+   },
+   "by_scene": {
+    "synth_square": {
+     "n": 5,
+     "accuracy": 1.0
+    },
+    "synth_studio": {
+     "n": 20,
+     "accuracy": 1.0
+    }
+   },
+   "frames_used": {
+    "egocentric": 9,
+    "intrinsic": 4
+   },
+   "ambiguity_detection": {
+    "tp": 7,
+    "fp": 2,
+    "fn": 1,
+    "tn": 15,
+    "precision": 0.7777777777777778,
+    "recall": 0.875,
+    "f1": 0.823529411764706
+   },
+   "frame_disagreement": {
+    "n_frame_dependent": 14,
+    "n_frames_disagreed": 3,
+    "fraction_frames_disagreed": 0.21428571428571427,
+    "n_disagreed_and_wrong": 0
+   },
+   "errors": {},
+   "median_latency_ms": 1.9409159431234002
+  },
+  "fixed frame: egocentric": {
+   "n": 25,
+   "accuracy": 0.96,
+   "accuracy_unambiguous_only": 0.9411764705882353,
+   "accuracy_ambiguous_only": 1.0,
+   "accuracy_frame_dependent": 0.9285714285714286,
+   "accuracy_frame_independent": 1.0,
+   "accuracy_frame_stated": 0.6666666666666666,
+   "accuracy_frame_unstated": 1.0,
+   "n_frame_dependent": 14,
+   "n_frame_independent": 11,
+   "by_relation_type": {
+    "between": {
+     "n": 1,
+     "accuracy": 1.0
+    },
+    "containment": {
+     "n": 1,
+     "accuracy": 1.0
+    },
+    "ordinal": {
+     "n": 6,
+     "accuracy": 0.8333333333333334
+    },
+    "projective_frontal": {
+     "n": 2,
+     "accuracy": 1.0
+    },
+    "projective_lateral": {
+     "n": 6,
+     "accuracy": 1.0
+    },
+    "proximity": {
+     "n": 2,
+     "accuracy": 1.0
+    },
+    "vertical": {
+     "n": 7,
+     "accuracy": 1.0
+    }
+   },
+   "by_gold_frame": {
+    "any": {
+     "n": 11,
+     "accuracy": 1.0
+    },
+    "egocentric": {
+     "n": 8,
+     "accuracy": 1.0
+    },
+    "intrinsic": {
+     "n": 5,
+     "accuracy": 0.8
+    },
+    "world": {
+     "n": 1,
+     "accuracy": 1.0
+    }
+   },
+   "by_difficulty": {
+    "easy": {
+     "n": 7,
+     "accuracy": 1.0
+    },
+    "hard": {
+     "n": 10,
+     "accuracy": 0.9
+    },
+    "medium": {
+     "n": 8,
+     "accuracy": 1.0
+    }
+   },
+   "by_scene": {
+    "synth_square": {
+     "n": 5,
+     "accuracy": 1.0
+    },
+    "synth_studio": {
+     "n": 20,
+     "accuracy": 0.95
+    }
+   },
+   "frames_used": {
+    "egocentric": 13
+   },
+   "ambiguity_detection": {
+    "tp": 4,
+    "fp": 3,
+    "fn": 4,
+    "tn": 14,
+    "precision": 0.5714285714285714,
+    "recall": 0.5,
+    "f1": 0.5333333333333333
+   },
+   "frame_disagreement": {
+    "n_frame_dependent": 14,
+    "n_frames_disagreed": 0,
+    "fraction_frames_disagreed": 0.0,
+    "n_disagreed_and_wrong": 0
+   },
+   "errors": {},
+   "median_latency_ms": 1.2457079719752073
+  },
+  "fixed frame: intrinsic": {
+   "n": 25,
+   "accuracy": 0.84,
+   "accuracy_unambiguous_only": 0.9411764705882353,
+   "accuracy_ambiguous_only": 0.625,
+   "accuracy_frame_dependent": 0.7142857142857143,
+   "accuracy_frame_independent": 1.0,
+   "accuracy_frame_stated": 0.6666666666666666,
+   "accuracy_frame_unstated": 0.7272727272727273,
+   "n_frame_dependent": 14,
+   "n_frame_independent": 11,
+   "by_relation_type": {
+    "between": {
+     "n": 1,
+     "accuracy": 1.0
+    },
+    "containment": {
+     "n": 1,
+     "accuracy": 1.0
+    },
+    "ordinal": {
+     "n": 6,
+     "accuracy": 0.3333333333333333
+    },
+    "projective_frontal": {
+     "n": 2,
+     "accuracy": 1.0
+    },
+    "projective_lateral": {
+     "n": 6,
+     "accuracy": 1.0
+    },
+    "proximity": {
+     "n": 2,
+     "accuracy": 1.0
+    },
+    "vertical": {
+     "n": 7,
+     "accuracy": 1.0
+    }
+   },
+   "by_gold_frame": {
+    "any": {
+     "n": 11,
+     "accuracy": 1.0
+    },
+    "egocentric": {
+     "n": 8,
+     "accuracy": 0.5
+    },
+    "intrinsic": {
+     "n": 5,
+     "accuracy": 1.0
+    },
+    "world": {
+     "n": 1,
+     "accuracy": 1.0
+    }
+   },
+   "by_difficulty": {
+    "easy": {
+     "n": 7,
+     "accuracy": 1.0
+    },
+    "hard": {
+     "n": 10,
+     "accuracy": 0.7
+    },
+    "medium": {
+     "n": 8,
+     "accuracy": 0.875
+    }
+   },
+   "by_scene": {
+    "synth_square": {
+     "n": 5,
+     "accuracy": 1.0
+    },
+    "synth_studio": {
+     "n": 20,
+     "accuracy": 0.8
+    }
+   },
+   "frames_used": {
+    "intrinsic": 13
+   },
+   "ambiguity_detection": {
+    "tp": 4,
+    "fp": 5,
+    "fn": 4,
+    "tn": 12,
+    "precision": 0.4444444444444444,
+    "recall": 0.5,
+    "f1": 0.47058823529411764
+   },
+   "frame_disagreement": {
+    "n_frame_dependent": 14,
+    "n_frames_disagreed": 0,
+    "fraction_frames_disagreed": 0.0,
+    "n_disagreed_and_wrong": 0
+   },
+   "errors": {},
+   "median_latency_ms": 1.2870419304817915
+  },
+  "fixed frame: world": {
+   "n": 25,
+   "accuracy": 0.96,
+   "accuracy_unambiguous_only": 0.9411764705882353,
+   "accuracy_ambiguous_only": 1.0,
+   "accuracy_frame_dependent": 0.9285714285714286,
+   "accuracy_frame_independent": 1.0,
+   "accuracy_frame_stated": 0.6666666666666666,
+   "accuracy_frame_unstated": 1.0,
+   "n_frame_dependent": 14,
+   "n_frame_independent": 11,
+   "by_relation_type": {
+    "between": {
+     "n": 1,
+     "accuracy": 1.0
+    },
+    "containment": {
+     "n": 1,
+     "accuracy": 1.0
+    },
+    "ordinal": {
+     "n": 6,
+     "accuracy": 0.8333333333333334
+    },
+    "projective_frontal": {
+     "n": 2,
+     "accuracy": 1.0
+    },
+    "projective_lateral": {
+     "n": 6,
+     "accuracy": 1.0
+    },
+    "proximity": {
+     "n": 2,
+     "accuracy": 1.0
+    },
+    "vertical": {
+     "n": 7,
+     "accuracy": 1.0
+    }
+   },
+   "by_gold_frame": {
+    "any": {
+     "n": 11,
+     "accuracy": 1.0
+    },
+    "egocentric": {
+     "n": 8,
+     "accuracy": 1.0
+    },
+    "intrinsic": {
+     "n": 5,
+     "accuracy": 0.8
+    },
+    "world": {
+     "n": 1,
+     "accuracy": 1.0
+    }
+   },
+   "by_difficulty": {
+    "easy": {
+     "n": 7,
+     "accuracy": 1.0
+    },
+    "hard": {
+     "n": 10,
+     "accuracy": 0.9
+    },
+    "medium": {
+     "n": 8,
+     "accuracy": 1.0
+    }
+   },
+   "by_scene": {
+    "synth_square": {
+     "n": 5,
+     "accuracy": 1.0
+    },
+    "synth_studio": {
+     "n": 20,
+     "accuracy": 0.95
+    }
+   },
+   "frames_used": {
+    "world": 13
+   },
+   "ambiguity_detection": {
+    "tp": 4,
+    "fp": 6,
+    "fn": 4,
+    "tn": 11,
+    "precision": 0.4,
+    "recall": 0.5,
+    "f1": 0.4444444444444445
+   },
+   "frame_disagreement": {
+    "n_frame_dependent": 14,
+    "n_frames_disagreed": 0,
+    "fraction_frames_disagreed": 0.0,
+    "n_disagreed_and_wrong": 0
+   },
+   "errors": {},
+   "median_latency_ms": 1.2222910299897194
+  },
+  "oracle frame": {
+   "n": 25,
+   "accuracy": 1.0,
+   "accuracy_unambiguous_only": 1.0,
+   "accuracy_ambiguous_only": 1.0,
+   "accuracy_frame_dependent": 1.0,
+   "accuracy_frame_independent": 1.0,
+   "accuracy_frame_stated": 1.0,
+   "accuracy_frame_unstated": 1.0,
+   "n_frame_dependent": 14,
+   "n_frame_independent": 11,
+   "by_relation_type": {
+    "between": {
+     "n": 1,
+     "accuracy": 1.0
+    },
+    "containment": {
+     "n": 1,
+     "accuracy": 1.0
+    },
+    "ordinal": {
+     "n": 6,
+     "accuracy": 1.0
+    },
+    "projective_frontal": {
+     "n": 2,
+     "accuracy": 1.0
+    },
+    "projective_lateral": {
+     "n": 6,
+     "accuracy": 1.0
+    },
+    "proximity": {
+     "n": 2,
+     "accuracy": 1.0
+    },
+    "vertical": {
+     "n": 7,
+     "accuracy": 1.0
+    }
+   },
+   "by_gold_frame": {
+    "any": {
+     "n": 11,
+     "accuracy": 1.0
+    },
+    "egocentric": {
+     "n": 8,
+     "accuracy": 1.0
+    },
+    "intrinsic": {
+     "n": 5,
+     "accuracy": 1.0
+    },
+    "world": {
+     "n": 1,
+     "accuracy": 1.0
+    }
+   },
+   "by_difficulty": {
+    "easy": {
+     "n": 7,
+     "accuracy": 1.0
+    },
+    "hard": {
+     "n": 10,
+     "accuracy": 1.0
+    },
+    "medium": {
+     "n": 8,
+     "accuracy": 1.0
+    }
+   },
+   "by_scene": {
+    "synth_square": {
+     "n": 5,
+     "accuracy": 1.0
+    },
+    "synth_studio": {
+     "n": 20,
+     "accuracy": 1.0
+    }
+   },
+   "frames_used": {
+    "egocentric": 8,
+    "intrinsic": 5
+   },
+   "ambiguity_detection": {
+    "tp": 3,
+    "fp": 2,
+    "fn": 5,
+    "tn": 15,
+    "precision": 0.6,
+    "recall": 0.375,
+    "f1": 0.4615384615384615
+   },
+   "frame_disagreement": {
+    "n_frame_dependent": 14,
+    "n_frames_disagreed": 0,
+    "fraction_frames_disagreed": 0.0,
+    "n_disagreed_and_wrong": 0
+   },
+   "errors": {},
+   "median_latency_ms": 1.297708018682897
+  },
+  "gold parse": {
+   "n": 25,
+   "accuracy": 1.0,
+   "accuracy_unambiguous_only": 1.0,
+   "accuracy_ambiguous_only": 1.0,
+   "accuracy_frame_dependent": 1.0,
+   "accuracy_frame_independent": 1.0,
+   "accuracy_frame_stated": 1.0,
+   "accuracy_frame_unstated": 1.0,
+   "n_frame_dependent": 14,
+   "n_frame_independent": 11,
+   "by_relation_type": {
+    "between": {
+     "n": 1,
+     "accuracy": 1.0
+    },
+    "containment": {
+     "n": 1,
+     "accuracy": 1.0
+    },
+    "ordinal": {
+     "n": 6,
+     "accuracy": 1.0
+    },
+    "projective_frontal": {
+     "n": 2,
+     "accuracy": 1.0
+    },
+    "projective_lateral": {
+     "n": 6,
+     "accuracy": 1.0
+    },
+    "proximity": {
+     "n": 2,
+     "accuracy": 1.0
+    },
+    "vertical": {
+     "n": 7,
+     "accuracy": 1.0
+    }
+   },
+   "by_gold_frame": {
+    "any": {
+     "n": 11,
+     "accuracy": 1.0
+    },
+    "egocentric": {
+     "n": 8,
+     "accuracy": 1.0
+    },
+    "intrinsic": {
+     "n": 5,
+     "accuracy": 1.0
+    },
+    "world": {
+     "n": 1,
+     "accuracy": 1.0
+    }
+   },
+   "by_difficulty": {
+    "easy": {
+     "n": 7,
+     "accuracy": 1.0
+    },
+    "hard": {
+     "n": 10,
+     "accuracy": 1.0
+    },
+    "medium": {
+     "n": 8,
+     "accuracy": 1.0
+    }
+   },
+   "by_scene": {
+    "synth_square": {
+     "n": 5,
+     "accuracy": 1.0
+    },
+    "synth_studio": {
+     "n": 20,
+     "accuracy": 1.0
+    }
+   },
+   "frames_used": {
+    "egocentric": 9,
+    "intrinsic": 4
+   },
+   "ambiguity_detection": {
+    "tp": 7,
+    "fp": 2,
+    "fn": 1,
+    "tn": 15,
+    "precision": 0.7777777777777778,
+    "recall": 0.875,
+    "f1": 0.823529411764706
+   },
+   "frame_disagreement": {
+    "n_frame_dependent": 14,
+    "n_frames_disagreed": 3,
+    "fraction_frames_disagreed": 0.21428571428571427,
+    "n_disagreed_and_wrong": 0
+   },
+   "errors": {},
+   "median_latency_ms": 2.00908409897238
+  }
+ },
+ "attribution": {
+  "n_failures": 0,
+  "counts": {
+   "unresolvable": 0,
+   "parse": 0,
+   "perception": 0,
+   "frame_unavailable": 0,
+   "frame_convention": 0,
+   "geometry": 0,
+   "ambiguous_item": 0
+  },
+  "fractions": {
+   "unresolvable": null,
+   "parse": null,
+   "perception": null,
+   "frame_unavailable": null,
+   "frame_convention": null,
+   "geometry": null,
+   "ambiguous_item": null
+  },
+  "attribution_order": [
+   "unresolvable",
+   "parse",
+   "perception",
+   "frame_unavailable",
+   "frame_convention",
+   "geometry",
+   "ambiguous_item"
+  ],
+  "by_relation_type": {},
+  "per_item": {},
+  "examples": {},
+  "headline": {
+   "frame_dependent_failures": 0,
+   "of_which_frame_errors": 0,
+   "fraction_of_frame_dependent_failures_that_are_frame_errors": null,
+   "fraction_of_all_failures_that_are_frame_errors": null,
+   "fraction_of_all_failures_that_are_perception": null
+  }
+ },
+ "meta": {
+  "items": [
+   "benchmark/queries/synthetic.jsonl"
+  ],
+  "perception": "gt",
+  "parse": "rules",
+  "config": "defaults"
+ }
+}

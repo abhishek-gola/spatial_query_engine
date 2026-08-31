@@ -8,9 +8,49 @@ exactly that one.
 The part that is actually hard is the phrase **"from the left"**.
 
 > *"Left of the laptop"* — left from whose view? The camera's, the laptop's own
-> front, or the room's canonical axes? Existing pipelines silently pick one and
-> get it wrong constantly. Because the failure looks like a wrong object, it gets
-> counted as a perception error and attacked with a bigger detector.
+> front, or the room's canonical axes? Pipelines that ground spatial language
+> compute this from object coordinates without committing to, or reporting, a
+> frame. Because the resulting failure looks like a wrong object, it gets counted
+> as a perception error and attacked with a bigger detector.
+
+That is a narrow claim and it is checkable, so here is the check. **SpatialRGPT**
+defines its relation set as "left, right, above, below, behind, front …" and
+computes it by traversing object nodes and using "the point cloud centroids and
+bounding boxes" — no frame named. **SpatialVLM** asks "which is more towards the
+left?" and, in one template, "how far is A positioned behind B *relative to the
+camera*" — so the frame is the camera's, stated inside a template string rather
+than as a modelling commitment. Literal quotes, page numbers and the rest of the
+positioning are in **[docs/RELATED_WORK.md](docs/RELATED_WORK.md)**.
+
+The frame trichotomy itself is not new — it is standard in linguistics, and
+Levinson (2003) devotes a chapter to it. **The contribution here is making it
+operational in a 3-D pipeline and measuring it, not discovering it.**
+
+## How often does the frame actually change the answer?
+
+On **882 queries over 5 ScanNet++ scenes with ground-truth perception**:
+
+### Two plausible frames pick different objects on 12–20% of frame-dependent queries
+
+18.8% as configured; median 16.1% and never below 11.3% across 20 trials that
+jitter all 43 query-time constants by ±30%
+([results/robustness/](results/robustness/robustness.md)).
+Highest for lateral relations (24.8%), lower for frontal (15.4%).
+
+This is the number to quote, for two reasons. It makes no reference to *which*
+frame is correct, so it does not depend on my policy being right. And it is a
+lower bound: a frame that could not be constructed at all — because an anchor's
+front was not estimable — counts as agreement here, not as disagreement.
+
+A second, **weaker** statistic: forcing one fixed convention changes the answer
+on 38.7–58.8% of frame-dependent queries depending on the convention. That is
+*not* an error rate — it measures divergence from my policy's answer, and the
+policy has not yet been validated against human labels. Full table and caveats
+in [results/sensitivity/](results/sensitivity/sensitivity.md).
+
+**No accuracy number is claimed yet.** Accuracy needs the hand-annotated frame
+labels; 882 proposals are generated and waiting. See
+[the benchmark section](#the-benchmark).
 
 This repo makes the reference frame an explicit, first-class, **measured** part
 of the pipeline: a frame-aware relation resolver, a hand-annotated benchmark
@@ -249,6 +289,7 @@ exact ground truth:
 | Front estimation vs annotation `dominantNormal` | **83–86% same axis** on real scenes |
 | Self-test | **46/46** hand-derived frame checks |
 | Room-canonical forward margin, office `0b031f3119` | **0.024** — the allocentric frame is undetermined |
+| Frame disagreement, 512 frame-dependent queries | **18.8%** (12.7–19.4% under ±30% threshold jitter) |
 | Scene build / query latency | ~7 s per scene / **~2–15 ms** per query |
 | Box overlays on real frames | boxes land on the objects across all scenes checked (see `renders/`) |
 | Dubious GT instances found | **15 of 495 (3.0%)**, excluded from proposals |
@@ -257,6 +298,35 @@ exact ground truth:
 The last one is a finding in its own right: in all five real rooms the
 room-canonical frame is close to a coin flip, so any system reporting confident
 room-relative directions is reporting one.
+
+## What is not established
+
+Stated plainly, because these are the things a reviewer will find:
+
+* **No accuracy number exists.** Every accuracy, attribution and
+  ambiguity-detection figure in the report is defined against hand annotation
+  that has not been done yet. The sensitivity numbers above are the only
+  quantitative results currently available.
+* **47 hand-set constants, zero labelled examples.** 34 in
+  `configs/relations.yaml` and 13 module-level. They are set from what the words
+  mean and from the geometry of ordinary rooms, and documented with rationales —
+  but pre-registration only earns credibility once an evaluation has run against
+  it. `sqe robustness` is the partial answer: the sensitivity result holds
+  (11.3–26.0%) under ±30% jitter of all 43 query-time constants, so the *size of
+  the frame problem* does not hinge on my choices. It says nothing about whether
+  the resolver's answers are the ones a person would give.
+* **The synthetic suite is saturated and partly circular.** 100% on 25
+  hand-derived items is a regression test, not evidence of generalisation — the
+  rooms were built by me, and the thresholds were adjusted while looking at them.
+  Its value is catching sign and handedness regressions, which it has done
+  repeatedly.
+* **Five scenes.** Enough for a real finding, not enough to claim it
+  generalises. Per-scene tables are in the report so the variance is visible.
+* **Ambiguity flags fire on 74% of queries**, dominated by `anchor` (401 of 882)
+  and `score_tie` (297) — real rooms contain five keyboards and four tables. The
+  claimed kind, `frame`, fires on 96. The report scores each kind separately for
+  exactly this reason; a pooled precision/recall would be dominated by the two
+  kinds that have nothing to do with the contribution.
 
 ## Repository map
 

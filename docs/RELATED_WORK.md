@@ -7,9 +7,15 @@ Citations are marked by how far they have been checked:
 * **`[KB nnn]`** — the paper is in the local library at `../3d-kb` under that id,
   and any claim attributed to it below was read out of the parsed text. Quotes
   are literal.
+* **`[web-verified]`** — checked against the publisher or the project page, with
+  the URL given. Use these freely.
 * **`[unverified]`** — written from memory. Title and first author are probably
   right; **venue and year should be checked before this goes anywhere public.**
   Nothing in this repo's code or claims depends on these.
+
+The two entries the argument actually rests on — Levinson for the frame
+trichotomy, and ReferIt3D for the benchmark comparison — have been promoted to
+`[web-verified]`, since those are the ones an external reader would check first.
 
 The library has 603 papers but its `enrich` stage has not run, so it holds no
 years or venues at all — which is why even the verified entries below carry no
@@ -73,12 +79,17 @@ absolute — is not new; it is standard in linguistics and cognitive science and
 has been for decades. The contribution here is making it operational in a 3D
 pipeline and measuring it, not discovering it.
 
-* **Levinson, S. C. — *Space in Language and Cognition: Explorations in
-  Cognitive Diversity*.** Cambridge University Press. `[unverified]`
+* **Levinson, S. C. (2003) — *Space in Language and Cognition: Explorations in
+  Cognitive Diversity*.** Cambridge University Press. `[web-verified]`
+  <https://www.cambridge.org/core/books/space-in-language-and-cognition/>
+  Chapter 2 is titled "Frames of reference"
+  (<https://www.cambridge.org/core/books/abs/space-in-language-and-cognition/frames-of-reference/41A4C90489EC9DA34C5D05974C437907>).
   The canonical treatment of the intrinsic / relative / absolute trichotomy and
-  of the cross-linguistic variation in which frame a language prefers. This
-  repo's `intrinsic`, `egocentric` and `world` frames map onto that trichotomy;
-  `addressee` is the mirrored relative reading Levinson also discusses.
+  of the cross-linguistic variation in which frame a language prefers; the
+  publisher's description states the book "is concerned with the frames of
+  reference commonly used in spatial language and thinking". This repo's
+  `intrinsic`, `egocentric` and `world` frames map onto that trichotomy;
+  `addressee` is the mirrored relative reading.
 * **Carlson-Radvansky, L. A. and Irwin, D. E. — "Frames of reference in vision
   and language: Where is above?"** *Cognition*. `[unverified]`
   Experimental evidence that speakers switch between frames for the *same*
@@ -112,12 +123,21 @@ library**, which is worth fixing.
   in RGB-D Scans using Natural Language".** `[unverified]`
   The standard 3D grounding benchmark on ScanNet. Free-form descriptions, gold
   target box. No frame annotation.
-* **Achlioptas, P. et al. — "ReferIt3D: Neural Listeners for Fine-Grained 3D
-  Object Identification in Real-World Scenes"** (Nr3D and Sr3D). `[unverified]`
-  Sr3D is machine-generated from spatial relation templates and so inherits
-  whatever frame convention the generator used; Nr3D is human, and therefore
-  contains a mixture of frames that is not labelled. This is precisely the
-  situation this repo's benchmark is designed to un-mix.
+* **Achlioptas, P., Abdelreheem, A., Xia, F., Elhoseiny, M., Guibas, L. (2020)
+  — "ReferIt3D: Neural Listeners for Fine-Grained 3D Object Identification in
+  Real-World Scenes".** ECCV 2020. `[web-verified]`
+  doi:10.1007/978-3-030-58452-8_25 · <https://referit3d.github.io/>
+  Two datasets, and the distinction matters here:
+  **Sr3D** — 83.5K "template-based utterances leveraging spatial relations",
+  so it inherits whatever frame convention the template generator used, applied
+  uniformly.
+  **Nr3D** — 41.5K "natural, free-form utterances collected by deploying a
+  2-player object reference game in 3D scenes", so it contains a *mixture* of
+  frames, unlabelled.
+  Both sizes and both quotes are from the project page. This is precisely the
+  situation this repo's benchmark is designed to un-mix: the frame is either
+  fixed-and-unstated or mixed-and-unlabelled, and neither lets you attribute a
+  failure to it.
 * **Goyal, A., Yang, K., Yang, D., Deng, J. — "Rel3D: A Minimally Contrastive
   Benchmark for Grounding Spatial Relations in 3D".** `[unverified]`
   The nearest relative in spirit: minimally contrastive pairs isolating a single

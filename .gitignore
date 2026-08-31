@@ -4,10 +4,15 @@ __pycache__/
 .pytest_cache/
 .DS_Store
 
-# built artefacts, all reproducible
+# reproducible build artefacts
 cache/
-renders/
-results/
 data/
+renders/
 
-# annotations are NOT ignored: benchmark/queries/*.jsonl is the deliverable
+# Results are ignored by default -- a timestamped run directory is scratch.
+# The two that are actual claims are tracked, because a claim that lives only
+# in an untracked file is not a claim anyone can check.
+results/*
+!results/sensitivity/
+!results/robustness/
+!results/synthetic_example/

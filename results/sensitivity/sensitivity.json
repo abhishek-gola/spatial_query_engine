@@ -1,0 +1,68 @@
+{
+ "n_queries": 882,
+ "n_frame_dependent": 512,
+ "n_frame_independent": 370,
+ "policy_frames_used": {
+  "egocentric": 354,
+  "intrinsic": 153,
+  "world": 1
+ },
+ "disagreement": {
+  "n": 96,
+  "rate": 0.1875,
+  "note": "two plausible frames, both available and confident, pick different objects"
+ },
+ "flip_rate_vs_fixed_frame": {
+  "egocentric": {
+   "n_considered": 512,
+   "n_changed": 198,
+   "flip_rate": 0.38671875,
+   "n_no_answer_under_this_frame": 158
+  },
+  "intrinsic": {
+   "n_considered": 512,
+   "n_changed": 301,
+   "flip_rate": 0.587890625,
+   "n_no_answer_under_this_frame": 185
+  },
+  "addressee": {
+   "n_considered": 512,
+   "n_changed": 273,
+   "flip_rate": 0.533203125,
+   "n_no_answer_under_this_frame": 181
+  },
+  "world": {
+   "n_considered": 512,
+   "n_changed": 300,
+   "flip_rate": 0.5859375,
+   "n_no_answer_under_this_frame": 118
+  }
+ },
+ "by_relation_type": {
+  "ordinal": {
+   "n": 54,
+   "disagreement_rate": 0.07407407407407407,
+   "worst_fixed_frame_flip_rate": 0.7777777777777778
+  },
+  "projective_frontal": {
+   "n": 228,
+   "disagreement_rate": 0.15350877192982457,
+   "worst_fixed_frame_flip_rate": 0.6403508771929824
+  },
+  "projective_lateral": {
+   "n": 230,
+   "disagreement_rate": 0.24782608695652175,
+   "worst_fixed_frame_flip_rate": 0.7521739130434782
+  }
+ },
+ "ambiguity_kinds": {
+  "frame": 96,
+  "anchor": 401,
+  "score_tie": 297,
+  "weak_match": 114,
+  "ordinal_tie": 28,
+  "level_even": 5,
+  "ordinal_degenerate": 10
+ },
+ "n_flagged_ambiguous": 653
+}
