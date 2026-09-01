@@ -1,9 +1,21 @@
 # Spatial query engine — reference-frame-aware relation resolution
 
-You walk through a room filming with a phone. The system builds a 3-D map that
-knows what each object is and where it sits relative to everything else, so you
-can type *"the second mug from the left on the middle shelf"* and it points at
-exactly that one.
+Type *"the second mug from the left on the middle shelf"* at an indoor 3-D scan
+and it points at exactly that one.
+
+The input is a reconstructed mesh plus registered camera poses -- a phone capture,
+for the ScanNet++ scans used here. **Reconstruction and instance segmentation are
+inputs to this project, not contributions of it.** The default configuration reads
+ScanNet++'s own mesh, poses and ground-truth instances, and that is deliberate:
+the whole point is to attribute a wrong answer to the *reference frame* rather
+than to perception, which is only possible if perception error is held near zero.
+An open-vocabulary segmentation backend exists and its quality is measured
+(recall@0.25 = 0.63, mean IoU 0.34), but it is a replaceable component.
+
+What the system does add: it estimates which way each object faces, builds five
+competing reference frames around an anchor, resolves the sentence in an explicit
+one, and reports when two readings pick different objects instead of choosing
+quietly.
 
 The part that is actually hard is the phrase **"from the left"**.
 
@@ -104,9 +116,11 @@ from my policy, which is itself unvalidated.
 ## Can a system be instructed into a frame?
 
 `sqe minimal-pairs` builds sentences differing **only** in an explicit marker of
-whose left is meant, on scenes where the two readings provably pick different
-objects — 35 validated pairs from 4 of the 5 scenes, plus 35 non-contrastive control
-paraphrases matched for awkwardness.
+whose left is meant, on layouts where the two readings pick different objects —
+35 validated pairs from 4 of the 5 scenes, plus 35 non-contrastive control
+paraphrases matched for awkwardness. "Pick different objects" is established by
+this resolver's own geometry, which also generated the pairs; that circularity is
+what the controls below exist to bound.
 
 The metric is calibrated against systems whose behaviour is known in advance: the
 cue-following resolver scores **100% switched-correctly** (a circularity check —
@@ -117,12 +131,18 @@ attributable rather than a parse artefact.
 
 ### The result
 
-**The finding is the default, not the cue.** Given the plain, unmarked sentence
-— *the cabinet to the left of the bed* — with the observer's position stated,
-Claude Opus 5's answer matches the **viewer-relative** reading on 22 of 35 pairs,
-the object's own frame on 4, and neither on 9. Even on *in front of* / *behind*,
-where the object's own frame is the entrenched English default, it goes
-viewer-first, **9 to 3**.
+**The finding is the default, not the cue.** Claude Opus 5 was given each scene
+**as text** — object ids, class names, box centres and sizes, plus the observer's
+position and look direction. No images. Asked which object the plain, unmarked
+sentence refers to (*the cabinet to the left of the bed*), its answer matches the
+**viewer-relative** reading on 22 of 35 pairs, the object's own frame on 4, and
+neither on 9.
+
+There are two candidate answers per pair, so chance is a coin flip. Restricted to
+the 26 pairs whose answer landed on either frame, that is **22 of 26 = 85%
+viewer-relative (95% CI 66-94%, one-sided binomial p = 2.7e-4)**. Even on *in
+front of* / *behind*, where the object's own frame is the entrenched English
+default, it goes viewer-first, **9 to 3**.
 
 That is the number that makes the Sr3D finding bite: the standard benchmark's
 projective class is computed entirely in the anchor's intrinsic frame, and the
@@ -141,7 +161,11 @@ agreement about the unmarked sentence isolates the claim:
 | Claude Opus 5 *(self-administered)* | 16 of 35 | 12 | **2** | 1 | 1 |
 | Claude Haiku 4.5 *(self-administered)* | 13 of 35 | 1 | **7** | 1 | 3 |
 
-On that subset the cue mostly *does* land: 12 of 16. **The pooled rate over all
+On that subset the cue mostly *does* land: **12 of 16 (95% CI 51-90%, p = 0.038)**
+— so this is not a model that cannot represent frames. On the other 19 pairs the
+model and I read the plain sentence differently and **there is no ground truth
+saying which of us is right**; that is the main limit on everything in this
+section. **The pooled rate over all
 35 pairs — 42.9% switched, 25.7% frame-blind — is in
 `results/frame_probe/frame_probe.md` and should not be quoted.** It mixes in
 every item where the model and I simply read the plain sentence differently, so
@@ -467,6 +491,15 @@ room-relative directions is reporting one.
 
 Stated plainly, because these are the things a reviewer will find:
 
+* **Perception is given, not solved.** Every number here is produced from
+  ScanNet++'s mesh, its registered camera poses and its ground-truth instance
+  annotations. Holding perception fixed is what makes it possible to charge a
+  wrong answer to the reference frame rather than to detection — but it also
+  means nothing in this README has been tested against real segmentation error.
+  The open-vocabulary backend is the only perception this project contributes,
+  it is measured at recall@0.25 = 0.63 / mean IoU 0.34, and it is not
+  competitive with a learned proposal network. Re-running the whole report under
+  `--perception openvocab` is the obvious next experiment and has not been done.
 * **No accuracy number exists.** Every accuracy, attribution and
   ambiguity-detection figure in the report is defined against hand annotation
   that has not been done yet. The sensitivity numbers above are the only
@@ -532,8 +565,9 @@ sqe/
 
 docs/METHOD.md        the reasoning and the experimental design
 docs/RELATED_WORK.md  positioning, with the quotes the gap claim rests on
-docs/POST_DRAFT.md    write-up draft, ambiguity reported per kind
 docs/CONVENTIONS.md   every sign convention, in one place
+docs/EXTERNAL_BENCHMARK_AUDIT.md  what Sr3D's projective class actually computes
+docs/FRAME_PROBE_PROTOCOL.md      the minimal-pair experiment, controls and blinding
 configs/relations.yaml every physical threshold, with its rationale
 run_benchmark.sh      build -> propose -> annotate -> evaluate
 ```
