@@ -26,13 +26,16 @@ The frame trichotomy itself is not new — it is standard in linguistics, and
 Levinson (2003) devotes a chapter to it. **The contribution here is making it
 operational in a 3-D pipeline and measuring it, not discovering it.**
 
-## The strongest finding: Sr3D fixes the frame and mislabels it
+## The strongest finding: the standard benchmark has no viewer-relative "left"
 
-**Sr3D** — 83,572 template-generated utterances, the field's standard spatial-
-reference benchmark for 3-D grounding — has a relation class called
-**`allocentric`** covering "left", "right", "front", "back", at ~8% of the data,
-so **≈6,700 projective utterances**. The ReferIt3D ECCV 2020 supplementary
-(§2.5, p.9) defines it:
+**Sr3D** — 83,572 template-generated utterances, the field's standard
+spatial-reference benchmark for 3-D grounding — has one relation class covering
+"left", "right", "front" and "back", called **`allocentric`**. Table 1 of the
+ReferIt3D ECCV 2020 paper puts it at **1,880 contexts / 3,760 utterances, 4.50%
+of Sr3D**, and the paper's own definition (§Spatial References, iv) says what it
+computes: the target's location "with respect to the **intrinsic
+self-orientation** of an anchor". The supplementary (§2.5, p.9) gives the
+machinery:
 
 > "These relations indicate where a target object might exist **with respect to
 > the anchor orientation** […] whether the anchor objects have an **intrinsic
@@ -40,22 +43,28 @@ so **≈6,700 projective utterances**. The ReferIt3D ECCV 2020 supplementary
 > alignments** […] we create **four oriented sections** (front, back, left, and
 > right)."
 
-That is the **intrinsic** frame. *Allocentric*, in the standard taxonomy
-(Levinson 2003, ch. 2), means the world frame — the opposite. And searching the
-whole 13-page supplementary for `camera`, `viewer`, `observer`, `point of view`
-and `egocentric` returns **zero matches**: Sr3D contains no viewer-relative
-projective utterances at all, not a few, none. The relative reading — the
-dominant one for "left of X" in ordinary English — is absent by construction.
+That is the **intrinsic** frame, and it is a deliberate design consequence rather
+than an oversight. View-independence is an explicit goal of the work, stated in
+the introduction — "*without a camera view dependency*", "*bypass camera view
+dependency*", and cameras randomised between speaker and listener to "*remove any
+camera view bias*". Take the camera out of the loop and the anchor's own front is
+the only frame left for left/right, which is exactly why the generator reaches
+for PartNet fronts and Scan2CAD alignments.
 
-To be fair to the authors: the convention **is** documented, in supplementary
-material. So the claim is not "they never say so". It is that a single intrinsic
-convention is applied uniformly to ~6,700 utterances under a name that denotes
-the opposite frame, so a model evaluated on Sr3D is rewarded for the intrinsic
-reading and penalised for the relative one, and no headline number reveals it.
+Which is what makes it structural. Searching the whole 13-page supplementary for
+`camera`, `viewer`, `observer`, `point of view` and `egocentric` returns **zero
+matches**: Sr3D contains no viewer-relative projective utterances at all — not
+few, none. Yet every utterance still carries a **single gold answer**, so a model
+that reads "left of the TV" the way most English speakers do is simply marked
+wrong, and the frame is nowhere a parameter of the score. My probe below finds
+that the viewer-relative reading is exactly the one a frontier model falls back
+on when no frame is stated (22 of 35). The dataset's declared frame and the
+model's silent default differ, and the evaluation cannot see it.
 
-How much does that choice cost? On my five ScanNet++ scenes, forcing the
-intrinsic frame changes **34.0%** of answerable frame-dependent answers relative
-to the natural-default policy. Details and what remains to be checked:
+How much does the choice cost? On my five ScanNet++ scenes, forcing the intrinsic
+frame changes **34.0%** of answerable frame-dependent answers relative to the
+natural-default policy. Details, the verbatim quotes, a correction to an earlier
+miscount of this class, and what remains to be checked:
 **[docs/EXTERNAL_BENCHMARK_AUDIT.md](docs/EXTERNAL_BENCHMARK_AUDIT.md)**.
 
 ## How often does the frame change the answer?
@@ -108,34 +117,45 @@ attributable rather than a parse artefact.
 
 ### The result
 
-Two models, given the scene as a listing of ids, classes, box centres and sizes,
-plus the observer's stated position:
+**The finding is the default, not the cue.** Given the plain, unmarked sentence
+— *the cabinet to the left of the bed* — with the observer's position stated,
+Claude Opus 5's answer matches the **viewer-relative** reading on 22 of 35 pairs,
+the object's own frame on 4, and neither on 9. Even on *in front of* / *behind*,
+where the object's own frame is the entrenched English default, it goes
+viewer-first, **9 to 3**.
 
-| system | pairs | switched correctly | frame blind | switched wrongly | partial | control stable |
-|---|---|---|---|---|---|---|
-| resolver, cue-following *(circularity check)* | 35 | 100.0% | 0.0% | 0.0% | 0.0% | 100.0% |
-| resolver, frame pinned *(positive control)* | 35 | 0.0% | **100.0%** | 0.0% | 0.0% | 100.0% |
-| Claude Opus 5 *(self-administered)* | 35 | 42.9% | **25.7%** | 11.4% | 20.0% | 80.0% |
-| Claude Haiku 4.5 *(self-administered)* | 35 | 5.7% | **48.6%** | 14.3% | 25.7% | 37.1% |
+That is the number that makes the Sr3D finding bite: the standard benchmark's
+projective class is computed entirely in the anchor's intrinsic frame, and the
+model's silent default is the other one.
 
-Restricted to the pairs where each system answered its **own** control pair
-consistently — the item-level stability check, and the only reading of
-`frame_blind` that survives a noisy system:
+**What about following an explicit cue?** Reportable only in conditioned form.
+`frame_blind` means "gave the same answer to both cued arms" — but if a system
+already disagrees with this resolver about the *unmarked* sentence, two identical
+answers can be a consistent reading of a sentence I resolve differently, and
+there is no ground truth yet saying which of us is right. Conditioning on
+agreement about the unmarked sentence isolates the claim:
 
-| system | pairs kept | switched correctly | frame blind | partial |
-|---|---|---|---|---|
-| Claude Opus 5 | 28 of 35 | 12 (42.9%) | **8 (28.6%)** | 5 (17.9%) |
-| Claude Haiku 4.5 | 13 of 35 | 1 (7.7%) | **8 (61.5%)** | 3 (23.1%) |
+| system | pairs kept | switched correctly | frame blind | switched wrongly | partial |
+|---|---|---|---|---|---|
+| resolver, frame pinned *(positive control)* | 18 / 17 | 0 | **all** | 0 | 0 |
+| Claude Opus 5 *(self-administered)* | 16 of 35 | 12 | **2** | 1 | 1 |
+| Claude Haiku 4.5 *(self-administered)* | 13 of 35 | 1 | **7** | 1 | 3 |
 
-Told explicitly which frame to use, the stronger model gave the **identical
-answer to both arms** on 8 of 28 pairs, and got both arms right on 12. Split by
-relation, it followed an explicit *lateral* cue far more often than an explicit
-*frontal* one (8 of 11 `right` pairs correct; 6 of 14 `front` pairs frame-blind)
-— which is what the front/back-is-intrinsic default predicts. With no marker at
-all, its answer matches the egocentric reading on 22 of 35.
+On that subset the cue mostly *does* land: 12 of 16. **The pooled rate over all
+35 pairs — 42.9% switched, 25.7% frame-blind — is in
+`results/frame_probe/frame_probe.md` and should not be quoted.** It mixes in
+every item where the model and I simply read the plain sentence differently, so
+it charges baseline disagreement to frame-blindness. Sixteen items is also
+underpowered for a headline.
 
-**Read the Haiku row as a failed precondition, not a finding.** 37% control
-stability means it answers two identical-in-meaning paraphrases differently, so
+**Not claimed: a lateral-vs-frontal asymmetry in cue-following.** The raw split
+looks striking (11 of 18 lateral pairs switched correctly against 4 of 17
+frontal), but it tracks baseline agreement almost exactly — 72% lateral, 18%
+frontal — and the conditioned frontal subset is n=3. Attributing it to the
+front/back-is-intrinsic default would be circular.
+
+**Read the Haiku row as a failed precondition, not a finding.** Its control
+stability is 37% — it answers two meaning-identical paraphrases differently — so
 its frame-blindness is unattributable. That is what the negative control is for.
 
 **Three caveats, none of them optional:**
@@ -147,11 +167,9 @@ its frame-blindness is unattributable. That is what the negative control is for.
    then `--model anthropic:… openai:… google:…` runs the independent version and
    needs only an API key.
 2. On the **control** sentences — plain, no frame marker — Opus agreed with this
-   resolver on only 16 of 35. The controls test stability, not correctness, so
-   this says the model and I disagree on ordinary sentences about half the time,
-   and *which of us is right is unmeasured*. The probe supports "an explicit
-   frame instruction often does nothing"; it does not support "the model is worse
-   at spatial language than this resolver".
+   resolver on only 16 of 35, which is the same 16 as the conditioned subset
+   above. That disagreement is the main limit on everything here, and only hand
+   annotation settles which of us is right.
 3. Four trials named an anchor missing from the object listing (room-fixed
    objects were filtered out, and some anchors are room-fixed). Four answerers
    reported it independently with no shared context and no access to the key.
@@ -175,21 +193,36 @@ not the contribution.
 
 ![one query, two frames, two different objects](renders/gif/frame_switch.gif)
 
-*"The first pillow from the left on the bed."* Two pillows, side by side. From
-where I am standing, the first from the left is the near one. Counting from the
-bed's own left -- the left of someone lying in it -- it is the other one. Both
-readings are ordinary English and both are right; the sentence does not say
-which is meant. Same scene, same camera, same geometry, and the only thing that
+*"The office chair to the right of the monitor."* Two chairs, one either side.
+From where I am standing, the one on the right is the right-hand one. From the
+monitor's own right -- the side that is on your right when you sit facing it --
+it is the other one. Both readings are ordinary English and both are right; the
+sentence does not say which is meant, and the two readings are mirror images of
+each other. Same scene, same camera, same geometry, and the only thing that
 changes between the two states is the reference frame. Regenerate with
 
-    sqe gif --root DATA --scene 0a184cf634 --frame 1686 --anchor-hidden hide \
-        "the first pillow from the left on the bed"
+    sqe gif --root DATA --scene 0b031f3119 \
+        "the office chair to the right of the monitor"
 
-or `sqe find-gif --items <proposals>` to list other queries that work as a
-picture. It is a rendering of the resolver's output on a real capture frame, not
-a screen recording of the viewer. Boxes are drawn only on the objects the
-relation involves, and their occluded edges are removed against sensor depth --
-a half-hidden object does not get a complete box.
+The frame is chosen by `best_poster_view`, which scores what the picture needs
+rather than what a diagnostic needs: the anchor must be visible so the reader can
+see which way it faces, the two candidates must be separated and not overlapping,
+and everything must fit well inside the frame so the crop has something to remove.
+`sqe find-gif --items <proposals>` lists other frame-split queries; only about a
+dozen of them compose well enough to be worth rendering.
+
+It is a rendering of the resolver's output on a real capture frame, not a screen
+recording of the viewer. The default `--style poster` composes for a feed, where
+a 1100 px image arrives about 550 px wide: the sentence is set 3.2x larger than
+the diagnostic view had it, the frame is cropped to the two candidates so no
+large region is identical in both states, the answer carries a filled glow and a
+heavy stroke rather than a hairline, and neither the anchor's box nor the frame
+axes are drawn -- long lines sprawling to a corner mean nothing to a reader who
+has seen no README. `--style debug` restores all of it, plus faint boxes on
+context objects via `--context N`, which is the view to check geometry in.
+
+Occluded box edges are removed against sensor depth in both styles, so a
+half-hidden object does not get a complete box.
 
 
 Same sentence, same scene, same geometry. Only the frame changes.
@@ -419,7 +452,7 @@ exact ground truth:
 | Self-test | **46/46** hand-derived frame checks |
 | Room-canonical forward margin, office `0b031f3119` | **0.024** — the allocentric frame is undetermined |
 | Frame disagreement, 512 frame-dependent queries | **4.1%** unenriched (18.8% on a frame-sensitivity-enriched sample) |
-| Sr3D `allocentric` class | ~6,700 utterances, intrinsic frame, zero viewer-relative — verified from the supplementary |
+| Sr3D `allocentric` class | 3,760 utterances (4.50%), intrinsic frame by design, zero viewer-relative — verified from Table 1 and the supplementary |
 | Minimal-pair probe controls | cue-following 100% switched; all pinned frames 100% frame-blind at 100% control-stability |
 | Scene build / query latency | ~7 s per scene / **~2–15 ms** per query |
 | Box overlays on real frames | boxes land on the objects across all scenes checked (see `renders/`) |

@@ -418,8 +418,8 @@ def cmd_frame_probe(args):
     from .bench.minimal_pairs import ControlPair, read_jsonl
     from .bench.frame_probe import (FileProbe, LLMProbe, ResolverProbe,
                                     render, run, run_controls, save,
-                                    stable_only, summarise,
-                                    summarise_controls)
+                                    stable_only, stratify_by_baseline,
+                                    summarise, summarise_controls)
     get = _scene_getter(args)
     cfg = RelationConfig.load(args.config)
     pairs = read_jsonl(args.pairs)
@@ -467,6 +467,7 @@ def cmd_frame_probe(args):
             cres = run_controls(controls, get, probe, verbose=not args.quiet)
             s["controls"] = summarise_controls(cres)
             s["stable_only"] = stable_only(res, cres)
+        s["baseline_agree"] = stratify_by_baseline(res, pairs)
         summaries[probe.name] = s
         results[probe.name] = res
         print(f"  {probe.name}: {s['outcomes']}")
@@ -609,6 +610,7 @@ def cmd_gif(args):
     """Animated GIF of one query resolving differently under each frame."""
     from .viz.animate import frame_switch_gif
     from .viz.overlay import scannetpp_frame_source
+    from .viz.poster import ZOOM, frame_switch_poster
     get = _scene_getter(args)
     if not args.root:
         print("error: --root is needed, the GIF is drawn on real camera frames")
@@ -616,13 +618,23 @@ def cmd_gif(args):
     scene = get(args.scene)
     src = scannetpp_frame_source(args.root, args.scene)
     out = args.out or f"renders/gif/{args.scene}.gif"
-    p = frame_switch_gif(scene, src, args.text, out,
-                         cfg=RelationConfig.load(args.config),
-                         kinds=tuple(args.frames), width=args.width,
-                         hold_ms=args.hold, colours=args.colours,
-                         max_context=args.context,
-                         frame_index=args.frame,
-                         anchor_hidden_style=args.anchor_hidden)
+    if args.style == "poster":
+        p = frame_switch_poster(scene, src, args.text, out,
+                                cfg=RelationConfig.load(args.config),
+                                kinds=tuple(args.frames), width=args.width,
+                                hold_ms=args.hold, colours=args.colours,
+                                frame_index=args.frame,
+                                zoom=args.zoom or ZOOM,
+                                aspect=args.aspect,
+                                title_scale=args.title_scale)
+    else:
+        p = frame_switch_gif(scene, src, args.text, out,
+                             cfg=RelationConfig.load(args.config),
+                             kinds=tuple(args.frames), width=args.width,
+                             hold_ms=args.hold, colours=args.colours,
+                             max_context=args.context,
+                             frame_index=args.frame,
+                             anchor_hidden_style=args.anchor_hidden)
     if p is None:
         print("no GIF written: the frames agree on this query, or no single "
               "camera frame shows the anchor and every candidate answer. Try "
@@ -1142,7 +1154,19 @@ def build_parser() -> argparse.ArgumentParser:
                         "shows the anchor and every candidate most fully")
     p.add_argument("--anchor-hidden", default="dashed",
                    choices=["dashed", "dim", "hide"],
-                   help="how to draw the anchor box's occluded edges")
+                   help="how to draw the anchor box's occluded edges "
+                        "(debug style only)")
+    p.add_argument("--style", default="poster", choices=["poster", "debug"],
+                   help="poster: composed for a feed -- cropped to the "
+                        "candidates, large title, no anchor box or axes. "
+                        "debug: every participant boxed, axes drawn")
+    p.add_argument("--zoom", type=float, default=None,
+                   help="poster: crop width as a multiple of the candidates' "
+                        "bounding box")
+    p.add_argument("--aspect", type=float, default=4.0 / 3.0,
+                   help="poster: output aspect ratio")
+    p.add_argument("--title-scale", type=float, default=1.55,
+                   help="poster: requested title size; shrunk to fit one line")
     p.add_argument("--colours", type=int, default=160)
     p.add_argument("--perception", default="gt", choices=["gt", "openvocab"])
     p.add_argument("--gt-fronts", action="store_true")

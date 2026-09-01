@@ -12,6 +12,20 @@ Minimal pairs: two sentences differing only in an explicit marker of whose left 
 
 **`control stable` is load-bearing.** It is the fraction of *non-contrastive* paraphrase pairs -- equally awkward, matched for shape, differing in nothing that should change the answer -- that the system answers identically. A high `frame_blind` rate only means "has no frame to instruct" if `control stable` is also high. A system with low `control stable` is unstable to surface form, and its frame-blindness is unattributable.
 
+## Conditioned on agreement about the *unmarked* sentence
+
+`frame_blind` means "same answer to both cued arms". If a system already disagrees with this resolver about the plain, uncued sentence, its two identical answers can be a consistent reading of a sentence I resolve differently -- the disagreement is about the baseline, not about whether the cue landed. Pooling the two populations charges baseline disagreement to frame-blindness. Counts, not percentages: the subset is small.
+
+| system | pairs kept | dropped | switched correctly | frame blind | switched wrongly | partial |
+|---|---|---|---|---|---|---|
+| resolver (cue-following) | 35 | 0 | 35 | **0** | 0 | 0 |
+| pinned:egocentric | 18 | 17 | 0 | **18** | 0 | 0 |
+| pinned:intrinsic | 17 | 18 | 0 | **17** | 0 | 0 |
+| claude-opus-5 (self-administered) | 16 | 19 | 12 | **2** | 1 | 1 |
+| claude-haiku-4.5 (self-administered) | 13 | 22 | 1 | **7** | 1 | 3 |
+
+**This is the row to read.** A pooled `frame_blind` rate over all 35 pairs mixes in every item where the system and I simply read the plain sentence differently, and there is no ground truth yet saying which of us is right. On the conditioned subset the cue mostly does land, and the honest summary is that the pooled rate was not measuring what its name says.
+
 ## The same table, restricted to control-matched pairs
 
 Each control is built from one pair, so every pair has an item-level check on whether that system's answers move for reasons unrelated to the frame. Restricting to the pairs that passed their own check is the reading of `frame_blind` that survives a noisy system: on these items the system answers the same sentence the same way twice.

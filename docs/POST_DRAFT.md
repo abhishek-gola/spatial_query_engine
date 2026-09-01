@@ -1,26 +1,33 @@
 # Post draft — reference frames in 3D spatial queries
 
-> Draft. Numbers are current as of the last run; regenerate with
-> `./run_benchmark.sh <data>` before posting. **There is still no end-to-end
-> accuracy number** — that needs hand-annotated frame labels. Nothing in this
-> draft claims one.
+> **[docs/LINKEDIN_POST.md](LINKEDIN_POST.md) is the canonical post to publish.**
+> This file is the long-form working draft plus the supporting material behind it:
+> the full probe tables, the per-kind ambiguity breakdown, and the answers to the
+> questions a reader will ask. Where the two differ, LINKEDIN_POST.md wins.
+>
+> Numbers are current as of the last run; regenerate with `./run_benchmark.sh
+> <data>` before posting. **There is still no end-to-end accuracy number** — that
+> needs hand-annotated frame labels. Nothing here claims one.
 
-**Asset:** `renders/gif/frame_switch.gif` — *"the first pillow from the left on
-the bed"*, two pillows side by side, and the highlighted one jumps when the
-reference frame changes. Lead with it. Boxes are drawn only on the objects the
-relation involves, and occluded edges are removed against sensor depth. It is a
-rendering of the resolver's own output on a real capture frame, not a screen
-recording of the viewer; say so if anyone asks.
+**Asset:** `renders/gif/frame_switch.gif` — *"the office chair to the right of
+the monitor"*, two chairs either side of a desk, and the highlighted one jumps
+when the reference frame changes. The two readings are mirror images, which is
+the handedness point made visible. Lead with it. Boxes are drawn only on the two
+candidates, occluded edges are removed against sensor depth, and the anchor's own
+box and axes are deliberately not drawn. It is a rendering of the resolver's own
+output on a real capture frame, not a screen recording of the viewer; say so if
+anyone asks.
 
 ---
 
 ## Version A — short (LinkedIn)
 
-> **"The first pillow from the left on the bed."** Two pillows, side by side.
+> **"The office chair to the right of the monitor."** Two chairs, one either side.
 >
-> From where I'm standing, the first from the left is the near one. Counting from
-> the bed's own left — the left of someone lying in it — it's the other one. Both
-> are ordinary English. Both are right. The sentence doesn't say which is meant.
+> From where I'm standing, the right-hand one is the right-hand one. From the
+> monitor's own right — the side on your right when you sit facing it — it's the
+> other one. Both are ordinary English. Both are right. The sentence doesn't say
+> which is meant, and the two readings are mirror images.
 >
 > [GIF: same scene, same camera, same geometry. Only the reference frame changes,
 > and the answer moves.]
@@ -35,30 +42,38 @@ recording of the viewer; say so if anyone asks.
 > differs, and it is the one thing that determines the answer. On scenes where
 > the two readings provably pick different objects.
 >
-> The stronger model got both arms right on **12 of 28** pairs. On **8** it gave
-> the **identical answer to both** — told explicitly which frame to use, twice,
-> and the instruction did nothing. Frontal relations were worse than lateral: it
-> followed "the bed's own left" more often than "from the bed's point of view".
+> The result that survives every stratification is about the **default**, not the
+> cue. Given the plain, unmarked sentence, the stronger model's answer matches the
+> **viewer-relative** reading on **22 of 35** pairs, the object's own frame on 4,
+> neither on 9. Even on "in front of" and "behind", where the object's own frame
+> is the entrenched English default, it goes viewer-first, **9 to 3**.
 >
-> And when no frame is marked at all, its silent default is the **viewer's** —
-> 22 of 35.
+> (On following an explicit cue it mostly succeeds — 12 of the 16 pairs where it
+> and my resolver agree about the unmarked sentence — and I am not publishing the
+> pooled rate, because pooling charges baseline disagreement to frame-blindness.
+> The numbers and the reason are in the README.)
 >
-> That last number is the interesting one, because:
+> The default is the interesting part, because:
 >
 > **Sr3D — 83,572 utterances, the standard benchmark for spatial reference in
-> 3D — has a relation class named `allocentric` covering left/right/front/back,
-> roughly 6,700 utterances. Its own supplementary defines it as computed "with
-> respect to the anchor orientation", from PartNet front annotations and Scan2CAD
-> 9DoF alignments, over "four oriented sections (front, back, left, and right)".
-> That is the object's own frame. The words "camera", "viewer", "observer" and
-> "point of view" appear nowhere in the 13-page supplementary.**
+> 3D — has exactly one relation class covering left/right/front/back. Table 1 of
+> the paper puts it at 3,760 utterances. Its supplementary defines it as computed
+> "with respect to the anchor orientation", from PartNet front annotations and
+> Scan2CAD 9DoF alignments, over "four oriented sections (front, back, left, and
+> right)". That is the object's own frame. The words "camera", "viewer",
+> "observer" and "point of view" appear nowhere in the 13-page supplementary.**
 >
-> So: the benchmark scores one reading. The model defaults to the other. Neither
-> of them says which one out loud.
+> And that is deliberate. View-independence is an explicit goal of the work,
+> stated in its introduction — "without a camera view dependency", "bypass camera
+> view dependency", cameras randomised between speaker and listener to "remove
+> any camera view bias". Remove the camera and the anchor's own front is the only
+> frame left. Nothing is hidden and nothing is a mistake.
 >
-> (It *is* documented — filed under a name many readers will take to mean the
-> room's axes. The problem isn't concealment, it's that a single convention
-> covers ~6,700 utterances and no headline number mentions it.)
+> Which is why it's a structural problem rather than a bug report. The benchmark
+> scores one reading, by design. The model defaults to the other. Every utterance
+> still gets a single gold answer, and the frame is nowhere a parameter of the
+> score — so the mismatch is invisible to the evaluation, and a model penalised
+> for it looks like a model with a perception problem.
 >
 > Why this matters beyond the pedantry: when a grounding pipeline gets one of
 > these wrong, the failure looks like a wrong object. So it gets logged as a
@@ -102,10 +117,15 @@ one of them whichever basis it picks.
 **The asymmetry that does the work.** `front`/`behind` default to the object's own
 frame — "in front of the sofa" means the side the sofa faces, nobody means
 "between me and the sofa". `left`/`right` default to the viewer's. One reused
-basis is wrong for one of them. The probe result lines up with this: the model
-followed an explicit *lateral* cue far more often than an explicit *frontal* one,
-which is what you'd expect if the frontal default is entrenched enough to
-override being told.
+basis is wrong for one of them.
+
+The probe looks like it corroborates this — the model followed lateral cues far
+more often than frontal ones — but it does not, and the temptation is worth
+naming. That split tracks baseline agreement almost exactly (72% lateral vs 18%
+frontal), and the conditioned frontal subset is n=3. Reporting it as evidence for
+the asymmetry would be circular. What the probe *does* show, cleanly, is that the
+model's uncued default is viewer-relative even for frontal relations, 9 to 3 —
+which cuts against the asymmetry being entrenched in the model at all.
 
 **Ambiguity is an output, not an error.** When the plausible frames disagree, the
 honest answer is "here's the default reading, and here's what the other reading
@@ -126,14 +146,22 @@ and every design decision: `docs/FRAME_PROBE_PROTOCOL.md`. Full table:
 | Claude Opus 5 *(self-administered)* | 35 | 42.9% | **25.7%** | 11.4% | 20.0% | 80.0% |
 | Claude Haiku 4.5 *(self-administered)* | 35 | 5.7% | **48.6%** | 14.3% | 25.7% | 37.1% |
 
-Restricted to the pairs where that system answered its **own** control pair
-consistently — the item-level version of the stability check, and the only
-reading of `frame_blind` that survives a noisy system:
+**Do not quote either model's pooled row.** `frame_blind` means "same answer to
+both cued arms", and a system that already disagrees with this resolver about the
+*unmarked* sentence can give two identical answers as a consistent reading of a
+sentence I resolve differently. Pooling charges that baseline disagreement to
+frame-blindness. Conditioned on agreement about the unmarked sentence, counts not
+percentages because the subset is small:
 
-| system | pairs kept | switched correctly | frame blind | partial |
-|---|---|---|---|---|
-| Claude Opus 5 | 28 of 35 | 12 (42.9%) | **8 (28.6%)** | 5 (17.9%) |
-| Claude Haiku 4.5 | 13 of 35 | 1 (7.7%) | **8 (61.5%)** | 3 (23.1%) |
+| system | pairs kept | switched correctly | frame blind | switched wrongly | partial |
+|---|---|---|---|---|---|
+| Claude Opus 5 | 16 of 35 | 12 | **2** | 1 | 1 |
+| Claude Haiku 4.5 | 13 of 35 | 1 | **7** | 1 | 3 |
+
+So on the items where the model and I read the plain sentence the same way, the
+explicit cue mostly lands: 12 of 16. The pooled 25.7% was not measuring what its
+name says. The publishable finding from this probe is the uncued default (22 of
+35 viewer-relative), not the instructability rate.
 
 **Do not quote the Haiku row as a finding.** Its control stability is 37% — it
 gives different answers to two paraphrases that differ in nothing at all — so its

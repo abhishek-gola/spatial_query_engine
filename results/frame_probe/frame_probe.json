@@ -84,6 +84,46 @@
     "n_errors": 0,
     "n_dropped": 0,
     "basis": "pairs whose matched control pair was answered consistently"
+   },
+   "baseline_agree": {
+    "n_pairs": 35,
+    "outcomes": {
+     "switched_correctly": 35,
+     "switched_incorrectly": 0,
+     "frame_blind": 0,
+     "partial": 0,
+     "no_answer": 0,
+     "error": 0
+    },
+    "rates": {
+     "switched_correctly": 1.0,
+     "switched_incorrectly": 0.0,
+     "frame_blind": 0.0,
+     "partial": 0.0,
+     "no_answer": 0.0,
+     "error": 0.0
+    },
+    "by_relation": {
+     "behind": {
+      "switched_correctly": 3
+     },
+     "front": {
+      "switched_correctly": 14
+     },
+     "left": {
+      "switched_correctly": 7
+     },
+     "right": {
+      "switched_correctly": 11
+     }
+    },
+    "neutral_implies": {
+     "intrinsic": 17,
+     "egocentric": 18
+    },
+    "n_errors": 0,
+    "n_dropped": 0,
+    "basis": "pairs where the system's answer to the unmarked sentence matches this resolver's"
    }
   },
   "pinned:egocentric": {
@@ -168,6 +208,39 @@
     "n_errors": 0,
     "n_dropped": 0,
     "basis": "pairs whose matched control pair was answered consistently"
+   },
+   "baseline_agree": {
+    "n_pairs": 18,
+    "outcomes": {
+     "switched_correctly": 0,
+     "switched_incorrectly": 0,
+     "frame_blind": 18,
+     "partial": 0,
+     "no_answer": 0,
+     "error": 0
+    },
+    "rates": {
+     "switched_correctly": 0.0,
+     "switched_incorrectly": 0.0,
+     "frame_blind": 1.0,
+     "partial": 0.0,
+     "no_answer": 0.0,
+     "error": 0.0
+    },
+    "by_relation": {
+     "left": {
+      "frame_blind": 7
+     },
+     "right": {
+      "frame_blind": 11
+     }
+    },
+    "neutral_implies": {
+     "egocentric": 18
+    },
+    "n_errors": 0,
+    "n_dropped": 17,
+    "basis": "pairs where the system's answer to the unmarked sentence matches this resolver's"
    }
   },
   "pinned:intrinsic": {
@@ -252,6 +325,39 @@
     "n_errors": 0,
     "n_dropped": 0,
     "basis": "pairs whose matched control pair was answered consistently"
+   },
+   "baseline_agree": {
+    "n_pairs": 17,
+    "outcomes": {
+     "switched_correctly": 0,
+     "switched_incorrectly": 0,
+     "frame_blind": 17,
+     "partial": 0,
+     "no_answer": 0,
+     "error": 0
+    },
+    "rates": {
+     "switched_correctly": 0.0,
+     "switched_incorrectly": 0.0,
+     "frame_blind": 1.0,
+     "partial": 0.0,
+     "no_answer": 0.0,
+     "error": 0.0
+    },
+    "by_relation": {
+     "behind": {
+      "frame_blind": 3
+     },
+     "front": {
+      "frame_blind": 14
+     }
+    },
+    "neutral_implies": {
+     "intrinsic": 17
+    },
+    "n_errors": 0,
+    "n_dropped": 18,
+    "basis": "pairs where the system's answer to the unmarked sentence matches this resolver's"
    }
   },
   "claude-opus-5 (self-administered)": {
@@ -359,6 +465,47 @@
     "n_errors": 0,
     "n_dropped": 7,
     "basis": "pairs whose matched control pair was answered consistently"
+   },
+   "baseline_agree": {
+    "n_pairs": 16,
+    "outcomes": {
+     "switched_correctly": 12,
+     "switched_incorrectly": 1,
+     "frame_blind": 2,
+     "partial": 1,
+     "no_answer": 0,
+     "error": 0
+    },
+    "rates": {
+     "switched_correctly": 0.75,
+     "switched_incorrectly": 0.0625,
+     "frame_blind": 0.125,
+     "partial": 0.0625,
+     "no_answer": 0.0,
+     "error": 0.0
+    },
+    "by_relation": {
+     "front": {
+      "frame_blind": 1,
+      "switched_correctly": 1,
+      "switched_incorrectly": 1
+     },
+     "left": {
+      "switched_correctly": 3,
+      "partial": 1
+     },
+     "right": {
+      "switched_correctly": 8,
+      "frame_blind": 1
+     }
+    },
+    "neutral_implies": {
+     "egocentric": 13,
+     "intrinsic": 3
+    },
+    "n_errors": 0,
+    "n_dropped": 19,
+    "basis": "pairs where the system's answer to the unmarked sentence matches this resolver's"
    }
   },
   "claude-haiku-4.5 (self-administered)": {
@@ -461,6 +608,51 @@
     "n_errors": 0,
     "n_dropped": 22,
     "basis": "pairs whose matched control pair was answered consistently"
+   },
+   "baseline_agree": {
+    "n_pairs": 13,
+    "outcomes": {
+     "switched_correctly": 1,
+     "switched_incorrectly": 1,
+     "frame_blind": 7,
+     "partial": 3,
+     "no_answer": 1,
+     "error": 0
+    },
+    "rates": {
+     "switched_correctly": 0.07692307692307693,
+     "switched_incorrectly": 0.07692307692307693,
+     "frame_blind": 0.5384615384615384,
+     "partial": 0.23076923076923078,
+     "no_answer": 0.07692307692307693,
+     "error": 0.0
+    },
+    "by_relation": {
+     "behind": {
+      "frame_blind": 1
+     },
+     "front": {
+      "frame_blind": 2,
+      "switched_correctly": 1,
+      "partial": 1
+     },
+     "left": {
+      "no_answer": 1,
+      "switched_incorrectly": 1,
+      "frame_blind": 2
+     },
+     "right": {
+      "frame_blind": 2,
+      "partial": 2
+     }
+    },
+    "neutral_implies": {
+     "egocentric": 8,
+     "intrinsic": 5
+    },
+    "n_errors": 0,
+    "n_dropped": 22,
+    "basis": "pairs where the system's answer to the unmarked sentence matches this resolver's"
    }
   }
  },

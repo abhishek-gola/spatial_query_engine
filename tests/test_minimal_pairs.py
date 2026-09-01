@@ -11,7 +11,7 @@ import numpy as np
 import pytest
 
 from sqe.bench.frame_probe import (OUTCOMES, ResolverProbe, classify_pair,
-                                   stable_only,
+                                   stable_only, stratify_by_baseline,
                                    render)
 from sqe.bench.frame_probe import run as probe_run
 from sqe.bench.frame_probe import summarise as probe_summarise
@@ -172,3 +172,43 @@ def test_stable_only_keeps_nothing_when_no_control_is_stable():
     controls = [ControlResult("p0__control", [1, 2], 1, False, False)]
     out = stable_only(pairs, controls)
     assert out["n_pairs"] == 0 and out["n_dropped"] == 1
+
+
+def test_stratify_by_baseline_keeps_only_baseline_agreement():
+    """Pooling baseline disagreement into `frame_blind` is the trap this avoids."""
+    from sqe.bench.frame_probe import PairResult
+    from sqe.bench.minimal_pairs import Arm, MinimalPair
+
+    def mp(pid, neutral):
+        return MinimalPair(id=pid, scene_id="s", relation="left", anchor_id=1,
+                           anchor_label="bed", target_class="mug",
+                           arms=[Arm("egocentric", "a", 7, 1.0, "egocentric"),
+                                 Arm("intrinsic", "b", 9, 1.0, "intrinsic")],
+                           neutral_text="n", neutral_answer_id=neutral,
+                           neutral_frame_chosen="egocentric",
+                           candidate_ids=[7, 9], n_class_instances=2,
+                           viewpoint={"mode": "position", "position": [0, 0, 1],
+                                      "look_at": [0, 1, 1]})
+
+    pairs = [mp("p0", 7), mp("p1", 9)]
+    # the system agrees about the unmarked sentence on p0 only
+    results = [PairResult("p0", "s", "left", {}, {}, 7, None, "frame_blind"),
+               PairResult("p1", "s", "left", {}, {}, 7, None, "frame_blind")]
+    out = stratify_by_baseline(results, pairs)
+    assert out["n_pairs"] == 1 and out["n_dropped"] == 1
+    assert out["outcomes"]["frame_blind"] == 1
+
+
+def test_stratify_by_baseline_drops_a_no_answer_baseline():
+    from sqe.bench.frame_probe import PairResult
+    from sqe.bench.minimal_pairs import Arm, MinimalPair
+
+    p = MinimalPair(id="p0", scene_id="s", relation="left", anchor_id=1,
+                    anchor_label="bed", target_class="mug",
+                    arms=[Arm("egocentric", "a", 7, 1.0, "egocentric"),
+                          Arm("intrinsic", "b", 9, 1.0, "intrinsic")],
+                    neutral_text="n", neutral_answer_id=None,
+                    neutral_frame_chosen=None, candidate_ids=[7, 9],
+                    n_class_instances=2)
+    r = PairResult("p0", "s", "left", {}, {}, None, None, "frame_blind")
+    assert stratify_by_baseline([r], [p])["n_pairs"] == 0

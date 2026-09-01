@@ -449,6 +449,38 @@ def stable_only(pair_results: Sequence[PairResult],
     return out
 
 
+def stratify_by_baseline(pair_results: Sequence[PairResult],
+                         pairs: Sequence[MinimalPair]) -> Dict:
+    """Re-summarise over the pairs where the system and this resolver agree on
+    the **unmarked** sentence.
+
+    This is the stratification that matters, and it demolishes the pooled
+    `frame_blind` rate. `frame_blind` means "gave the same answer to both cued
+    arms". But if the system already disagrees with me about the plain,
+    uncued sentence, then its two identical answers may be a perfectly
+    consistent reading of a sentence I resolve differently -- the disagreement is
+    about the baseline, not about whether the frame cue landed. Pooling the two
+    populations attributes baseline disagreement to frame-blindness.
+
+    Conditioning on baseline agreement isolates the thing being claimed: for
+    these items the system and I read the plain sentence the same way, so if a
+    cue then fails to move it, that is about the cue.
+
+    The subset is small, and the count is reported rather than a percentage for
+    exactly that reason.
+    """
+    neutral = {p.id: p.neutral_answer_id for p in pairs}
+    kept = [r for r in pair_results
+            if r.pair_id in neutral
+            and r.neutral_answer is not None
+            and r.neutral_answer == neutral[r.pair_id]]
+    out = summarise(kept)
+    out["n_dropped"] = len(pair_results) - len(kept)
+    out["basis"] = ("pairs where the system's answer to the unmarked sentence "
+                    "matches this resolver's")
+    return out
+
+
 def render(summaries: Dict[str, Dict], title: str = "Frame instructability") -> str:
     """Table across systems. Controls are marked and explained."""
     def pct(x):
@@ -479,6 +511,37 @@ def render(summaries: Dict[str, Dict], title: str = "Frame instructability") -> 
              "high. A system with low `control stable` is unstable to surface "
              "form, and its frame-blindness is unattributable.")
     L.append("")
+    if any("baseline_agree" in s for s in summaries.values()):
+        L.append("## Conditioned on agreement about the *unmarked* sentence")
+        L.append("")
+        L.append("`frame_blind` means \"same answer to both cued arms\". If a "
+                 "system already disagrees with this resolver about the plain, "
+                 "uncued sentence, its two identical answers can be a "
+                 "consistent reading of a sentence I resolve differently -- the "
+                 "disagreement is about the baseline, not about whether the cue "
+                 "landed. Pooling the two populations charges baseline "
+                 "disagreement to frame-blindness. Counts, not percentages: the "
+                 "subset is small.")
+        L.append("")
+        L.append("| system | pairs kept | dropped | switched correctly | "
+                 "frame blind | switched wrongly | partial |")
+        L.append("|---|---|---|---|---|---|---|")
+        for name, s in summaries.items():
+            ba = s.get("baseline_agree")
+            if not ba:
+                continue
+            o = ba["outcomes"]
+            L.append(f"| {name} | {ba['n_pairs']} | {ba['n_dropped']} | "
+                     f"{o['switched_correctly']} | **{o['frame_blind']}** | "
+                     f"{o['switched_incorrectly']} | {o['partial']} |")
+        L.append("")
+        L.append("**This is the row to read.** A pooled `frame_blind` rate over "
+                 "all 35 pairs mixes in every item where the system and I simply "
+                 "read the plain sentence differently, and there is no ground "
+                 "truth yet saying which of us is right. On the conditioned "
+                 "subset the cue mostly does land, and the honest summary is "
+                 "that the pooled rate was not measuring what its name says.")
+        L.append("")
     if any("stable_only" in s for s in summaries.values()):
         L.append("## The same table, restricted to control-matched pairs")
         L.append("")

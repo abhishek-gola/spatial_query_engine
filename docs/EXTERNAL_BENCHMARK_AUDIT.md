@@ -17,17 +17,28 @@ Consequences, and they are binding:
 
 ---
 
-## Finding 1 — Sr3D fixes the frame to *intrinsic* and calls it "allocentric"
+## Finding 1 — the standard benchmark has no viewer-relative "left", by design
 
-**Verified from the ReferIt3D ECCV 2020 supplementary, §2.5 (p.9).** The PDF is
-in `3d-papers/pdfs/900-referit3d-…-SUPPLEMENTARY.pdf`.
+**Verified from the ReferIt3D ECCV 2020 paper (Table 1, p.7) and its
+supplementary (§2.5, p.9).** Both PDFs are in `3d-papers/pdfs/` (901-, 900-).
 
-Sr3D has five relation types with roughly this distribution: horizontal
-proximity ~81%, **allocentric ~8%**, support ~5%, vertical proximity ~4%,
-between ~2%, over 83,572 utterances. So the projective class is **≈6,700
-utterances**.
+Table 1 gives the exact composition, in contexts and utterances:
 
-The supplementary defines that class:
+| | Horiz. prox. | Vert. prox. | Support | **Allocentric** | Between | All |
+|---|---|---|---|---|---|---|
+| contexts | 34,001 | 1,589 | 747 | **1,880** | 3,569 | 41,786 |
+| utterances | 68,002 | 3,178 | 1,494 | **3,760** | 7,138 | 83,572 |
+
+So the projective class is **3,760 utterances, 4.50% of Sr3D**.
+
+> **Correction.** An earlier version of this document, and of the README, said
+> "~8%, ≈6,700 utterances". That was wrong: 8.5% and 3,569 contexts are the
+> **`between`** row, and ≈6,700 came from multiplying that share by the 83,572
+> total. Two rows of the same table were read across each other. The correct
+> figure is 3,760 utterances (4.50%), and it is smaller than the number the
+> mistake produced.
+
+The supplementary defines the class:
 
 > "**Allocentric Relations.** These relations indicate where a target object
 > might exist **with respect to the anchor orientation**. For example, the
@@ -46,32 +57,63 @@ And from the figure caption:
 > respect to one of the four oriented sections of the anchor (front, back, left,
 > and right)."
 
-Three things follow.
+### This is a design consequence, not an oversight
 
-**1. The category name denotes the wrong frame.** In the standard taxonomy
-(Levinson 2003, ch. 2) *allocentric* / absolute means the world or environment
-frame — cardinal directions, room axes. What Sr3D computes is the **intrinsic**
-frame: the anchor's own front, back, left and right. A reader who sees
-"allocentric" and reasons about the dataset accordingly will mis-predict its
-behaviour on every one of those ~6,700 utterances.
+The paper says what it is doing and why. View-independence is an explicit,
+stated goal of the work, not something it forgot about:
 
-**2. The viewer never appears.** Searching the whole 13-page supplementary for
-`camera`, `viewer`, `observer`, `point of view`, `egocentric` and
-`view-dependent` returns **zero matches**. Sr3D therefore contains **no
-viewer-relative projective utterances at all** — not a few, none. The relative
-frame, which is the dominant reading of "left of X" in ordinary English, is
-absent by construction.
+> "…**without a camera view dependency** – can benefit many downstream robotics
+> applications…" (p.2)
 
-**3. It is documented, and the claim must respect that.** The convention *is*
-stated, in supplementary material. So the honest claim is **not** "and never says
-so". It is:
+> "This flexibility enables us also to **bypass camera view dependency**." (p.2)
 
-> Sr3D applies a single intrinsic convention uniformly across ~6,700 projective
-> utterances, files it under a name that means the opposite frame, and therefore
-> contains none of the viewer-relative readings that dominate natural English. A
-> model evaluated on Sr3D is *rewarded* for the intrinsic reading and *penalised*
-> for the relative one, and nothing in the benchmark's headline numbers reveals
-> that.
+> "In order to **remove any camera view bias**, we initialize the 'speaker' and
+> 'listener' 3D interfaces with different randomized camera parameters." (p.8)
+
+Nr3D even carries `View-Independent` as one of its annotated utterance
+properties, and the paper reports that view-independence "does not require the
+observer to place themselves into the scene facing certain objects" (p.9).
+
+Read against that goal, Sr3D's `allocentric` class is the **only** thing it could
+have been. Remove the camera from the loop and the anchor's own front is the one
+frame still available for left/right, which is exactly why the generator reaches
+for PartNet fronts and Scan2CAD 9DoF alignments. The design is coherent on its
+own terms, and nothing is concealed: the convention is stated in the
+supplementary and its motivation is stated in the introduction.
+
+**That makes the finding stronger, not weaker.** The problem is not a mistake
+someone made; it is a structural property of how the field's standard resource is
+built:
+
+> Sr3D's 3,760 projective utterances are all computed in the anchor's intrinsic
+> frame, because view-independence is a design goal. It therefore contains **no
+> viewer-relative projective utterances at all** — not few, none. Searching the
+> whole 13-page supplementary for `camera`, `viewer`, `observer`, `point of view`,
+> `egocentric` and `view-dependent` returns **zero matches**. But each utterance
+> still carries a **single gold answer**, so a model that reads "left of the TV"
+> the way most English speakers do is marked wrong, and the frame is nowhere a
+> parameter of the evaluation. The dataset's declared frame and the model's
+> silent default are different, and the scoring cannot see the difference.
+
+**The naming point is dead and should not be made.** An earlier version of this
+document argued that "allocentric" denotes the world frame in the standard
+taxonomy (Levinson 2003, ch. 2) and so mislabels what Sr3D computes. But the main
+paper's own definition of the class says exactly what frame it uses:
+
+> "(iv) **Allocentric:** Allocentric relations encode information about the
+> location of the target with respect to the **intrinsic self-orientation** of an
+> anchor." (p.6)
+
+The word *intrinsic* is theirs, in the definition, in the main paper. Nothing is
+mislabelled, and the argument does not need it — it was a weaker claim standing in
+front of a stronger one.
+
+One further detail that cuts in the same direction: Nr3D's own annotation finds
+only **63%** of its utterances view-independent, so roughly a third *are*
+view-dependent — and there the paper notes speakers "were instructed to guide the
+listeners on how to place themselves in the scene" (p.9). The field is aware the
+frame matters. What is missing is the frame as an explicit parameter of the
+score.
 
 **Why this matters quantitatively.** On my own five ScanNet++ scenes, forcing the
 intrinsic frame changes **34.0%** of answerable frame-dependent answers relative
@@ -168,11 +210,30 @@ cue-following resolver 100% `switched_correctly`, all four pinned frames 100%
 `frame_blind` at 100% control stability.
 
 Result, self-administered arm (Claude Opus 5 / Claude Haiku 4.5, each block of
-trials answered by an isolated agent that never saw the other arm of any pair):
-Opus 42.9% `switched_correctly`, 25.7% `frame_blind`, 80% control-stable; on the
-28 control-matched pairs, 8 `frame_blind`. Haiku fails the control-stability
-precondition (37%) and its row is reported as uninterpretable rather than as a
-finding.
+trials answered by an isolated agent that never saw the other arm of any pair).
+**The reportable finding is the uncued default:** on the plain, unmarked
+sentence Opus's answer matches the viewer-relative reading on **22 of 35** pairs,
+the anchor's own frame on 4, neither on 9 — and 9-to-3 viewer-first even on
+`front`/`behind`. That is the number that meets Finding 1 head-on, since Sr3D's
+projective class is entirely intrinsic.
+
+**The instructability rate is only reportable conditioned on baseline
+agreement.** `frame_blind` means "same answer to both cued arms", but a system
+that already disagrees with this resolver about the unmarked sentence can give
+two identical answers as a consistent reading of a sentence I resolve
+differently; pooling charges that to frame-blindness. On the 16 pairs where Opus
+and this resolver agree about the unmarked sentence: 12 switched correctly, **2
+frame-blind**. The pooled figures (42.9% switched, 25.7% frame-blind) are kept in
+`results/frame_probe/frame_probe.md` and marked not-quotable.
+
+Two analyses that were tried and should **not** be published: the pooled
+frame-blind rate (above), and a lateral-vs-frontal asymmetry in cue-following —
+the raw split is 11 of 18 against 4 of 17, but it tracks baseline agreement
+almost exactly (72% vs 18%) and the conditioned frontal subset is n=3, so
+attributing it to the front/back-is-intrinsic default is circular.
+
+Haiku fails the control-stability precondition (37%) and its row is reported as
+uninterpretable rather than as a finding.
 
 Two decisions made while running it, both of which changed the numbers:
 
